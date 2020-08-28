@@ -1,0 +1,11 @@
+{
+  "name": "tie-fighter",
+  "version": "1.0.0",
+  "description": "tie fighter",
+  "dependencies": {
+    "dat.gui": "^0.7.1",
+    "three": "^0.91.0"
+  },
+  "author": "Sandman",
+  "license": "ISC"
+}
