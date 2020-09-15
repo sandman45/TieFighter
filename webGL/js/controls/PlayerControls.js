@@ -1,6 +1,6 @@
 import * as THREE from '../../node_modules/three/build/three.module.js'
 
-export default (mesh, camera, config, collisionManager) => {
+export default (mesh, laser, camera, config, collisionManager) => {
 
 	const keycodes = {
         W: 87,
@@ -35,10 +35,10 @@ export default (mesh, camera, config, collisionManager) => {
             rotate(Math.PI/2, "x", duration);
         }
         // rotate
-        else if(keyCode === keycodes.Q) {
+        else if(keyCode === keycodes.E) {
             rotate(-Math.PI/2,"z", 200);
         }
-        else if(keyCode === keycodes.E) {
+        else if(keyCode === keycodes.Q) {
             rotate(Math.PI/2, "z", 200);
         }
         // rotate 90 degrees
@@ -52,17 +52,14 @@ export default (mesh, camera, config, collisionManager) => {
 
         // space fire cannons
         else if(keyCode === keycodes.SPACE) {
-            fireCannons();
+            fireCannons(mesh);
         }
 
     }
 
-    function fireCannons() {
-	    // create the green lazers
-        console.log(`object position => z: ${mesh.position.z} x: ${mesh.position.x}`);
-
+    function fireCannons(mesh) {
         // move / translate them on the game world
-
+        laser.fire(mesh, 2);
         // collision for lazers
     }
 
@@ -111,19 +108,25 @@ export default (mesh, camera, config, collisionManager) => {
             const stepVector = directionVector.multiplyScalar( config.speed * direction );
             const tPosition = mesh.position.clone().add(stepVector);
 
-            const collision = collisionManager.checkCollision(tPosition);
+            const collision = collisionManager.checkCollision({ position: tPosition, name:'Player' });
 
+            // console.log(`collision: ${collision}`);
+            // console.log(`position: ${JSON.stringify(tPosition)}`);
             if(!collision) {
                 mesh.position.add(stepVector);
                 camera.position.add(stepVector);
              }
         } else
-            collisionManager.checkCollision(mesh.position);
+            collisionManager.checkCollision({ position: mesh.position, name:'Player' });
     }
 
     function resetPosition() {
         mesh.position.x = config.position.x;
-        mesh.position.z = config.position.y;
+        mesh.position.y = config.position.y;
+        mesh.position.z = config.position.z;
+        mesh.scale.x = config.scale;
+        mesh.scale.z = config.scale;
+        mesh.scale.y = config.scale;
 
         setCameraPositionRelativeToMesh(camera, mesh);
     }
@@ -131,8 +134,9 @@ export default (mesh, camera, config, collisionManager) => {
     function setCameraPositionRelativeToMesh(camera, mesh) {
         camera.position.x = mesh.position.x;
         camera.position.z = mesh.position.z + 20;
-
-        camera.lookAt(new THREE.Vector3(mesh.position.x, 0, mesh.position.z));
+        camera.position.y = mesh.position.y + 5;
+        console.log(`after camera position z: ${camera.position.z}`);
+        camera.lookAt(new THREE.Vector3(mesh.position.x, mesh.position.y, mesh.position.z));
     }
 
 	return {

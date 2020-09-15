@@ -3,15 +3,34 @@ const config = {
         size: { x: 500, y: 500 },
         transparent: false
     },
-    player: {
-        position: { x: .5, y: 1 },
-        speed: 1,
-        scale: .5
-    },
-    player2: {
-        position: { x: .5, y: 2 },
-        speed: 1
-    },
+    players: [
+        {
+            name: 'Tie',
+            position: { x: 10, y: 1, z: 1 },
+            speed: .8,
+            scale: .5
+        },
+        {
+            name: 'Other',
+            position: { x: 15, y: 1, z: 1 },
+            speed: .8,
+            scale: .5
+        }
+    ],
+    weapons: [
+        {
+            name: "laser",
+            color: "green",
+            speed: 2.2,
+            position: { x: 0.5, y: 0.5 },
+        },
+        {
+            name: "laser",
+            color: "red",
+            speed: 2.2,
+            position: { x: 0.5, y: 0.5 },
+        }
+    ],
     sonars: [
         {
             name: "sonar-1",
