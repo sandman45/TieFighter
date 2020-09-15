@@ -15,10 +15,10 @@ export default (scene, floorConfig) => {
 
 	function checkCollision(position) {
 		if(Math.abs(position.x) > floorConfig.size.x/2 || Math.abs(position.z) > floorConfig.size.y/2 ) {
-			return {collision: true, objectName: 'floor-border'};
+			return { collision: true, name: 'floor-border' };
 		}
 		else {
-			return {collision: false};
+			return { collision: false };
 		}
 	}
 

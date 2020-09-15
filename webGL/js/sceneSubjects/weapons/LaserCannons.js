@@ -1,49 +1,95 @@
 import * as THREE from '../../../node_modules/three/build/three.module.js'
 
 export default (scene, sourceShipPosition, config) => {
-    let currentTime;
-    let sourceMesh;
-    // const rayCaster = new THREE.Raycaster();
-    const ballMaterial = new THREE.MeshPhongMaterial( { color: 'green' } );
+
     const lasers = [];
 
     function fire(sourceShipMesh, numberOfLasers) {
-        // create laser/projectile
-        sourceMesh = sourceShipMesh;
-        // console.log(`sourceMesh Rotation: ${JSON.stringify(sourceMesh.rotation)}`);
-        const angle = sourceMesh.rotation.y * 180/Math.PI;
-        // console.log(`rotation angle: ${angle}`);
-        const simpleAngle = ((angle * Math.PI/360) % Math.PI)*360/Math.PI;
-        // console.log(`simple angle: ${Math.abs(Math.floor(simpleAngle))}`);
-        for(let l=0; l<numberOfLasers; l++){
-            const laserRadius = 0.2;
-            let xPos = sourceShipMesh.position.x;
-            let yPos = sourceShipMesh.position.y;
-            let zPos = sourceShipMesh.position.z;
-            // this is to space out the double lasers for the Tie Fighter when facing different directions
-            if((Math.abs(simpleAngle) >= 0 && Math.abs(simpleAngle) <= 1) || (Math.abs(simpleAngle) >= 179 && Math.abs(simpleAngle) <= 180)){
-                xPos = l === 0 ? sourceShipMesh.position.x - .5 : sourceShipMesh.position.x + .5;
-            }
-            // this is to space out the double lasers for the Tie Fighter when facing different directions
-            if(Math.abs(simpleAngle) >= 89 && Math.abs(simpleAngle) <= 90 || (Math.abs(simpleAngle) >= 269 && Math.abs(simpleAngle) <= 270)) {
-                zPos = l === 0 ? sourceShipMesh.position.z - .5 : sourceShipMesh.position.z + .5;
-            }
-            const laser = new THREE.Mesh( new THREE.SphereBufferGeometry( laserRadius, 14, 10), ballMaterial );
-            console.log('Firing Laser');
-            scene.add(laser);
+        lasers.push(new Laser(scene, sourceShipMesh, numberOfLasers, config));
+    }
 
-            laser.position.set(xPos, yPos, zPos);
+    function update(time) {
+        lasers.forEach( laser => {
+            laser.update(time);
+        } );
+    }
 
-            lasers.push({
-                laser,
-                sourceMesh: sourceMesh.clone()
-            });
 
-            setTimeout(() => {
-                    cleanup(laser);
-                }
-                , 6000);
+    function checkCollision(position) {
+       for(let i=0; i<lasers.length; i++){
+           const collisionCheck = lasers[i].checkCollision(position);
+           if(collisionCheck.collision){
+               return collisionCheck;
+           }
+       }
+       return { collision: false };
+    }
+
+    return {
+       fire,
+       checkCollision,
+       update,
+    }
+}
+
+function Laser(scene, sourceShipMesh, numberOfLasers, config) {
+    let sourceMesh;
+    let laserSet = [];
+    const ballMaterial = new THREE.MeshPhongMaterial( { color: 'green' } );
+    // create laser/projectile
+    sourceMesh = sourceShipMesh.clone();
+    // console.log(`sourceMesh Rotation: ${JSON.stringify(sourceMesh.rotation)}`);
+    const angle = sourceMesh.rotation.y * 180/Math.PI;
+    // console.log(`rotation angle: ${angle}`);
+    const simpleAngle = ((angle * Math.PI/360) % Math.PI)*360/Math.PI;
+    // console.log(`simple angle: ${Math.abs(Math.floor(simpleAngle))}`);
+    for(let l=0; l<numberOfLasers; l++){
+        const laserRadius = 0.2;
+        let xPos = sourceMesh.position.x;
+        let yPos = sourceMesh.position.y;
+        let zPos = sourceMesh.position.z;
+        // this is to space out the double lasers for the Tie Fighter when facing different directions
+        if((Math.abs(simpleAngle) >= 0 && Math.abs(simpleAngle) <= 1) || (Math.abs(simpleAngle) >= 179 && Math.abs(simpleAngle) <= 180)){
+            xPos = l === 0 ? sourceMesh.position.x - .5 : sourceMesh.position.x + .5;
         }
+        // this is to space out the double lasers for the Tie Fighter when facing different directions
+        if(Math.abs(simpleAngle) >= 89 && Math.abs(simpleAngle) <= 90 || (Math.abs(simpleAngle) >= 269 && Math.abs(simpleAngle) <= 270)) {
+            zPos = l === 0 ? sourceMesh.position.z - .5 : sourceMesh.position.z + .5;
+        }
+        const laser = new THREE.Mesh( new THREE.SphereBufferGeometry( laserRadius, 14, 10), ballMaterial );
+        console.log('Firing Laser');
+        scene.add(laser);
+
+        laser.position.set(xPos, yPos, zPos);
+
+        laserSet.push({
+            laser,
+            sourceMesh
+        });
+    }
+
+    function update(time) {
+        // move laser
+        moveLaser(time);
+    }
+
+    function checkCollision(pos) {
+        if(pos.position){
+            const position = pos.position;
+            console.log(position.name);
+           laserSet.forEach(laser => {
+               if(position.x >= laser.laser.position.x - .2 && position.x <= laser.laser.position.x + .2 ||
+                   position.y >= laser.laser.position.y - .2 && position.y <= laser.laser.position.y + .2 ||
+                   position.z >= laser.laser.position.z - .2 && position.z <= laser.laser.position.z + .2){
+                   console.log(`position: ${JSON.stringify(position)}`);
+                   console.log(`laser position HIT: ${JSON.stringify(laser.laser.position)}`);
+                   cleanup(laser);
+                   return { collision: true, name: 'Laser-hit' };
+               }
+           });
+        }
+
+        return { collision: false };
     }
 
     function calculateDirectionVector(sourceShipMesh) {
@@ -56,50 +102,24 @@ export default (scene, sourceShipPosition, config) => {
     }
 
     function moveLaser(time) {
-        for(let i=0; i<lasers.length; i++){
-
+        laserSet.forEach(laser => {
             const direction = -1;
-            const stepVector = calculateDirectionVector(lasers[i].sourceMesh).multiplyScalar( config.speed * direction );
-
-            lasers[i].laser.position.add(stepVector);
-        }
+            const stepVector = calculateDirectionVector(laser.sourceMesh).multiplyScalar( config.speed * direction );
+            laser.laser.position.add(stepVector);
+        });
     }
 
     function cleanup(obj) {
         console.log(`Clean up object laser`);
-        const index = lasers.indexOf(obj);
+        // const index = lasers.indexOf(obj);
         scene.remove(obj);
-        lasers.splice(index,1);
-    }
-
-    function checkCollision(pos) {
-        if(pos.position){
-            const position = pos.position;
-            console.log(position.name);
-            for(let i=0; i<lasers.length; i++){
-                if(position.x >= lasers[i].laser.position.x - .2 && position.x <= lasers[i].laser.position.x + .2 ||
-                    position.y >= lasers[i].laser.position.y - .2 && position.y <= lasers[i].laser.position.y + .2 ||
-                    position.z >= lasers[i].laser.position.z - .2 && position.z <= lasers[i].laser.position.z + .2){
-                    console.log(`position: ${JSON.stringify(position)}`);
-                    console.log(`laser position HIT: ${JSON.stringify(lasers[i].laser.position)}`);
-                    cleanup(lasers[i]);
-                    return { collision: true, name: 'Laser-hit' };
-                }
-            }
-        }
-        return { collision: false };
-
-    }
-
-    function update(time) {
-        // move laser/ball
-        currentTime = time;
-        moveLaser(currentTime);
+        // lasers.splice(index,1);
     }
 
     return {
-       fire,
-       checkCollision,
-       update,
+        laserSet,
+        sourceMesh,
+        update,
+        checkCollision
     }
 }

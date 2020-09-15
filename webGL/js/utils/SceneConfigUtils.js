@@ -33,9 +33,6 @@ export function parseConfiguration(config) {
     //     obstacle.size.y *= floor.size.y;
     // });
 
-    // console.log(`clone players pos x: ${clone.players[0].position.x}`);
-    // console.log(`clone players pox y: ${clone.players[0].position.y}`);
-    // console.log(`clone players pos z: ${clone.players[0].position.z}`);
     return clone
 }
 

@@ -110,12 +110,14 @@ export default (mesh, laser, camera, config, collisionManager) => {
 
             const collision = collisionManager.checkCollision({ position: tPosition, name:'Player' });
 
+            // console.log(`collision: ${collision}`);
+            // console.log(`position: ${JSON.stringify(tPosition)}`);
             if(!collision) {
                 mesh.position.add(stepVector);
                 camera.position.add(stepVector);
              }
         } else
-            collisionManager.checkCollision(mesh.position);
+            collisionManager.checkCollision({ position: mesh.position, name:'Player' });
     }
 
     function resetPosition() {
