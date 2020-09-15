@@ -132,8 +132,9 @@ export default (mesh, laser, camera, config, collisionManager) => {
     function setCameraPositionRelativeToMesh(camera, mesh) {
         camera.position.x = mesh.position.x;
         camera.position.z = mesh.position.z + 20;
+        camera.position.y = mesh.position.y + 5;
         console.log(`after camera position z: ${camera.position.z}`);
-        camera.lookAt(new THREE.Vector3(mesh.position.x, 0, mesh.position.z));
+        camera.lookAt(new THREE.Vector3(mesh.position.x, mesh.position.y, mesh.position.z));
     }
 
 	return {
