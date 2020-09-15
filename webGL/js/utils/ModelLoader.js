@@ -6,7 +6,8 @@ export const ModelType = {
 };
 
 export default (scene, playerConfiguration, modelType) => {
-    const playerPosition = { x: playerConfiguration.position.x, y: 6, z: 4 };
+    const playerPosition = { x: playerConfiguration.position.x, y: playerConfiguration.position.y, z: playerConfiguration.position.z };
+    console.log(`player POS: ${JSON.stringify(playerPosition)}`);
     let loader;
     const group = new THREE.Group();
     group.position.set(playerPosition.x, playerPosition.y, playerPosition.z);
@@ -46,7 +47,9 @@ export default (scene, playerConfiguration, modelType) => {
             const playerMesh = new THREE.Mesh(playerGeometry, playerMaterials);
             playerMesh.rotation.y = -Math.PI/2;
             playerMesh.castShadow = true;
-
+            playerMesh.scale.x = playerConfiguration.scale;
+            playerMesh.scale.y = playerConfiguration.scale;
+            playerMesh.scale.z = playerConfiguration.scale;
             group.add(playerMesh);
         })
     }
@@ -55,7 +58,8 @@ export default (scene, playerConfiguration, modelType) => {
         const scale = (Math.sin(time)+4)/5;
         const positionY = Math.sin(time)/2;
 
-        group.position.y = playerPosition.y + positionY;
+        // this makes the ship look like its floating
+        // group.position.y = playerPosition.y + positionY;
     }
 
     return {

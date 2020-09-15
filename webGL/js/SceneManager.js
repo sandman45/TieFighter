@@ -6,7 +6,7 @@ import StaticObstacles from './sceneSubjects/StaticObstacles.js';
 import MovingObstacles from './sceneSubjects/MovingObstacles.js';
 import ModelLoader from './utils/ModelLoader.js';
 import PlayerControls from './controls/PlayerControls.js';
-// import weapons from './sceneSubjects/LaserCannons';
+import LaserCannons from './sceneSubjects/weapons/LaserCannons.js';
 import CollisionManager from './controls/CollisionManager.js';
 import Sonars from './sceneSubjects/Sonars.js';
 import SkyBox from "./sceneSubjects/SkyBox.js";
@@ -71,24 +71,26 @@ export default canvas => {
 
     function createSceneSubjects(scene, sceneConstants, camera) {
         const floorConfig = sceneConstants.floor;
-        const playerConfig = sceneConstants.player;
-        const player2Config = sceneConstants.player2;
-        const staticObstaclesConfig = sceneConstants.staticObstacles;
-        const movingObstaclesConfig = sceneConstants.movingObstacles;
-        const sonarsConfig = sceneConstants.sonars;
+        const playerConfig = sceneConstants.players[0];
+        const player2Config = sceneConstants.players[1];
+        // const staticObstaclesConfig = sceneConstants.staticObstacles;
+        // const movingObstaclesConfig = sceneConstants.movingObstacles;
+        // const sonarsConfig = sceneConstants.sonars;
 
         const floor = Floor(scene, floorConfig);
         const player = ModelLoader(scene, player2Config, ModelType.JSON);
         const tiePlayer = ModelLoader(scene, playerConfig, ModelType.OBJECT);
-        // const laser = weapons(scene, tiePlayer.mesh.position, player.mesh.position);
+        const laser = LaserCannons(scene, tiePlayer.mesh.position, sceneConstants.weapons[0]);
         // const staticObstacles = StaticObstacles(scene, staticObstaclesConfig);
         // const movingObstacles = MovingObstacles(scene, movingObstaclesConfig);
         // const sonars = Sonars(scene, sonarsConfig);
 
         // const collisionManager = CollisionManager([floor, staticObstacles, movingObstacles, sonars]);
-        const collisionManager = CollisionManager([floor]);
+        const collisionManager = CollisionManager([floor, laser]);
 
-        const controls = PlayerControls(tiePlayer.mesh, camera, playerConfig, collisionManager);
+         // TODO: need to update the NON player Ship
+        // const controls2 = PlayerControls(player.mesh, camera, player2Config, collisionManager);
+        const controls = PlayerControls(tiePlayer.mesh, laser, camera, playerConfig, collisionManager);
 
         const sceneSubjects = [
             GeneralLights(scene),
@@ -96,10 +98,11 @@ export default canvas => {
             // staticObstacles,
             // movingObstacles,
             // sonars,
-            // laser,
+            laser,
             tiePlayer,
             player,
-            controls
+            controls,
+            // controls2
         ];
 
         return { sceneSubjects, controls };
