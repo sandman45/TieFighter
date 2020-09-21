@@ -108,16 +108,16 @@ export default (mesh, laser, camera, config, collisionManager) => {
             const stepVector = directionVector.multiplyScalar( config.speed * direction );
             const tPosition = mesh.position.clone().add(stepVector);
 
-            const collision = collisionManager.checkCollision({ position: tPosition, name:'Player' });
+            const collision = collisionManager.checkCollision({ position: tPosition, name:'PLAYER' });
 
-            // console.log(`collision: ${collision}`);
-            // console.log(`position: ${JSON.stringify(tPosition)}`);
+            console.log(`collision: ${collision}`);
+            console.log(`position: ${JSON.stringify(tPosition)}`);
             if(!collision) {
                 mesh.position.add(stepVector);
                 camera.position.add(stepVector);
              }
         } else
-            collisionManager.checkCollision({ position: mesh.position, name:'Player' });
+            collisionManager.checkCollision({ position: mesh.position, name:'PLAYER' });
     }
 
     function resetPosition() {
