@@ -2,13 +2,13 @@ import eventBus from '../eventBus/EventBus.js'
 import eventBusEvents from '../eventBus/events.js'
 
 export default colliders => {
-    function checkCollision(position) {
+    function checkCollision(obj) {
         for(let i=0; i<colliders.length; i++) {
-            const collisionCheck = colliders[i].checkCollision(position.position);
+            const collisionCheck = colliders[i].checkCollision(obj);
 
             if(collisionCheck.collision) {
-                eventBus.post(eventBusEvents.collision, collisionCheck.name);
-                console.log(`Collision detected: ${position.name} at ${JSON.stringify(position.position)} with ${collisionCheck.name}`);
+                console.log(`Collision detected: ${obj.name} at ${JSON.stringify(obj.position)} with ${collisionCheck.name}`);
+                eventBus.post(eventBusEvents.collision, { target: collisionCheck.name, source: obj.name });
                 return true;
             }
         }

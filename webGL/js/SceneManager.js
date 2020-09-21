@@ -78,15 +78,16 @@ export default canvas => {
         // const sonarsConfig = sceneConstants.sonars;
 
         const floor = Floor(scene, floorConfig);
+        const collisionManager = CollisionManager([floor]);
         const player = ModelLoader(scene, player2Config, ModelType.JSON);
         const tiePlayer = ModelLoader(scene, playerConfig, ModelType.OBJECT);
-        const laser = LaserCannons(scene, tiePlayer.mesh.position, sceneConstants.weapons[0]);
+        const laser = LaserCannons(scene, tiePlayer.mesh.position, sceneConstants.weapons[0], collisionManager);
         // const staticObstacles = StaticObstacles(scene, staticObstaclesConfig);
         // const movingObstacles = MovingObstacles(scene, movingObstaclesConfig);
         // const sonars = Sonars(scene, sonarsConfig);
 
         // const collisionManager = CollisionManager([floor, staticObstacles, movingObstacles, sonars]);
-        const collisionManager = CollisionManager([floor, laser]);
+
 
          // TODO: need to update the NON player Ship
         // const controls2 = PlayerControls(player.mesh, camera, player2Config, collisionManager);

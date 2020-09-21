@@ -13,8 +13,8 @@ export default (scene, floorConfig) => {
 		// cube.material.uniforms.transparent = floorConfig.transparent;
 	}
 
-	function checkCollision(position) {
-		if(Math.abs(position.x) > floorConfig.size.x/2 || Math.abs(position.z) > floorConfig.size.y/2 ) {
+	function checkCollision(obj) {
+		if(Math.abs(obj.position.x) > floorConfig.size.x/2 || Math.abs(obj.position.z) > floorConfig.size.y/2 ) {
 			return { collision: true, name: 'floor-border' };
 		}
 		else {
