@@ -1,10 +1,12 @@
 import * as THREE from '../../../node_modules/three/build/three.module.js'
 
-export default (scene, sourceShipPosition, config, collisionManager) => {
+export default (scene, sourceShipPosition, config, collisionManager, audio) => {
 
     const lasers = [];
 
     function fire(sourceShipMesh, numberOfLasers) {
+        // trigger sound
+        audio.sound.play();
         lasers.push(new Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager));
     }
 
@@ -16,9 +18,11 @@ export default (scene, sourceShipPosition, config, collisionManager) => {
 
     function checkCollision(obj) {
        for(let i=0; i<lasers.length; i++){
-           const collisionCheck = lasers[i].checkCollision(obj.position);
-           if(collisionCheck.collision){
-               return collisionCheck;
+           if(obj.name !== "TIE"){
+               const collisionCheck = lasers[i].checkCollision(obj.position, obj.name);
+               if(collisionCheck.collision){
+                   return collisionCheck;
+               }
            }
        }
        return { collision: false };
@@ -72,16 +76,17 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager) 
         moveLaser(time);
     }
 
-    function checkCollision(pos) {
-        if(pos.position){
-            const position = pos.position;
-            console.log(position.name);
+    function checkCollision(pos, name) {
+        if(pos && name !== "TIE"){
+            const position = pos;
+            const spread = 2;
            laserSet.forEach((laser, i) => {
-               if(position.x >= laser.laser.position.x - .2 && position.x <= laser.laser.position.x + .2 ||
-                   position.y >= laser.laser.position.y - .2 && position.y <= laser.laser.position.y + .2 ||
-                   position.z >= laser.laser.position.z - .2 && position.z <= laser.laser.position.z + .2){
-                   console.log(`position: ${JSON.stringify(position)}`);
-                   console.log(`laser position HIT: ${JSON.stringify(laser.laser.position)}`);
+               if((laser.laser.position.x >= (position.x - spread) && laser.laser.position.x <= (position.x + spread)) &&
+                   (laser.laser.position.y >= (position.y - spread) && laser.laser.position.y <= (position.y + spread)) &&
+                   (laser.laser.position.z >= (position.z - spread) && laser.laser.position.z <= (position.z + spread))
+               ){
+                   console.log(`object position: ${JSON.stringify(position)}`);
+                   console.log(`laser HIT ${name}: at position: ${JSON.stringify(laser.laser.position)}`);
                    cleanup(laser.laser, i);
                    return { collision: true, name: 'Laser-hit' };
                }

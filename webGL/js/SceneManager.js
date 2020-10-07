@@ -2,23 +2,23 @@ import * as THREE from '../node_modules/three/build/three.module.js';
 
 import GeneralLights from './sceneSubjects/GeneralLights.js';
 import Floor from './sceneSubjects/Floor.js';
-import StaticObstacles from './sceneSubjects/StaticObstacles.js';
-import MovingObstacles from './sceneSubjects/MovingObstacles.js';
 import ModelLoader from './utils/ModelLoader.js';
 import PlayerControls from './controls/PlayerControls.js';
 import LaserCannons from './sceneSubjects/weapons/LaserCannons.js';
+import WeaponsCollisionManager from './controls/WeaponsCollisionManager.js';
 import CollisionManager from './controls/CollisionManager.js';
-import Sonars from './sceneSubjects/Sonars.js';
+import AudioStuff from './utils/Audio.js';
+
 import SkyBox from "./sceneSubjects/SkyBox.js";
 import sceneConfiguration from '../sceneConfig.js';
-import { parseConfiguration, mapConfigurationToGUI } from './utils/SceneConfigUtils.js';
 
+import { parseConfiguration, mapConfigurationToGUI } from './utils/SceneConfigUtils.js';
 import dat from '../node_modules/dat.gui/build/dat.gui.module.js';
 import { ModelType } from "./utils/ModelLoader.js";
 
 export default canvas => {
     const clock = new THREE.Clock();
-
+    let weaponsCollision;
     const screenDimensions = {
         width: canvas.width,
         height: canvas.height
@@ -29,9 +29,11 @@ export default canvas => {
     const scene = buildScene();
     const renderer = buildRender(screenDimensions);
     const camera = buildCamera(screenDimensions);
-    const {sceneSubjects, controls} = createSceneSubjects(scene, sceneConstants, camera);
+    const audio = AudioStuff(camera);
+    const {sceneSubjects, controls} = createSceneSubjects(scene, sceneConstants, camera, audio);
 
     const datGui = new dat.GUI();
+
     mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
 
     function buildScene() {
@@ -69,51 +71,41 @@ export default canvas => {
         return camera;
     }
 
-    function createSceneSubjects(scene, sceneConstants, camera) {
+    function createSceneSubjects(scene, sceneConstants, camera, audio) {
         const floorConfig = sceneConstants.floor;
         const playerConfig = sceneConstants.players[0];
-        const player2Config = sceneConstants.players[1];
-        // const staticObstaclesConfig = sceneConstants.staticObstacles;
-        // const movingObstaclesConfig = sceneConstants.movingObstacles;
-        // const sonarsConfig = sceneConstants.sonars;
+        const npcConfig = sceneConstants.players[1];
 
         const floor = Floor(scene, floorConfig);
+        const npc = ModelLoader(scene, npcConfig, ModelType.JSON);
+        const player = ModelLoader(scene, playerConfig, ModelType.OBJECT);
+
+        // static collision manager
         const collisionManager = CollisionManager([floor]);
-        const player = ModelLoader(scene, player2Config, ModelType.JSON);
-        const tiePlayer = ModelLoader(scene, playerConfig, ModelType.OBJECT);
-        const laser = LaserCannons(scene, tiePlayer.mesh.position, sceneConstants.weapons[0], collisionManager);
-        // const staticObstacles = StaticObstacles(scene, staticObstaclesConfig);
-        // const movingObstacles = MovingObstacles(scene, movingObstaclesConfig);
-        // const sonars = Sonars(scene, sonarsConfig);
+        const laser = LaserCannons(scene, player.mesh.position, sceneConstants.weapons[0], collisionManager, audio);
 
-        // const collisionManager = CollisionManager([floor, staticObstacles, movingObstacles, sonars]);
-
-
-         // TODO: need to update the NON player Ship
-        // const controls2 = PlayerControls(player.mesh, camera, player2Config, collisionManager);
-        const controls = PlayerControls(tiePlayer.mesh, laser, camera, playerConfig, collisionManager);
+        const controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager);
 
         const sceneSubjects = [
             GeneralLights(scene),
             floor,
-            // staticObstacles,
-            // movingObstacles,
-            // sonars,
             laser,
-            tiePlayer,
             player,
+            npc,
             controls,
-            // controls2
         ];
+
+        weaponsCollision = WeaponsCollisionManager([laser]);
 
         return { sceneSubjects, controls };
     }
 
     function update() {
         const elapsedTime = clock.getElapsedTime();
-
-        for(let i = 0; i < sceneSubjects.length; i++)
-        	sceneSubjects[i].update(elapsedTime);
+        weaponsCollision.checkCollision(sceneSubjects);
+        for(let i = 0; i < sceneSubjects.length; i++) {
+            sceneSubjects[i].update(elapsedTime);
+        }
 
         renderer.render(scene, camera);
     }
