@@ -30,6 +30,7 @@ export default (scene, playerConfiguration, modelType) => {
             obj.scale.x = playerConfiguration.scale;
             obj.scale.y = playerConfiguration.scale;
             obj.scale.z = playerConfiguration.scale;
+            group.name = playerConfiguration.name;
             group.add(obj);
         })
     }
@@ -50,6 +51,7 @@ export default (scene, playerConfiguration, modelType) => {
             playerMesh.scale.x = playerConfiguration.scale;
             playerMesh.scale.y = playerConfiguration.scale;
             playerMesh.scale.z = playerConfiguration.scale;
+            group.name = playerConfiguration.name;
             group.add(playerMesh);
         })
     }

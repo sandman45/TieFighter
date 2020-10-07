@@ -5,13 +5,13 @@ const config = {
     },
     players: [
         {
-            name: 'Tie',
+            name: 'TIE',
             position: { x: 10, y: 1, z: 1 },
             speed: .8,
             scale: .5
         },
         {
-            name: 'Other',
+            name: 'NPC',
             position: { x: 15, y: 1, z: 1 },
             speed: .8,
             scale: .5
