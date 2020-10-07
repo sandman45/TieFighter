@@ -1,6 +1,6 @@
 import * as THREE from '../../node_modules/three/build/three.module.js'
 
-export default (mesh, laser, camera, config, collisionManager) => {
+export default (mesh, laser, camera, config, collisionManager, audio) => {
 
 	const keycodes = {
         W: 87,
@@ -104,6 +104,7 @@ export default (mesh, laser, camera, config, collisionManager) => {
         directionVector.applyMatrix4(matrix);
 
 		if(forward || backward) {
+            audio.playSound(mesh, "FLYBY");
             const direction = backward ? 1 : -1;
             const stepVector = directionVector.multiplyScalar( config.speed * direction );
             const tPosition = mesh.position.clone().add(stepVector);

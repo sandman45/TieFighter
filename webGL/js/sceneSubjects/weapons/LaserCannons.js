@@ -5,9 +5,10 @@ export default (scene, sourceShipPosition, config, collisionManager, audio) => {
     const lasers = [];
 
     function fire(sourceShipMesh, numberOfLasers) {
+        const l = new Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager)
         // trigger sound
-        audio.sound.play();
-        lasers.push(new Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager));
+        audio.playSound(l.laserSet[0], "BLAST");
+        lasers.push(l);
     }
 
     function update(time) {
