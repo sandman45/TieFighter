@@ -7,7 +7,7 @@ import PlayerControls from './controls/PlayerControls.js';
 import LaserCannons from './sceneSubjects/weapons/LaserCannons.js';
 import WeaponsCollisionManager from './controls/WeaponsCollisionManager.js';
 import CollisionManager from './controls/CollisionManager.js';
-import AudioStuff from './utils/Audio.js';
+import GameAudio from './utils/Audio.js';
 
 import SkyBox from "./sceneSubjects/SkyBox.js";
 import sceneConfiguration from '../sceneConfig.js';
@@ -29,7 +29,8 @@ export default canvas => {
     const scene = buildScene();
     const renderer = buildRender(screenDimensions);
     const camera = buildCamera(screenDimensions);
-    const audio = AudioStuff(camera);
+    const audio = new GameAudio(camera);
+
     const {sceneSubjects, controls} = createSceneSubjects(scene, sceneConstants, camera, audio);
 
     const datGui = new dat.GUI();
@@ -84,7 +85,7 @@ export default canvas => {
         const collisionManager = CollisionManager([floor]);
         const laser = LaserCannons(scene, player.mesh.position, sceneConstants.weapons[0], collisionManager, audio);
 
-        const controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager);
+        const controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
 
         const sceneSubjects = [
             GeneralLights(scene),
