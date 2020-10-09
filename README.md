@@ -3,6 +3,10 @@
 Creating a Tie Fighter game using [PierfrancescoSoffritti's Configurable Three JS App template](https://github.com/PierfrancescoSoffritti/configurable-threejs-app). Check it out 
 he has done an amazing job. 
 
+
+[![Watch the video](https://i.imgur.com/vKb2F1B.png)](https://imgur.com/gallery/ltWwFGF)
+
+
 ## How to start
 
 ### Install
