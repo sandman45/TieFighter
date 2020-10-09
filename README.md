@@ -4,7 +4,7 @@ Creating a Tie Fighter game using [PierfrancescoSoffritti's Configurable Three J
 he has done an amazing job. 
 
 
-[![Watch the video](https://i.imgur.com/vKb2F1B.png)](https://imgur.com/gallery/ltWwFGF)
+[![Watch the video](ttps://imgur.com/gallery/ltWwFGF)](https://imgur.com/gallery/ltWwFGF)
 
 
 ## How to start
