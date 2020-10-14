@@ -1,9 +1,10 @@
 import * as THREE from '../node_modules/three/build/three.module.js';
-
 import GeneralLights from './sceneSubjects/GeneralLights.js';
 import Floor from './sceneSubjects/Floor.js';
 import ModelLoader from './utils/ModelLoader.js';
 import PlayerControls from './controls/PlayerControls.js';
+import FlyControls from './controls/FlyControls.js';
+
 import LaserCannons from './sceneSubjects/weapons/LaserCannons.js';
 import WeaponsCollisionManager from './controls/WeaponsCollisionManager.js';
 import CollisionManager from './controls/CollisionManager.js';
@@ -31,11 +32,11 @@ export default canvas => {
     const camera = buildCamera(screenDimensions);
     const audio = new GameAudio(camera);
 
-    const {sceneSubjects, controls} = createSceneSubjects(scene, sceneConstants, camera, audio);
+    const {sceneSubjects, controls, flightControls} = createSceneSubjects(scene, sceneConstants, camera, audio);
 
     const datGui = new dat.GUI();
 
-    mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
+    mapConfigurationToGUI(sceneConstants, sceneConfiguration, flightControls, datGui, sceneConfiguration);
 
     function buildScene() {
         const scene = new THREE.Scene();
@@ -72,6 +73,16 @@ export default canvas => {
         return camera;
     }
 
+    function createFlightControls(mesh, camera, renderer, collisionManager, laser, audio, config) {
+        const flightControls = new FlyControls( mesh, camera, renderer.domElement, collisionManager, laser, audio, config );
+        flightControls.movementSpeed = config.speed;
+        flightControls.domElement = renderer.domElement;
+        flightControls.rollSpeed = config.rollSpeed;
+        flightControls.autoForward = config.autoForward;
+        flightControls.dragToLook = false;
+        return flightControls;
+    }
+
     function createSceneSubjects(scene, sceneConstants, camera, audio) {
         const floorConfig = sceneConstants.floor;
         const playerConfig = sceneConstants.players[0];
@@ -85,20 +96,25 @@ export default canvas => {
         const collisionManager = CollisionManager([floor]);
         const laser = LaserCannons(scene, player.mesh.position, sceneConstants.weapons[0], collisionManager, audio);
 
-        const controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
-
+        // const controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
+        const flightControls = createFlightControls(player.mesh, camera, renderer, collisionManager, laser, audio, playerConfig);
         const sceneSubjects = [
             GeneralLights(scene),
             floor,
             laser,
             player,
             npc,
-            controls,
+            flightControls,
+            // controls,
         ];
 
         weaponsCollision = WeaponsCollisionManager([laser]);
 
-        return { sceneSubjects, controls };
+        return {
+            sceneSubjects,
+            flightControls,
+            // controls
+        };
     }
 
     function update() {
@@ -124,11 +140,13 @@ export default canvas => {
     }
 
     function onKeyDown(keyCode, duration) {
-        controls.onKeyDown(keyCode, duration);
+        // controls.onKeyDown(keyCode, duration);
+        flightControls.onKeyDown(keyCode, duration);
     }
 
     function onKeyUp(keyCode) {
-        controls.onKeyUp(keyCode);
+        // controls.onKeyUp(keyCode);
+        flightControls.onKeyUp(keyCode);
     }
 
     return {
