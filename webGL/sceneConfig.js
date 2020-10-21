@@ -1,4 +1,8 @@
 const config = {
+    audio: {
+        music: false,
+        sfx: false,
+    },
     floor: {
         size: { x: 500, y: 500 },
         transparent: false
@@ -7,16 +11,16 @@ const config = {
         {
             name: 'TIE',
             position: { x: 10, y: 1, z: 1 },
-            speed: .8,
+            speed: .1,
             scale: .5,
             rollSpeed: .009,
-            autoForward: true
+            autoForward: false
         },
         {
             name: 'NPC',
             position: { x: 15, y: 1, z: 1 },
             speed: .8,
-            scale: .5
+            scale: 1
         }
     ],
     weapons: [

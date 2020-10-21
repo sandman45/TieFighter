@@ -4,24 +4,9 @@
 
 import * as THREE from '../../node_modules/three/build/three.module.js';
 
-// let object;
-// let camera;
-// let domElement;
-// let movementSpeed;
-// let rollSpeed;
-// let dragToLook;
-// let autoForward;
-// let tmpQuaternion;
-// let mouseStatus;
-// let moveVector;
-// let rotationVector;
-
-
 function bind( scope, fn ) {
     return function () {
-
         fn.apply( scope, arguments );
-
     };
 }
 
@@ -38,6 +23,7 @@ export default class FlyControls {
         this.camera = camera;
         this.laser = laser;
         this.audio = audio;
+        this.throttle = 0;
         this.collisionManager = collisionManager;
         this.goal = new THREE.Object3D();
         object.add( this.goal );
@@ -47,9 +33,8 @@ export default class FlyControls {
         if (domElement) this.domElement.setAttribute('tabindex', -1);
         // API
 
-        this.movementSpeed = 1.0;
+        this.movementSpeed = 0;
         this.rollSpeed = 0.005;
-
         this.dragToLook = false;
         this.autoForward = false;
 
@@ -113,7 +98,6 @@ export default class FlyControls {
     };
 
     onKeyDown = function( keyCode ) {
-        // console.log(`onKeyDown: ${JSON.stringify(keyCode)}`);
         switch ( keyCode ) {
 
             case 16: /* shift */ this.movementSpeedMultiplier = .1; break;
@@ -135,6 +119,18 @@ export default class FlyControls {
 
             case 81: /*Q*/ this.moveState.rollLeft = 1; break;
             case 69: /*E*/ this.moveState.rollRight = 1; break;
+            case 187: /*+/=*/
+                if(parseFloat(this.throttle) < 1){
+                    this.throttle = (parseFloat(this.throttle) + 0.1).toFixed(1);
+                }
+                console.log(`throttle: ${this.throttle}`);
+                break;
+            case 189: /*-*/
+                if(parseFloat(this.throttle) > 0){
+                    this.throttle = (parseFloat(this.throttle) - 0.1).toFixed(1);
+                }
+                console.log(`throttle: ${this.throttle}`);
+                break;
             case 32: this.fireCannons(this.object); break;
 
         }
@@ -143,9 +139,8 @@ export default class FlyControls {
         this.updateRotationVector();
 
     };
-    onKeyUp = function( event ) {
-        // console.log(`onKeyUp: ${JSON.stringify(event)}`);
-        switch ( event.keyCode ) {
+    onKeyUp = function( keyCode ) {
+        switch ( keyCode ) {
 
             case 16: /* shift */ this.movementSpeedMultiplier = 1; break;
 
@@ -255,12 +250,12 @@ export default class FlyControls {
         const directionVector = new THREE.Vector3( 0, 0, 1 );
         directionVector.applyMatrix4(matrix);
         // console.log(`delta: ${delta}`);
-        const moveMult = this.movementSpeed;
+        const moveMult = this.throttle;
         const rotMult = this.rollSpeed;
 
         // console.log(`rotMult: ${rotMult}`);
         const direction = this.moveState.back ? 1 : -1;
-        const stepVector = directionVector.multiplyScalar( this.movementSpeed * direction );
+        const stepVector = directionVector.multiplyScalar( this.throttle * direction );
         const tPosition = this.object.position.clone().add(stepVector);
         const collision = this.collisionManager.checkCollision({
             position: tPosition,

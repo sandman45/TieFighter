@@ -5,6 +5,7 @@ import ModelLoader from './utils/ModelLoader.js';
 import PlayerControls from './controls/PlayerControls.js';
 import FlyControls from './controls/FlyControls.js';
 
+import Explosion from '../js/particles/explosion.js';
 import LaserCannons from './sceneSubjects/weapons/LaserCannons.js';
 import WeaponsCollisionManager from './controls/WeaponsCollisionManager.js';
 import CollisionManager from './controls/CollisionManager.js';
@@ -30,7 +31,7 @@ export default canvas => {
     const scene = buildScene();
     const renderer = buildRender(screenDimensions);
     const camera = buildCamera(screenDimensions);
-    const audio = new GameAudio(camera);
+    const audio = new GameAudio(camera, sceneConfiguration.audio);
 
     const {sceneSubjects, controls, flightControls} = createSceneSubjects(scene, sceneConstants, camera, audio);
 
@@ -98,6 +99,8 @@ export default canvas => {
 
         // const controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
         const flightControls = createFlightControls(player.mesh, camera, renderer, collisionManager, laser, audio, playerConfig);
+        const explosion = Explosion(scene, npc.mesh.position, "EXPLOSION", audio);
+
         const sceneSubjects = [
             GeneralLights(scene),
             floor,
@@ -106,6 +109,7 @@ export default canvas => {
             npc,
             flightControls,
             // controls,
+            explosion
         ];
 
         weaponsCollision = WeaponsCollisionManager([laser]);

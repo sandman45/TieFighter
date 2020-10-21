@@ -4,7 +4,7 @@ export default (weapons) => {
         for(let i=0; i<weapons.length; i++) {
             sceneObjects.forEach(obj => {
                 // checkCollision with weapons with scene objects
-                if(obj.mesh){
+                if(obj && obj.mesh){
                     // console.log(`checking mesh collision: ${obj.mesh.name}`);
                     const collisionCheck = weapons[i].checkCollision(obj.mesh);
                     if(collisionCheck.collision){

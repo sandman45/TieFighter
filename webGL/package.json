@@ -4,6 +4,7 @@
   "description": "tie fighter",
   "dependencies": {
     "dat.gui": "^0.7.1",
+    "shader-particle-engine": "^1.0.6",
     "three": "^0.91.0"
   },
   "author": "Sandman",
