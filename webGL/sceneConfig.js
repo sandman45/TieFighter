@@ -1,4 +1,8 @@
 const config = {
+    controls: {
+        flightControls: false,
+        controls: true,
+    },
     audio: {
         music: false,
         sfx: false,
@@ -11,7 +15,7 @@ const config = {
         {
             name: 'TIE',
             position: { x: 10, y: 1, z: 1 },
-            speed: .1,
+            speed: .8,
             scale: .5,
             rollSpeed: .009,
             autoForward: false

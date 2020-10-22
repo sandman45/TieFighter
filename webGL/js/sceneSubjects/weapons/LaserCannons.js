@@ -81,7 +81,8 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager) 
         if(pos && name !== "TIE"){
             const position = pos;
             const spread = 2;
-           laserSet.forEach((laser, i) => {
+            let collisionRes = {};
+            laserSet.forEach((laser, i) => {
                if((laser.laser.position.x >= (position.x - spread) && laser.laser.position.x <= (position.x + spread)) &&
                    (laser.laser.position.y >= (position.y - spread) && laser.laser.position.y <= (position.y + spread)) &&
                    (laser.laser.position.z >= (position.z - spread) && laser.laser.position.z <= (position.z + spread))
@@ -89,9 +90,10 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager) 
                    console.log(`object position: ${JSON.stringify(position)}`);
                    console.log(`laser HIT ${name}: at position: ${JSON.stringify(laser.laser.position)}`);
                    cleanup(laser.laser, i);
-                   return { collision: true, name: 'Laser-hit' };
+                   collisionRes = { collision: true, name: 'Laser-hit' };
                }
            });
+           return collisionRes;
         }
 
         return { collision: false };

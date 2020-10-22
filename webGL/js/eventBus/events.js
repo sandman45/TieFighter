@@ -1,4 +1,4 @@
 export default {
-    sonarActivated: 'sonarActivated',
-    collision: 'collision'    
+    collision: 'collision',
+    EXPLOSION: "EXPLOSION"
 }

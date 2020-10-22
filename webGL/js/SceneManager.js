@@ -96,9 +96,13 @@ export default canvas => {
         // static collision manager
         const collisionManager = CollisionManager([floor]);
         const laser = LaserCannons(scene, player.mesh.position, sceneConstants.weapons[0], collisionManager, audio);
+        let controls;
+        if(sceneConstants.controls.flightControls){
+            controls = createFlightControls(player.mesh, camera, renderer, collisionManager, laser, audio, playerConfig);
+        } else {
+            controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
+        }
 
-        // const controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
-        const flightControls = createFlightControls(player.mesh, camera, renderer, collisionManager, laser, audio, playerConfig);
         const explosion = Explosion(scene, npc.mesh.position, "EXPLOSION", audio);
 
         const sceneSubjects = [
@@ -107,8 +111,7 @@ export default canvas => {
             laser,
             player,
             npc,
-            flightControls,
-            // controls,
+            controls,
             explosion
         ];
 
@@ -116,8 +119,7 @@ export default canvas => {
 
         return {
             sceneSubjects,
-            flightControls,
-            // controls
+            controls
         };
     }
 
@@ -144,13 +146,11 @@ export default canvas => {
     }
 
     function onKeyDown(keyCode, duration) {
-        // controls.onKeyDown(keyCode, duration);
-        flightControls.onKeyDown(keyCode, duration);
+        controls.onKeyDown(keyCode, duration);
     }
 
     function onKeyUp(keyCode) {
-        // controls.onKeyUp(keyCode);
-        flightControls.onKeyUp(keyCode);
+        controls.onKeyUp(keyCode);
     }
 
     return {

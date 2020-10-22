@@ -1,3 +1,4 @@
+import eventType from "../eventBus/events.js"
 
 export default (weapons) => {
     function checkCollision(sceneObjects) {
@@ -8,12 +9,22 @@ export default (weapons) => {
                     // console.log(`checking mesh collision: ${obj.mesh.name}`);
                     const collisionCheck = weapons[i].checkCollision(obj.mesh);
                     if(collisionCheck.collision){
-                        console.log(`lasers collided with ${obj.mesh.name}`);
-                        console.log(`do something now.. `);
+                        // console.log(`lasers collided with ${obj.mesh.name}`);
+                        // console.log(`trigger: explosion at ${JSON.stringify(obj.mesh.position)}`);
+                        // trigger explosion
+                        triggerEvent(sceneObjects, obj.mesh.position, eventType.EXPLOSION);
                         return true;
                     }
                 }
             });
+        }
+    }
+
+    function triggerEvent(sceneObjects, position, event) {
+        for(let i=0; i<sceneObjects.length; i++){
+            if(event === eventType.EXPLOSION && sceneObjects[i].name === event){
+                sceneObjects[i].trigger(position);
+            }
         }
     }
 

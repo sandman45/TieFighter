@@ -1,6 +1,6 @@
 import * as THREE from '../../node_modules/three/build/three.module.js';
 
-export default function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) {
+export default function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration, destroy) {
     // note: texture passed by reference, will be updated by the update function.
 
     let tilesHorizontal = tilesHoriz;
@@ -30,6 +30,7 @@ export default function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles
             currentTile++;
             if (currentTile === numberOfTiles)
                 currentTile = 0;
+                destroy();
             let currentColumn = currentTile % tilesHorizontal;
             texture.offset.x = currentColumn / tilesHorizontal;
             let currentRow = Math.floor( currentTile / tilesHorizontal );
