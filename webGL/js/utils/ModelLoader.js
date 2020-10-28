@@ -1,8 +1,6 @@
-// import * as THREE from '../../node_modules/three/build/three.module.js';
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
-// import * as GLTFLoader from '../../node_modules/three/examples/js/loaders/GLTFLoader.js';
-// import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.122/examples/jsm/loaders/GLTFLoader.js";
 import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/loaders/GLTFLoader.js';
+
 export const ModelType = {
     JSON: "JSON",
     OBJECT: "OBJECT",
@@ -10,10 +8,12 @@ export const ModelType = {
 };
 
 export const Model = {
-    TIE: "models/tie-fighter.json",
+    TIE: "models/tie-fighter/tie.glb",
     TIE_BOMBER: "models/tie-bomber/tie-bomber.glb",
-    CORRELLIAN_LIGHT_FREIGHTER: "models/mFalcon/correllian-lf.json",
+    TIE_INTERCEPTOR: "models/tie-interceptor/tie-interceptor.glb",
+    TIE_ADVANCED: "models/tie-advanced/tie-advanced.glb",
     TIE_DEFENDER: "models/tie-defender/tie-defender.glb",
+    SHUTTLE: "models/shuttle/shuttle.glb",
     ISD: "models/destroyer/isd.glb"
 };
 
@@ -38,11 +38,11 @@ export default (scene, playerConfiguration, modelType, model, position) => {
                 console.log(`${JSON.stringify(err)}`);
             }
             const root = gltf.scene;
-            // root.rotation.y = 3.15;
             root.rotation.y = playerConfiguration.rotation.y;
             root.scale.x = playerConfiguration.scale;
             root.scale.y = playerConfiguration.scale;
             root.scale.z = playerConfiguration.scale;
+            group.name = playerConfiguration.name;
             group.add(root);
         });
     }

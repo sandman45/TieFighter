@@ -5,7 +5,7 @@ export default (scene, sourceShipPosition, config, collisionManager, audio) => {
     const lasers = [];
 
     function fire(sourceShipMesh, numberOfLasers) {
-        const l = new Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager)
+        const l = new Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager);
         // trigger sound
         audio.playSound(l.laserSet[0], "BLAST");
         lasers.push(l);
@@ -19,7 +19,7 @@ export default (scene, sourceShipPosition, config, collisionManager, audio) => {
 
     function checkCollision(obj) {
        for(let i=0; i<lasers.length; i++){
-           if(obj.name !== "TIE"){
+           if(obj.name !== "TIE_DEFENDER"){
                const collisionCheck = lasers[i].checkCollision(obj.position, obj.name);
                if(collisionCheck.collision){
                    return collisionCheck;
@@ -78,7 +78,7 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager) 
     }
 
     function checkCollision(pos, name) {
-        if(pos && name !== "TIE"){
+        if(pos && name !== "TIE_DEFENDER"){
             const position = pos;
             const spread = 2;
             let collisionRes = {};

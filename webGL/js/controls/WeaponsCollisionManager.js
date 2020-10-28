@@ -9,8 +9,8 @@ export default (weapons) => {
                     // console.log(`checking mesh collision: ${obj.mesh.name}`);
                     const collisionCheck = weapons[i].checkCollision(obj.mesh);
                     if(collisionCheck.collision){
-                        // console.log(`lasers collided with ${obj.mesh.name}`);
-                        // console.log(`trigger: explosion at ${JSON.stringify(obj.mesh.position)}`);
+                        console.log(`lasers collided with ${obj.mesh.name}`);
+                        console.log(`trigger: explosion at ${JSON.stringify(obj.mesh.position)}`);
                         // trigger explosion
                         triggerEvent(sceneObjects, obj.mesh.position, eventType.EXPLOSION);
                         return true;

@@ -88,7 +88,8 @@ export default canvas => {
     function createSceneSubjects(scene, sceneConstants, camera, audio) {
         const floorConfig = sceneConstants.floor;
         const playerConfig = sceneConstants.players[1];
-        const player2Config = sceneConstants.players[0];
+        const tieAdvancedConfig = sceneConstants.players[0];
+        const tieInterceptorConfig = sceneConstants.players[5];
         const player3Config = sceneConstants.players[3];
         const player4Config = sceneConstants.players[4];
         const npcConfig = sceneConstants.players[2];
@@ -96,6 +97,8 @@ export default canvas => {
         const floor = Floor(scene, floorConfig);
         const npc = ModelLoader(scene, player4Config, ModelType.GLTF, Model.ISD);
         const npc2 = ModelLoader(scene, npcConfig, ModelType.GLTF, Model.TIE_BOMBER);
+        const npc3 = ModelLoader(scene, tieAdvancedConfig, ModelType.GLTF, Model.TIE_ADVANCED);
+        const npc4 = ModelLoader(scene, tieInterceptorConfig, ModelType.GLTF, Model.TIE_INTERCEPTOR);
         const player = ModelLoader(scene, player3Config, ModelType.GLTF, Model.TIE_DEFENDER);
         // const player = ModelLoader(scene, playerConfig, ModelType.OBJECT, Model.TIE);
 
@@ -109,16 +112,17 @@ export default canvas => {
             controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
         }
 
-        const explosion = Explosion(scene, npc2.mesh.position, "EXPLOSION", audio);
+        const explosion = Explosion(scene, "EXPLOSION", audio);
 
         const sceneSubjects = [
             GeneralLights(scene),
             floor,
             laser,
             player,
-            // npc,
+            npc,
             npc2,
-            // npc3,
+            npc3,
+            npc4,
             controls,
             explosion
         ];
