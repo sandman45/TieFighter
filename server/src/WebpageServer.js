@@ -54,7 +54,6 @@ function initSocketIOServer(callbacks) {
         webpageReady = true;
         console.log("webpage ready");
 
-        socket.on( 'sonarActivated', callbacks.onSonarActivated );
         socket.on( 'collision', callbacks.onCollision );
         socket.on( 'disconnect', () => { delete sockets[key]; webpageReady = false; console.log("webpage disconnected") } );
     })

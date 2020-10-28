@@ -57,6 +57,12 @@ export function mapConfigurationToGUI(sceneConstants, sceneConfiguration, contro
             controller.onChange( value => {
                 updateSceneConstants(sceneConstants, parseConfiguration(sceneConfiguration));
                 // updates player position
+                if(sceneConstants.controls.flightControls) {
+                    // switch to flight controls
+
+                } else {
+                    // switch to other controls
+                }
                 controls.resetPosition();
                 // TODO: need to update the other ships position
             })

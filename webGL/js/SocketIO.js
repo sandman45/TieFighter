@@ -18,7 +18,6 @@ export default (onKeyUp, onKeyDown) => {
 
     socket.on( 'disconnect', () => console.log("server disconnected") );
 
-    eventBus.subscribe( eventBusEvents.sonarActivated, sonarId => socket.emit('sonarActivated', sonarId));
     eventBus.subscribe( eventBusEvents.collision, objectName => {
         console.log(`collision: ${JSON.stringify(objectName)}`);
         // if player hits object call stopMoving;

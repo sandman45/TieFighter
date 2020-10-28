@@ -1,5 +1,5 @@
-import * as THREE from '../../node_modules/three/build/three.module.js'
-
+// import * as THREE from '../../node_modules/three/build/three.module.js'
+import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 export default scene => {
 	const spotLight = new THREE.SpotLight( '#fff', 0.5 )
 	spotLight.castShadow = true
@@ -9,10 +9,10 @@ export default scene => {
 	spotLight.position.set(-10, 40, 0)
 
 	scene.add( spotLight )
-	
+
 	const ambientLight = new THREE.AmbientLight( 0x404040 )
 	scene.add( ambientLight )
-	
+
 	function update(time) {
 	}
 

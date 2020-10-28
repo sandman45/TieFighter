@@ -1,11 +1,11 @@
-import * as THREE from '../../../node_modules/three/build/three.module.js'
-
+// import * as THREE from '../../../node_modules/three/build/three.module.js'
+import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 export default (scene, sourceShipPosition, config, collisionManager, audio) => {
 
     const lasers = [];
 
     function fire(sourceShipMesh, numberOfLasers) {
-        const l = new Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager)
+        const l = new Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager);
         // trigger sound
         audio.playSound(l.laserSet[0], "BLAST");
         lasers.push(l);
@@ -19,7 +19,7 @@ export default (scene, sourceShipPosition, config, collisionManager, audio) => {
 
     function checkCollision(obj) {
        for(let i=0; i<lasers.length; i++){
-           if(obj.name !== "TIE"){
+           if(obj.name !== "TIE_DEFENDER"){
                const collisionCheck = lasers[i].checkCollision(obj.position, obj.name);
                if(collisionCheck.collision){
                    return collisionCheck;
@@ -78,10 +78,11 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager) 
     }
 
     function checkCollision(pos, name) {
-        if(pos && name !== "TIE"){
+        if(pos && name !== "TIE_DEFENDER"){
             const position = pos;
             const spread = 2;
-           laserSet.forEach((laser, i) => {
+            let collisionRes = {};
+            laserSet.forEach((laser, i) => {
                if((laser.laser.position.x >= (position.x - spread) && laser.laser.position.x <= (position.x + spread)) &&
                    (laser.laser.position.y >= (position.y - spread) && laser.laser.position.y <= (position.y + spread)) &&
                    (laser.laser.position.z >= (position.z - spread) && laser.laser.position.z <= (position.z + spread))
@@ -89,9 +90,10 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager) 
                    console.log(`object position: ${JSON.stringify(position)}`);
                    console.log(`laser HIT ${name}: at position: ${JSON.stringify(laser.laser.position)}`);
                    cleanup(laser.laser, i);
-                   return { collision: true, name: 'Laser-hit' };
+                   collisionRes = { collision: true, name: 'Laser-hit' };
                }
            });
+           return collisionRes;
         }
 
         return { collision: false };
