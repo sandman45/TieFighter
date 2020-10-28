@@ -1,5 +1,5 @@
-import * as THREE from '../../../node_modules/three/build/three.module.js'
-
+// import * as THREE from '../../../node_modules/three/build/three.module.js'
+import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 export default (scene, sourceShipPosition, config, collisionManager, audio) => {
 
     const lasers = [];

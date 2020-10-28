@@ -5,7 +5,7 @@ const config = {
     },
     audio: {
         music: false,
-        sfx: false,
+        sfx: true,
     },
     floor: {
         size: { x: 500, y: 500 },
@@ -13,19 +13,48 @@ const config = {
     },
     players: [
         {
+            name: 'TIE_ADVANCED',
+            position: { x: 10, y: 1, z: -10 },
+            rotation: { y: 3.15, x:0, z:0 },
+            speed: .9,
+            scale: 1.5,
+            rollSpeed: .009,
+            autoForward: false
+        },
+        {
             name: 'TIE',
             position: { x: 10, y: 1, z: 1 },
-            speed: .8,
+            rotation: { y: 3.15, x:0, z:0 },
+            speed: .7,
             scale: .5,
             rollSpeed: .009,
             autoForward: false
         },
         {
-            name: 'NPC',
+            name: 'TIE_BOMBER',
             position: { x: 15, y: 1, z: 1 },
+            rotation: { y: 3.15, x:0, z:0 },
+            speed: .5,
+            scale: 3
+        },
+        {
+            name: 'TIE_DEFENDER',
+            position: { x: 10, y: 1, z: 10 },
+            rotation: { y: 3.15, x:0, z:0 },
+            speed: 1,
+            scale: 3,
+            rollSpeed: .009,
+            autoForward: false
+        },
+        {
+            name: 'ISD',
+            position: { x: 20, y: 20, z: 10 },
+            rotation: { y: 0, x:0, z:0 },
             speed: .8,
-            scale: 1
-        }
+            scale: 10,
+            rollSpeed: .009,
+            autoForward: false
+        },
     ],
     weapons: [
         {

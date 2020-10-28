@@ -1,5 +1,5 @@
-import * as THREE from '../../node_modules/three/build/three.module.js'
-
+// import * as THREE from '../../node_modules/three/build/three.module.js'
+import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 export default (scene, floorConfig) => {
 	const geometry = new THREE.BoxBufferGeometry( 1, 1, 1 );
 	const material = new THREE.MeshStandardMaterial( { wireframe: true, color: '#fff', roughness: 0.5, metalness: 0.1} );

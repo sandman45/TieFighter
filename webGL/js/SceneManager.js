@@ -1,4 +1,5 @@
-import * as THREE from '../node_modules/three/build/three.module.js';
+// import * as THREE from '../node_modules/three/build/three.module.js';
+import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 import GeneralLights from './sceneSubjects/GeneralLights.js';
 import Floor from './sceneSubjects/Floor.js';
 import ModelLoader from './utils/ModelLoader.js';
@@ -16,7 +17,7 @@ import sceneConfiguration from '../sceneConfig.js';
 
 import { parseConfiguration, mapConfigurationToGUI } from './utils/SceneConfigUtils.js';
 import dat from '../node_modules/dat.gui/build/dat.gui.module.js';
-import { ModelType } from "./utils/ModelLoader.js";
+import { ModelType, Model } from "./utils/ModelLoader.js";
 
 export default canvas => {
     const clock = new THREE.Clock();
@@ -33,11 +34,11 @@ export default canvas => {
     const camera = buildCamera(screenDimensions);
     const audio = new GameAudio(camera, sceneConfiguration.audio);
 
-    const {sceneSubjects, controls, flightControls} = createSceneSubjects(scene, sceneConstants, camera, audio);
+    const {sceneSubjects, controls} = createSceneSubjects(scene, sceneConstants, camera, audio);
 
     const datGui = new dat.GUI();
 
-    mapConfigurationToGUI(sceneConstants, sceneConfiguration, flightControls, datGui, sceneConfiguration);
+    mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
 
     function buildScene() {
         const scene = new THREE.Scene();
@@ -86,12 +87,17 @@ export default canvas => {
 
     function createSceneSubjects(scene, sceneConstants, camera, audio) {
         const floorConfig = sceneConstants.floor;
-        const playerConfig = sceneConstants.players[0];
-        const npcConfig = sceneConstants.players[1];
+        const playerConfig = sceneConstants.players[1];
+        const player2Config = sceneConstants.players[0];
+        const player3Config = sceneConstants.players[3];
+        const player4Config = sceneConstants.players[4];
+        const npcConfig = sceneConstants.players[2];
 
         const floor = Floor(scene, floorConfig);
-        const npc = ModelLoader(scene, npcConfig, ModelType.JSON);
-        const player = ModelLoader(scene, playerConfig, ModelType.OBJECT);
+        const npc = ModelLoader(scene, player4Config, ModelType.GLTF, Model.ISD);
+        const npc2 = ModelLoader(scene, npcConfig, ModelType.GLTF, Model.TIE_BOMBER);
+        const player = ModelLoader(scene, player3Config, ModelType.GLTF, Model.TIE_DEFENDER);
+        // const player = ModelLoader(scene, playerConfig, ModelType.OBJECT, Model.TIE);
 
         // static collision manager
         const collisionManager = CollisionManager([floor]);
@@ -103,14 +109,16 @@ export default canvas => {
             controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
         }
 
-        const explosion = Explosion(scene, npc.mesh.position, "EXPLOSION", audio);
+        const explosion = Explosion(scene, npc2.mesh.position, "EXPLOSION", audio);
 
         const sceneSubjects = [
             GeneralLights(scene),
             floor,
             laser,
             player,
-            npc,
+            // npc,
+            npc2,
+            // npc3,
             controls,
             explosion
         ];

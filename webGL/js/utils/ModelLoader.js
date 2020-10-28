@@ -1,59 +1,50 @@
-import * as THREE from '../../node_modules/three/build/three.module.js';
-
+// import * as THREE from '../../node_modules/three/build/three.module.js';
+import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
+// import * as GLTFLoader from '../../node_modules/three/examples/js/loaders/GLTFLoader.js';
+// import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.122/examples/jsm/loaders/GLTFLoader.js";
+import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/loaders/GLTFLoader.js';
 export const ModelType = {
     JSON: "JSON",
-    OBJECT: "OBJECT"
+    OBJECT: "OBJECT",
+    GLTF: "GLTF"
 };
 
-export default (scene, playerConfiguration, modelType) => {
-    const playerPosition = { x: playerConfiguration.position.x, y: playerConfiguration.position.y, z: playerConfiguration.position.z };
+export const Model = {
+    TIE: "models/tie-fighter.json",
+    TIE_BOMBER: "models/tie-bomber/tie-bomber.glb",
+    CORRELLIAN_LIGHT_FREIGHTER: "models/mFalcon/correllian-lf.json",
+    TIE_DEFENDER: "models/tie-defender/tie-defender.glb",
+    ISD: "models/destroyer/isd.glb"
+};
+
+export default (scene, playerConfiguration, modelType, model, position) => {
+    const playerPosition = {
+        x: position ? position.x : playerConfiguration.position.x,
+        y: position ? position.y : playerConfiguration.position.y,
+        z: position ? position.z : playerConfiguration.position.z,
+    };
     console.log(`player POS: ${JSON.stringify(playerPosition)}`);
     let loader;
     const group = new THREE.Group();
     group.position.set(playerPosition.x, playerPosition.y, playerPosition.z);
     scene.add(group);
 
-    if(modelType === ModelType.JSON) {
-        loadModelJSON();
-    } else if (modelType === ModelType.OBJECT) {
-        loadModelObject();
-    } else {
-        // default to JSON
-        loadModelJSON();
-    }
+    loadGLTFObject(model);
 
-
-    function loadModelObject() {
-        loader = new THREE.ObjectLoader();
-        loader.load('models/tie-fighter.json', function(obj) {
-            obj.rotation.y = 3.15; // this is so the tie faces away
-            obj.scale.x = playerConfiguration.scale;
-            obj.scale.y = playerConfiguration.scale;
-            obj.scale.z = playerConfiguration.scale;
-            group.name = playerConfiguration.name;
-            group.add(obj);
-        })
-    }
-
-    function loadModelJSON() {
-        loader = new THREE.JSONLoader();
-        loader.load('models/spaceship.json', function(playerGeometry, playerMaterials) {
-            for(let i = 0; i < playerMaterials.length; i++) {
-                playerMaterials[i].flatShading = true;
-                playerMaterials[i].shininess = 0;
-                playerMaterials[i].metalness = 0;
-                playerMaterials[i].roughness = 0.4;
+    function loadGLTFObject(model) {
+        loader = new GLTFLoader();
+        loader.load(model, function(gltf, err) {
+            if(err){
+                console.log(`${JSON.stringify(err)}`);
             }
-
-            const playerMesh = new THREE.Mesh(playerGeometry, playerMaterials);
-            playerMesh.rotation.y = -Math.PI/2;
-            playerMesh.castShadow = true;
-            playerMesh.scale.x = playerConfiguration.scale;
-            playerMesh.scale.y = playerConfiguration.scale;
-            playerMesh.scale.z = playerConfiguration.scale;
-            group.name = playerConfiguration.name;
-            group.add(playerMesh);
-        })
+            const root = gltf.scene;
+            // root.rotation.y = 3.15;
+            root.rotation.y = playerConfiguration.rotation.y;
+            root.scale.x = playerConfiguration.scale;
+            root.scale.y = playerConfiguration.scale;
+            root.scale.z = playerConfiguration.scale;
+            group.add(root);
+        });
     }
 
     function update(time) {

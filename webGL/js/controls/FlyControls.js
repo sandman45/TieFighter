@@ -1,8 +1,8 @@
 /**
  * @author James Baicoianu / http://www.baicoianu.com/
  */
-
-import * as THREE from '../../node_modules/three/build/three.module.js';
+import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
+// import * as THREE from '../../node_modules/three/build/three.module.js';
 
 function bind( scope, fn ) {
     return function () {
