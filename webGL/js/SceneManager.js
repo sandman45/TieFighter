@@ -85,34 +85,45 @@ export default canvas => {
         return flightControls;
     }
 
+    function addRebelShips(scene, sceneConfig, camera, audio){
+        const rebelShips = [];
+        sceneConfig.opponents.forEach((config) => {
+            rebelShips.push(ModelLoader(scene, config, ModelType.GLTF, Model[config.name]));
+        });
+        return rebelShips;
+    }
+
     function createSceneSubjects(scene, sceneConstants, camera, audio) {
         const floorConfig = sceneConstants.floor;
-        const playerConfig = sceneConstants.players[1];
+        // const playerConfig = sceneConstants.players[1];
+        const tieConfig = sceneConstants.players[1];
         const tieAdvancedConfig = sceneConstants.players[0];
         const tieInterceptorConfig = sceneConstants.players[5];
-        const player3Config = sceneConstants.players[3];
-        const player4Config = sceneConstants.players[4];
+        const tieDefenderConfig = sceneConstants.players[3];
+        const isdConfig = sceneConstants.players[4];
         const npcConfig = sceneConstants.players[2];
 
         const floor = Floor(scene, floorConfig);
-        const npc = ModelLoader(scene, player4Config, ModelType.GLTF, Model.ISD);
+        const npc = ModelLoader(scene, isdConfig, ModelType.GLTF, Model.ISD);
+        const npc1 = ModelLoader(scene, tieConfig, ModelType.GLTF, Model.TIE);
         const npc2 = ModelLoader(scene, npcConfig, ModelType.GLTF, Model.TIE_BOMBER);
         const npc3 = ModelLoader(scene, tieAdvancedConfig, ModelType.GLTF, Model.TIE_ADVANCED);
         const npc4 = ModelLoader(scene, tieInterceptorConfig, ModelType.GLTF, Model.TIE_INTERCEPTOR);
-        const player = ModelLoader(scene, player3Config, ModelType.GLTF, Model.TIE_DEFENDER);
-        // const player = ModelLoader(scene, playerConfig, ModelType.OBJECT, Model.TIE);
+        const player = ModelLoader(scene, tieDefenderConfig, ModelType.GLTF, Model.TIE_DEFENDER);
 
         // static collision manager
         const collisionManager = CollisionManager([floor]);
         const laser = LaserCannons(scene, player.mesh.position, sceneConstants.weapons[0], collisionManager, audio);
         let controls;
         if(sceneConstants.controls.flightControls){
-            controls = createFlightControls(player.mesh, camera, renderer, collisionManager, laser, audio, playerConfig);
+            controls = createFlightControls(player.mesh, camera, renderer, collisionManager, laser, audio, tieDefenderConfig);
         } else {
-            controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
+            controls = PlayerControls(player.mesh, laser, camera, tieDefenderConfig, collisionManager, audio);
         }
 
         const explosion = Explosion(scene, "EXPLOSION", audio);
+
+        const rebels = addRebelShips(scene, sceneConstants, camera, audio);
 
         const sceneSubjects = [
             GeneralLights(scene),
@@ -120,12 +131,18 @@ export default canvas => {
             laser,
             player,
             npc,
+            npc1,
             npc2,
             npc3,
             npc4,
             controls,
-            explosion
+            explosion,
+            ...rebels
         ];
+
+
+
+        // sceneSubjects.concat(rebels);
 
         weaponsCollision = WeaponsCollisionManager([laser]);
 
