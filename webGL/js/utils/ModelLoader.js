@@ -14,14 +14,18 @@ export const Model = {
     TIE_ADVANCED: "models/tie-advanced/tie-advanced.glb",
     TIE_DEFENDER: "models/tie-defender/tie-defender.glb",
     SHUTTLE: "models/shuttle/shuttle.glb",
-    ISD: "models/destroyer/isd.glb"
+    ISD: "models/destroyer/isd.glb",
+    A_WING: "models/a-wing.glb",
+    B_WING: "models/b-wing.glb",
+    X_WING: "models/x-wing.glb",
+    Y_WING: "models/y-wing.glb"
 };
 
-export default (scene, playerConfiguration, modelType, model, position) => {
+export default (scene, modelConfiguration, modelType, model, position) => {
     const playerPosition = {
-        x: position ? position.x : playerConfiguration.position.x,
-        y: position ? position.y : playerConfiguration.position.y,
-        z: position ? position.z : playerConfiguration.position.z,
+        x: position ? position.x : modelConfiguration.position.x,
+        y: position ? position.y : modelConfiguration.position.y,
+        z: position ? position.z : modelConfiguration.position.z,
     };
     console.log(`player POS: ${JSON.stringify(playerPosition)}`);
     let loader;
@@ -38,11 +42,11 @@ export default (scene, playerConfiguration, modelType, model, position) => {
                 console.log(`${JSON.stringify(err)}`);
             }
             const root = gltf.scene;
-            root.rotation.y = playerConfiguration.rotation.y;
-            root.scale.x = playerConfiguration.scale;
-            root.scale.y = playerConfiguration.scale;
-            root.scale.z = playerConfiguration.scale;
-            group.name = playerConfiguration.name;
+            root.rotation.y = modelConfiguration.rotation.y;
+            root.scale.x = modelConfiguration.scale;
+            root.scale.y = modelConfiguration.scale;
+            root.scale.z = modelConfiguration.scale;
+            group.name = modelConfiguration.name;
             group.add(root);
         });
     }
