@@ -22,7 +22,7 @@ function WebpageServer(callbacks) {
 
 function startServer(callbacks) {
     startHttpServer();
-    initSocketIOServer(callbacks);
+    // initSocketIOServer(callbacks);
 }
 
 function allowCrossOrigin(req, res, next) {
@@ -34,7 +34,10 @@ function allowCrossOrigin(req, res, next) {
 
 function startHttpServer() {
     app.use(allowCrossOrigin);
-    const pathr = path.resolve('webGL');
+    let pathr = path.resolve('webGL');
+    if(pathr.search("server").length > -1){
+        pathr = "/home/ec2-user/TieFighter/webGL/";
+    }
     console.log(`startHTTPSERVER: ${pathr}`);
     app.use(favicon(path.join(pathr, 'public', 'favicon.ico')));
     app.use(express.static('webGL'));
