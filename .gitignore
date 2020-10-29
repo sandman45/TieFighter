@@ -1,0 +1,4 @@
+/server/node_modules
+/server/src/.env
+/webGL/node_modules
+/package-lock.json
