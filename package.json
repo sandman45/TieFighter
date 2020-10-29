@@ -1,0 +1,21 @@
+{
+  "name": "tiefighter",
+  "version": "1.0.0",
+  "description": "Creating a Tie Fighter game using [PierfrancescoSoffritti's Configurable Three JS App template](https://github.com/PierfrancescoSoffritti/configurable-threejs-app). Check it out  he has done an amazing job.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cd server && npm i && cd .. && cd webGL && npm i",
+    "start": "node server/src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandman45/TieFighter.git"
+  },
+  "author": "Matthew W. Sanders",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sandman45/TieFighter/issues"
+  },
+  "homepage": "https://github.com/sandman45/TieFighter#readme"
+}
