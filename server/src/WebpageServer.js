@@ -35,11 +35,10 @@ function allowCrossOrigin(req, res, next) {
 function startHttpServer() {
     app.use(allowCrossOrigin);
     const pathr = path.resolve('webGL');
+    console.log(`startHTTPSERVER: ${pathr}`);
     app.use(favicon(path.join(pathr, 'public', 'favicon.ico')));
     app.use(express.static('webGL'));
     app.get('/', (req, res) => res.sendFile('index.html', { root: `./webGL` }) );
-
-
     console.log(`Web server listening on port ${process.env.WEB_SERVER}`);
     http.listen(process.env.WEB_SERVER);
 }
