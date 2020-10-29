@@ -17,6 +17,8 @@
   "bugs": {
     "url": "https://github.com/sandman45/TieFighter/issues"
   },
-  "homepage": "https://github.com/sandman45/TieFighter#readme"
+  "homepage": "https://github.com/sandman45/TieFighter#readme",
+  "dependencies": {
+    "pm2": "^4.5.0"
+  }
 }
-
