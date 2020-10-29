@@ -29,22 +29,20 @@ export default canvas => {
 
     const sceneConstants = parseConfiguration(sceneConfiguration);
 
-    const scene = buildScene();
+    const scene = buildScene(sceneConstants);
     const renderer = buildRender(screenDimensions);
     const camera = buildCamera(screenDimensions);
     const audio = new GameAudio(camera, sceneConfiguration.audio);
-
+    buildLight(scene);
     const {sceneSubjects, controls} = createSceneSubjects(scene, sceneConstants, camera, audio);
 
     const datGui = new dat.GUI();
 
     mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
 
-    function buildScene() {
+    function buildScene(sceneConstants) {
         const scene = new THREE.Scene();
-        SkyBox(scene);
-        // scene.background = new THREE.Color('#000');
-
+        SkyBox(scene, sceneConstants);
         return scene;
     }
 
@@ -63,11 +61,19 @@ export default canvas => {
         return renderer
     }
 
+    function buildLight(scene){
+        const sphere = new THREE.SphereBufferGeometry(16,32,32);
+        const light = new THREE.PointLight( 0xffffff, 10, 700);
+        light.add(new THREE.Mesh( sphere, new THREE.MeshBasicMaterial({color: 0xffffff})));
+        light.position.set(400,400,500);
+        scene.add(light);
+    }
+
     function buildCamera({ width, height }) {
         const aspectRatio = width / height;
         const fieldOfView = 60;
         const nearPlane = 1;
-        const farPlane = 1000;
+        const farPlane = 3000;
         const camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
 
         camera.position.y = 10;
@@ -85,64 +91,59 @@ export default canvas => {
         return flightControls;
     }
 
-    function addRebelShips(scene, sceneConfig, camera, audio){
+    function addRebelShips(scene, sceneConfig){
         const rebelShips = [];
-        sceneConfig.opponents.forEach((config) => {
+        sceneConfig.rebels.forEach((config) => {
             rebelShips.push(ModelLoader(scene, config, ModelType.GLTF, Model[config.name]));
         });
         return rebelShips;
     }
 
+    function addImperialShips(scene,sceneConfig){
+        const imperialShips = [];
+        sceneConfig.imperials.forEach((config) => {
+            imperialShips.push(ModelLoader(scene, config, ModelType.GLTF, Model[config.name]));
+        });
+        return imperialShips;
+    }
+
+    function addPlayerShips(scene, sceneConfig){
+        const playerShips = [];
+        sceneConfig.players.forEach((config) => {
+            playerShips.push(ModelLoader(scene, config, ModelType.GLTF, Model[config.name]));
+        });
+        return playerShips;
+    }
+
     function createSceneSubjects(scene, sceneConstants, camera, audio) {
         const floorConfig = sceneConstants.floor;
-        // const playerConfig = sceneConstants.players[1];
-        const tieConfig = sceneConstants.players[1];
-        const tieAdvancedConfig = sceneConstants.players[0];
-        const tieInterceptorConfig = sceneConstants.players[5];
-        const tieDefenderConfig = sceneConstants.players[3];
-        const isdConfig = sceneConstants.players[4];
-        const npcConfig = sceneConstants.players[2];
-
         const floor = Floor(scene, floorConfig);
-        const npc = ModelLoader(scene, isdConfig, ModelType.GLTF, Model.ISD);
-        const npc1 = ModelLoader(scene, tieConfig, ModelType.GLTF, Model.TIE);
-        const npc2 = ModelLoader(scene, npcConfig, ModelType.GLTF, Model.TIE_BOMBER);
-        const npc3 = ModelLoader(scene, tieAdvancedConfig, ModelType.GLTF, Model.TIE_ADVANCED);
-        const npc4 = ModelLoader(scene, tieInterceptorConfig, ModelType.GLTF, Model.TIE_INTERCEPTOR);
-        const player = ModelLoader(scene, tieDefenderConfig, ModelType.GLTF, Model.TIE_DEFENDER);
-
+        const playerShips = addPlayerShips(scene,sceneConstants);
+        const playerConfig = sceneConstants.players[0];
         // static collision manager
         const collisionManager = CollisionManager([floor]);
-        const laser = LaserCannons(scene, player.mesh.position, sceneConstants.weapons[0], collisionManager, audio);
+        const laser = LaserCannons(scene, playerShips[0].mesh.position, sceneConstants.weapons[0], collisionManager, audio);
         let controls;
         if(sceneConstants.controls.flightControls){
-            controls = createFlightControls(player.mesh, camera, renderer, collisionManager, laser, audio, tieDefenderConfig);
+            controls = createFlightControls(playerShips[0].mesh, camera, renderer, collisionManager, laser, audio, playerConfig);
         } else {
-            controls = PlayerControls(player.mesh, laser, camera, tieDefenderConfig, collisionManager, audio);
+            controls = PlayerControls(playerShips[0].mesh, laser, camera, playerConfig, collisionManager, audio);
         }
 
         const explosion = Explosion(scene, "EXPLOSION", audio);
 
-        const rebels = addRebelShips(scene, sceneConstants, camera, audio);
-
+        const rebels = addRebelShips(scene, sceneConstants);
+        const imperials = addImperialShips(scene, sceneConstants);
         const sceneSubjects = [
             GeneralLights(scene),
             floor,
             laser,
-            player,
-            npc,
-            npc1,
-            npc2,
-            npc3,
-            npc4,
             controls,
             explosion,
+            ...playerShips,
+            ...imperials,
             ...rebels
         ];
-
-
-
-        // sceneSubjects.concat(rebels);
 
         weaponsCollision = WeaponsCollisionManager([laser]);
 

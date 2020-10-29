@@ -1,9 +1,9 @@
 // import * as THREE from '../../node_modules/three/build/three.module.js'
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
-export default (scene) => {
+export default (scene, config) => {
     const loader = new THREE.TextureLoader();
     // loader.crossOrigin = "";
-    const cubeGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
+    const cubeGeometry = new THREE.BoxGeometry(config.skyBox.size.x, config.skyBox.size.y, config.skyBox.size.z);
     const cubeMaterials = [];
     const front_texture = new loader.load("/images/skybox/space/space_ft.png");
     const back_texture = new loader.load("/images/skybox/space/space_bk.png");

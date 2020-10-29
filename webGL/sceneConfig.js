@@ -4,16 +4,30 @@ const config = {
         controls: false,
     },
     audio: {
-        music: true,
+        music: false,
         musicVolume: 20,
         sfx: true,
         sfxVolume: 30,
     },
     floor: {
-        size: { x: 500, y: 500 },
+        size: { x: 1000, y: 1000, z: 1000 },
         transparent: false
     },
-    players: [
+    skyBox: {
+        size: { x: 2000, y: 2000, z: 2000},
+    },
+    players:[
+        {
+            name: 'TIE_DEFENDER',
+            position: { x: 10, y: 1, z: 10 },
+            rotation: { y: 3.15, x:0, z:0 },
+            speed: 1,
+            scale: 3,
+            rollSpeed: .009,
+            autoForward: false
+        },
+    ],
+    imperials: [
         {
             name: 'TIE_ADVANCED',
             position: { x: 10, y: 1, z: -10 },
@@ -40,20 +54,11 @@ const config = {
             scale: 3
         },
         {
-            name: 'TIE_DEFENDER',
-            position: { x: 10, y: 1, z: 10 },
-            rotation: { y: 3.15, x:0, z:0 },
-            speed: 1,
-            scale: 3,
-            rollSpeed: .009,
-            autoForward: false
-        },
-        {
             name: 'ISD',
-            position: { x: 20, y: 20, z: 10 },
+            position: { x: 20, y: 40, z: 10 },
             rotation: { y: 0, x:0, z:0 },
             speed: .2,
-            scale: 10,
+            scale: 20,
             rollSpeed: .009,
             autoForward: false
         },
@@ -65,9 +70,18 @@ const config = {
             scale: 3,
             rollSpeed: .009,
             autoForward: false
+        },
+        {
+            name: 'SHUTTLE',
+            position: { x: 20, y: 15, z: -20 },
+            rotation: { y: 3.15, x:0, z:0 },
+            speed: .4,
+            scale: 3,
+            rollSpeed: .009,
+            autoForward: false
         }
     ],
-    opponents: [
+    rebels: [
         {
             name: 'A_WING',
             position: { x: -20, y: 1, z: -20 },
@@ -82,7 +96,7 @@ const config = {
             position: { x: -25, y: 1, z: -25 },
             rotation: { y: 3.15, x:0, z:0 },
             speed: .7,
-            scale: 3,
+            scale: 5,
             rollSpeed: .009,
             autoForward: false
         },
@@ -91,14 +105,14 @@ const config = {
             position: { x: -30, y: 1, z: -30 },
             rotation: { y: 3.15, x:0, z:0 },
             speed: .6,
-            scale: 3
+            scale: 4
         },
         {
             name: 'Y_WING',
             position: { x: -35, y: 1, z: -35 },
             rotation: { y: 3.15, x:0, z:0 },
             speed: .5,
-            scale: 3,
+            scale: 5,
             rollSpeed: .009,
             autoForward: false
         },

@@ -2,9 +2,8 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 export default (scene, floorConfig) => {
 	const geometry = new THREE.BoxBufferGeometry( 1, 1, 1 );
-	const material = new THREE.MeshStandardMaterial( { wireframe: true, color: '#fff', roughness: 0.5, metalness: 0.1} );
+	const material = new THREE.MeshBasicMaterial({color:0xff0000, transparent:true, opacity:0.0, side: THREE.DoubleSide});
 	const cube = new THREE.Mesh( geometry, material );
-	// cube.material.transparent = true;
 	cube.receiveShadow = true;
 	scene.add(cube);
 
@@ -16,6 +15,8 @@ export default (scene, floorConfig) => {
 	function checkCollision(obj) {
 		if(Math.abs(obj.position.x) > floorConfig.size.x/2 || Math.abs(obj.position.z) > floorConfig.size.y/2 ) {
 			return { collision: true, name: 'floor-border' };
+		} else if(Math.abs(obj.position.y) > floorConfig.size.z/2 || Math.abs(obj.position.y) > floorConfig.size.z/2 ) {
+			return { collision: true, name: 'floor-ceiling' };
 		}
 		else {
 			return { collision: false };
