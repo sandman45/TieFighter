@@ -44,16 +44,17 @@ function startHttpServer() {
 }
 
 function initSocketIOServer(callbacks) {
+    console.log(`initSocketIOServer: `);
     socketIO.on('connection', socket => {
         socketCount++;
         const key = socketCount;
         sockets[key] = socket;
 
-        callbacks.onWebpageReady();
+        // callbacks.onWebpageReady();
         webpageReady = true;
         console.log("webpage ready");
 
-        socket.on( 'collision', callbacks.onCollision );
+        // socket.on( 'collision', callbacks.onCollision );
         socket.on( 'disconnect', () => { delete sockets[key]; webpageReady = false; console.log("webpage disconnected") } );
     })
 }
