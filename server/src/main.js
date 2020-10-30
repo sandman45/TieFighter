@@ -11,7 +11,7 @@ const TCPServer = require('./TCPServer');
 // };
 
 // const webpageServer = new WebpageServer(webpageCallbacks);
-const webpageServer = new WebpageServer();
+WebpageServer();
 // const server = new TCPServer( {
 //     port: portNumber,
 //     onClientConnected: () => { if(isWebpageRead()) webpageCallbacks.onWebpageReady() },
