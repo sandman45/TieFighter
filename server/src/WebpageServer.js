@@ -35,14 +35,12 @@ function allowCrossOrigin(req, res, next) {
 function startHttpServer() {
     app.use(allowCrossOrigin);
     let pathr = path.resolve('webGL');
-    console.log(`contains server? ${pathr.search("server").length}`);
-    if(pathr.search("server").length > -1){
-        pathr = "/home/ec2-user/TieFighter/webGL/";
-    }
+    console.log(`dirname: ${__dirname}`);
+    console.log(`join: ${path.join(__dirname, '../../webGL/public', 'favicon.ico')}`);
     console.log(`startHTTPSERVER: ${pathr}`);
-    app.use(favicon(path.join(pathr, 'public', 'favicon.ico')));
+    app.use(favicon(path.join(__dirname, '../../webGL/public', 'favicon.ico')));
     app.use(express.static('webGL'));
-    app.get('/', (req, res) => res.sendFile('index.html', { root: `./webGL` }) );
+    app.get('/', (req, res) => res.sendFile('../../webGL/index.html') );
     console.log(`Web server listening on port ${process.env.WEB_SERVER}`);
     http.listen(process.env.WEB_SERVER);
 }
