@@ -10,8 +10,8 @@ let socketCount = -1;
 
 let webpageReady = false;
 
-function WebpageServer(callbacks) {
-    startServer(callbacks);
+function WebpageServer() {
+    startServer();
 
     this.moveForward = duration => Object.keys(sockets).forEach( key => sockets[key].emit('moveForward', duration) );
     this.moveBackward = duration => Object.keys(sockets).forEach( key => sockets[key].emit('moveBackward', duration) );
@@ -20,7 +20,7 @@ function WebpageServer(callbacks) {
     this.alarm = () => Object.keys(sockets).forEach( key => sockets[key].emit('alarm') );
 }
 
-function startServer(callbacks) {
+function startServer() {
     startHttpServer();
     // initSocketIOServer(callbacks);
 }
@@ -35,6 +35,7 @@ function allowCrossOrigin(req, res, next) {
 function startHttpServer() {
     app.use(allowCrossOrigin);
     let pathr = path.resolve('webGL');
+    console.log(`contains server? ${pathr.search("server").length}`);
     if(pathr.search("server").length > -1){
         pathr = "/home/ec2-user/TieFighter/webGL/";
     }
