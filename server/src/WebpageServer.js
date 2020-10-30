@@ -26,7 +26,8 @@ function startServer() {
 }
 
 function allowCrossOrigin(req, res, next) {
-    res.header('Access-Control-Allow-Origin', `localhost:${process.env.WEB_SERVER}`);
+    console.log(`headers-origin: ${req.headers.origin}`);
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
@@ -34,17 +35,14 @@ function allowCrossOrigin(req, res, next) {
 
 function startHttpServer() {
     app.use(allowCrossOrigin);
-    let pathr = path.resolve('webGL');
     console.log(`dirname: ${__dirname}`);
-    console.log(`join: ${path.join(__dirname, '../../webGL/public', 'favicon.ico')}`);
-    console.log(`startHTTPSERVER: ${pathr}`);
-    const myPath = path.resolve(__dirname+'../../../webGL/index.html');
+    const indexFile = path.resolve(__dirname+'../../../webGL/index.html');
     const staticPath = path.resolve(`${__dirname}../../../webGL`);
     console.log(`staticPath: ${staticPath}`);
-    console.log(`myPath: ${myPath}`);
+    console.log(`indexFile: ${indexFile}`);
     app.use(favicon(path.join(__dirname, '../../webGL/public', 'favicon.ico')));
     app.use(express.static(staticPath));
-    app.get('/', (req, res) => res.sendFile(myPath) );
+    app.get('/', (req, res) => res.sendFile(indexFile) );
     console.log(`Web server listening on port ${process.env.WEB_SERVER}`);
     http.listen(process.env.WEB_SERVER);
 }
