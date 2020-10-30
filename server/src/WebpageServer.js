@@ -26,8 +26,7 @@ function startServer() {
 }
 
 function allowCrossOrigin(req, res, next) {
-    console.log(`headers-origin: ${req.headers.origin}`);
-    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Origin', req.headers.origin || "*");
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
