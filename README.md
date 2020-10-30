@@ -6,6 +6,10 @@ he has done an amazing job.
 ![Tie Fighter Game](tie-fighter-game.gif)
 
 
+### Play it here http://tie-fighter.mattsanders.org:3001/
+
+or run it locally
+
 ## How to start
 
 ### Install
