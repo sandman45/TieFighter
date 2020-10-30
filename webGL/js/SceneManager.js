@@ -6,7 +6,7 @@ import ModelLoader from './utils/ModelLoader.js';
 import PlayerControls from './controls/PlayerControls.js';
 import FlyControls from './controls/FlyControls.js';
 
-import Explosion from '../js/particles/explosion.js';
+import Explosion from '../js/particles/Explosion.js';
 import LaserCannons from './sceneSubjects/weapons/LaserCannons.js';
 import WeaponsCollisionManager from './controls/WeaponsCollisionManager.js';
 import CollisionManager from './controls/CollisionManager.js';
