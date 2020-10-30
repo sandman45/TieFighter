@@ -38,9 +38,13 @@ function startHttpServer() {
     console.log(`dirname: ${__dirname}`);
     console.log(`join: ${path.join(__dirname, '../../webGL/public', 'favicon.ico')}`);
     console.log(`startHTTPSERVER: ${pathr}`);
+    const myPath = path.resolve(__dirname+'../../../webGL/index.html');
+    const staticPath = path.resolve(`${__dirname}../../../webGL`);
+    console.log(`staticPath: ${staticPath}`);
+    console.log(`myPath: ${myPath}`);
     app.use(favicon(path.join(__dirname, '../../webGL/public', 'favicon.ico')));
-    app.use(express.static('webGL'));
-    app.get('/', (req, res) => res.sendFile('../../webGL/index.html') );
+    app.use(express.static(staticPath));
+    app.get('/', (req, res) => res.sendFile(myPath) );
     console.log(`Web server listening on port ${process.env.WEB_SERVER}`);
     http.listen(process.env.WEB_SERVER);
 }
