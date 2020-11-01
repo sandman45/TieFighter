@@ -41,7 +41,7 @@ export default canvas => {
     let controls;
     let sc;
     if( sceneConstants.multiPlayer.active ) {
-        let other;
+        let userId;
         let player;
         let playerConfig;
 
@@ -50,6 +50,7 @@ export default canvas => {
 
             // add yourself
             console.log(`adding you to game as ${data.name}: ${data.id}`);
+            userId = data.id;
             const you = data.name;
             if(data.name === "PLAYER1"){
                 playerConfig = sceneConstants.players[0];
@@ -60,7 +61,7 @@ export default canvas => {
                 // camera to control
             }
             player = ModelLoader(scene, {position: playerConfig.position, rotation: playerConfig.rotation, scale: playerConfig.scale, userId:data.id, name: playerConfig.playerName, hull: playerConfig.hull, shields: playerConfig.shields}, ModelType.GLTF, Model[playerConfig.name]);
-            sc = createSceneMultiPlayerSubjects(scene, sceneConstants, camera, audio, player, playerConfig);
+            sc = createSceneMultiPlayerSubjects(scene, sceneConstants, camera, audio, player, playerConfig, userId);
             sceneSubjects = sc.sceneSubjects;
             controls = sc.controls;
             sceneSubjects.push(player);
@@ -83,7 +84,7 @@ export default canvas => {
 
         eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL, (data) => {
             if(data.type === "LASERS"){
-                console.log(`${data.type}: ${JSON.stringify(data)}`);
+                // console.log(`${data.type}: ${JSON.stringify(data)}`);
                 sceneSubjects.forEach(subject => {
                    if(subject.fire){
                        //grab mesh from player in scene
@@ -98,8 +99,13 @@ export default canvas => {
                 console.log(`${data.type}: ${JSON.stringify(data)}`);
                 scene.children.forEach(child => {
                    if(child.userId === data.userId){
+                       console.log(`removed ${child.name}: ${child.userId} `);
                        // remove from scene if its not already removed
-                       scene.remove(child);
+                       if(child.userId === userId){
+                           eventBus.post(eventBusEvents.GAME_STATE_LOCAL_END, data.userId);
+                       } else {
+                           scene.remove(child);
+                       }
                    }
                 });
             } else {
@@ -118,15 +124,12 @@ export default canvas => {
                         });
                     }
                 });
-                if(!found){
-                    // add to scene
-                    eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, data);
-                }
             }
         });
 
         eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL_END, (userId) => {
            // cleanup sceneObjects
+           console.log(`${eventBusEvents.GAME_STATE_LOCAL_END} userId: ${userId}`);
            sceneSubjects.forEach((subject,i) => {
               if(subject.mesh) {
                   console.log(subject);
@@ -221,7 +224,7 @@ export default canvas => {
         return playerShips;
     }
 
-    function createSceneMultiPlayerSubjects(scene, sceneConstants, camera, audio, player, playerConfig) {
+    function createSceneMultiPlayerSubjects(scene, sceneConstants, camera, audio, player, playerConfig, userId) {
         const floorConfig = sceneConstants.floor;
         const floor = Floor(scene, floorConfig);
 
@@ -245,7 +248,7 @@ export default canvas => {
             explosion,
         ];
 
-        weaponsCollision = WeaponsCollisionManager([laser]);
+        weaponsCollision = WeaponsCollisionManager([laser], userId);
 
         return {
             sceneSubjects,

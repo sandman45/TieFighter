@@ -28,17 +28,6 @@ export default () => {
     socket.on(eventBusEvents.UPDATES, (update) => {
         console.log(`You are: ${userId}`);
         console.log(`${eventBusEvents.UPDATES} ${JSON.stringify(update)}`);
-        // add self
-        // if(update.data.id === userId && config.multiPlayer.start) {
-        //     console.log(`add self: ${userId} to game: ${eventBusEvents.GAME_STATE_LOCAL}`);
-        //     eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT, update.data);
-        // }
-        //
-        // // add opponent
-        // if(update.data.id !== userId) {
-        //     console.log(`add ${update.data.name}:${update.data.id}`);
-        //     eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, update.data);
-        // }
     });
 
     socket.on(eventBusEvents.START_GAME, (update) => {

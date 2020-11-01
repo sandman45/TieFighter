@@ -192,7 +192,10 @@ function initSocketIOServer(callbacks) {
 
         socket.on(events.GAME_STATE, data => {
             if(gameState[data.room] && gameState[data.room].players[socket.id]){
-                // console.log(`user: ${gameState[data.room].players[socket.id].name}, data: ${JSON.stringify(data)}`);
+                if(data.type === "DESTROYED"){
+                    console.log(`user: ${gameState[data.room].players[socket.id].name}, data: ${JSON.stringify(data)}`);
+                }
+
                 gameState[data.room].players[socket.id].type = data.type;
                 gameState[data.room].players[socket.id].room = data.room;
                 gameState[data.room].players[socket.id].userId = data.userId;

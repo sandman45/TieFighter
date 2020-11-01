@@ -138,7 +138,7 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
     }
 
     function cleanup(obj, i) {
-        console.log(`Clean up object laser`);
+        // console.log(`Clean up object laser`);
         // const index = lasers.indexOf(obj);
         scene.remove(obj);
         // remove from array?
