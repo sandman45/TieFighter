@@ -1,3 +1,4 @@
+const events = require('./events.js');
 const net = require('net');
 
 const SEPARATOR = ';';
@@ -7,8 +8,20 @@ function TCPServer( { port, onClientConnected, onMessage } ) {
     start(port);
 
     this.send = function(object) {
-        for(let key in connectedClients)
+        for(let key in connectedClients){
+            console.log(`send: ${object.type}, client: ${connectedClients[key].id}`);
             connectedClients[key].write(SEPARATOR +JSON.stringify(object) +SEPARATOR +"\n")
+        }
+    };
+
+    this.connectClient = function (object) {
+        connectedClients[object.arg.objectName.client.id] = object.arg.objectName.client;
+        console.log(`TCP Connected: ${object.arg.objectName.client.id}`);
+    };
+
+    this.disconnectClient = function (object) {
+      delete connectedClients[object.arg.objectName.client.id];
+      console.log(`TCP: Disconnected ${object.arg.objectName.client.id}`);
     };
 
     function start(port) {

@@ -1,23 +1,27 @@
+const events = require('./events.js');
+
 require('dotenv').config({ path: `${__dirname}/.env` });
 
-const { WebpageServer, isWebpageRead } = require('./WebpageServer');
+const { WebpageServer, isWebpageReady } = require('./WebpageServer');
 
-const TCPServer = require('./TCPServer');
+// const TCPServer = require('./TCPServer');
 // const portNumber = readPortNumberFromArguments();
 
 // const webpageCallbacks = {
-//     onWebpageReady: () => server.send( { type: 'webpage-ready', arg: {} } ),
-//     onCollision: objectName => server.send( { type: 'collision', arg: { objectName } } )
+//     onDisconnect: objectName => server.disconnectClient( { type: events.DISCONNECT, arg: { objectName } } ),
+//     onWebpageReady: objectName => server.connectClient( { type: events.WEB_PAGE_READY, arg: { objectName } } ),
+//     onCollision: objectName => server.send( { type: events.COLLISION, arg: { objectName } } ),
+//     playerAdded: objectName => server.send( { type: events.PLAYER_ADD, arg: { objectName } } )
 // };
 
 // const webpageServer = new WebpageServer(webpageCallbacks);
-WebpageServer();
+const webpageServer = new WebpageServer();
 // const server = new TCPServer( {
 //     port: portNumber,
-//     onClientConnected: () => { if(isWebpageRead()) webpageCallbacks.onWebpageReady() },
+//     onClientConnected: () => { if(isWebpageReady()) webpageCallbacks.onWebpageReady() },
 //     onMessage: command => webpageServer[command.type](command.arg)
 // } );
-
+//
 // function readPortNumberFromArguments() {
 //     const port = Number(process.argv[2]) || process.env.PORT;
 //     if(!port || port < 0 || port >= 65536) {

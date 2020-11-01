@@ -8,7 +8,7 @@ export const ModelType = {
 };
 
 export const Model = {
-    TIE: "models/tie-fighter/tie.glb",
+    TIE_FIGHTER: "models/tie-fighter/tie.glb",
     TIE_BOMBER: "models/tie-bomber/tie-bomber.glb",
     TIE_INTERCEPTOR: "models/tie-interceptor/tie-interceptor.glb",
     TIE_ADVANCED: "models/tie-advanced/tie-advanced.glb",
@@ -30,10 +30,13 @@ export default (scene, modelConfiguration, modelType, model, position) => {
     console.log(`player POS: ${JSON.stringify(playerPosition)}`);
     let loader;
     const group = new THREE.Group();
+    group.hull = modelConfiguration.hull;
+    group.shields = modelConfiguration.shields;
+    group.name = modelConfiguration.name;
+    group.userId = modelConfiguration.userId;
     group.position.set(playerPosition.x, playerPosition.y, playerPosition.z);
-    scene.add(group);
-
     loadGLTFObject(model);
+    scene.add(group);
 
     function loadGLTFObject(model) {
         loader = new GLTFLoader();
@@ -46,7 +49,7 @@ export default (scene, modelConfiguration, modelType, model, position) => {
             root.scale.x = modelConfiguration.scale;
             root.scale.y = modelConfiguration.scale;
             root.scale.z = modelConfiguration.scale;
-            group.name = modelConfiguration.name;
+            root.name = modelConfiguration.name;
             group.add(root);
         });
     }

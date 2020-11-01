@@ -1,5 +1,7 @@
 // import * as THREE from '../../node_modules/three/build/three.module.js'
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
+import eventBus from "../eventBus/EventBus.js";
+import eventBusEvents from "../eventBus/events.js";
 export default (mesh, laser, camera, config, collisionManager, audio) => {
 
 	const keycodes = {
@@ -20,7 +22,7 @@ export default (mesh, laser, camera, config, collisionManager, audio) => {
     let backward = false;
     let rotating = false;
 
-    setCameraPositionRelativeToMesh(camera, mesh);
+    setCameraPositionRelativeToMesh(camera, mesh, config);
 
 	function onKeyDown(keyCode, duration) {
         if(keyCode === keycodes.W)
@@ -59,7 +61,7 @@ export default (mesh, laser, camera, config, collisionManager, audio) => {
 
     function fireCannons(mesh) {
         // move / translate them on the game world
-        laser.fire(mesh, 2);
+        laser.fire(mesh, 2, mesh.name === "PLAYER2" ? "REBELLION" : "IMPERIAL");
         // collision for lazers
     }
 
@@ -93,15 +95,30 @@ export default (mesh, laser, camera, config, collisionManager, audio) => {
             .to(tweenObj, duration)
             .easing(TWEEN.Easing.Quadratic.InOut)
             .onComplete( () => rotating = false)
-            .start()
+            .start();
+        updateServer(mesh, "PLAYER");
+    }
+
+    function updateServer(mesh, type){
+        eventBus.post(eventBusEvents.GAME_STATE, {
+            position: mesh.position,
+            rotation: mesh.rotation,
+            scale: mesh.scale,
+            type,
+        });
     }
 
     function update(time) {
         const matrix = new THREE.Matrix4();
         matrix.extractRotation( mesh.matrix );
-
-        const directionVector = new THREE.Vector3( 0, 0, 1 );
-        directionVector.applyMatrix4(matrix);
+        let directionVector;
+        if(config.playerName === "PLAYER2"){
+            directionVector = new THREE.Vector3( 0, 0, -1 );
+            directionVector.applyMatrix4(matrix);
+        } else {
+            directionVector = new THREE.Vector3( 0, 0, 1 );
+            directionVector.applyMatrix4(matrix);
+        }
 
 		if(forward || backward) {
             audio.playSound(mesh, "FLYBY");
@@ -111,12 +128,12 @@ export default (mesh, laser, camera, config, collisionManager, audio) => {
 
             const collision = collisionManager.checkCollision({ position: tPosition, name:'PLAYER' });
 
-            // console.log(`collision: ${collision}`);
-            // console.log(`position: ${JSON.stringify(tPosition)}`);
             if(!collision) {
                 mesh.position.add(stepVector);
                 camera.position.add(stepVector);
-             }
+                // update Server with position
+                updateServer(mesh, "PLAYER");
+            }
         } else
             collisionManager.checkCollision({ position: mesh.position, name:'PLAYER' });
     }
@@ -129,15 +146,30 @@ export default (mesh, laser, camera, config, collisionManager, audio) => {
         mesh.scale.z = config.scale;
         mesh.scale.y = config.scale;
 
-        setCameraPositionRelativeToMesh(camera, mesh);
+        setCameraPositionRelativeToMesh(camera, mesh, config);
     }
 
-    function setCameraPositionRelativeToMesh(camera, mesh) {
-        camera.position.x = mesh.position.x;
-        camera.position.z = mesh.position.z + 20;
-        camera.position.y = mesh.position.y + 5;
-        console.log(`after camera position z: ${camera.position.z}`);
-        camera.lookAt(new THREE.Vector3(mesh.position.x, mesh.position.y, mesh.position.z));
+    function setCameraPositionRelativeToMesh(camera, mesh, config) {
+	    if(config.playerName === "PLAYER1"){
+            camera.position.x = mesh.position.x;
+            camera.position.z = mesh.position.z + 20;
+            camera.position.y = mesh.position.y + 5;
+            console.log(`${config.name}: camera position: ${JSON.stringify(camera.position)}`);
+            camera.lookAt(new THREE.Vector3(mesh.position.x, mesh.position.y, mesh.position.z));
+        } else if (config.playerName === "PLAYER2") {
+            camera.position.x = mesh.position.x;
+            camera.position.z = mesh.position.z - 20;
+            camera.position.y = mesh.position.y + 5;
+            console.log(`${config.name}: camera position: ${JSON.stringify(camera.position)}`);
+            camera.lookAt(new THREE.Vector3(mesh.position.x, mesh.position.y, mesh.position.z));
+        } else {
+	        // spectator camera
+            camera.position.x = 0;
+            camera.position.z = 0;
+            camera.position.y = 100;
+            console.log(`spectate camera position: ${JSON.stringify(camera.position)}`);
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
+        }
     }
 
 	return {

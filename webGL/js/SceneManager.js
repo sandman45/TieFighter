@@ -12,6 +12,9 @@ import WeaponsCollisionManager from './controls/WeaponsCollisionManager.js';
 import CollisionManager from './controls/CollisionManager.js';
 import GameAudio from './utils/Audio.js';
 
+import eventBus from './eventBus/EventBus.js'
+import eventBusEvents from './eventBus/events.js'
+
 import SkyBox from "./sceneSubjects/SkyBox.js";
 import sceneConfiguration from '../sceneConfig.js';
 
@@ -34,7 +37,110 @@ export default canvas => {
     const camera = buildCamera(screenDimensions);
     const audio = new GameAudio(camera, sceneConfiguration.audio);
     buildLight(scene);
-    const {sceneSubjects, controls} = createSceneSubjects(scene, sceneConstants, camera, audio);
+    let sceneSubjects = [];
+    let controls;
+    let sc;
+    if( sceneConstants.multiPlayer.active ) {
+        let other;
+        let player;
+        let playerConfig;
+
+        eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL_INIT, (data) => {
+            console.log(data);
+
+            // add yourself
+            console.log(`adding you to game as ${data.name}: ${data.id}`);
+            const you = data.name;
+            if(data.name === "PLAYER1"){
+                playerConfig = sceneConstants.players[0];
+            } else if (data.name === "PLAYER2") {
+                playerConfig = sceneConstants.players[1];
+            } else {
+                // add spectator!
+                // camera to control
+            }
+            player = ModelLoader(scene, {position: playerConfig.position, rotation: playerConfig.rotation, scale: playerConfig.scale, userId:data.id, name: playerConfig.playerName, hull: playerConfig.hull, shields: playerConfig.shields}, ModelType.GLTF, Model[playerConfig.name]);
+            sc = createSceneMultiPlayerSubjects(scene, sceneConstants, camera, audio, player, playerConfig);
+            sceneSubjects = sc.sceneSubjects;
+            controls = sc.controls;
+            sceneSubjects.push(player);
+        });
+
+        eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, (data) => {
+            // add opponent
+            console.log(`adding opponent to game as ${data.name}: ${data.id}`);
+            if(data.name === "PLAYER1"){
+                playerConfig = sceneConstants.players[0];
+            } else if (data.name === "PLAYER2") {
+                playerConfig = sceneConstants.players[1];
+            } else {
+                // add spectator!
+                // camera to control
+            }
+            player = ModelLoader(scene, {position: playerConfig.position, rotation: playerConfig.rotation, scale: playerConfig.scale, userId:data.id, name: playerConfig.playerName, hull: playerConfig.hull, shields: playerConfig.shields}, ModelType.GLTF, Model[playerConfig.name]);
+            sceneSubjects.push(player);
+        });
+
+        eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL, (data) => {
+            if(data.type === "LASERS"){
+                console.log(`${data.type}: ${JSON.stringify(data)}`);
+                sceneSubjects.forEach(subject => {
+                   if(subject.fire){
+                       //grab mesh from player in scene
+                       scene.children.forEach(child => {
+                           if(child.userId === data.userId){
+                               subject.fire(child, 2, child.name === "PLAYER2" ? "REBELLION" : "IMPERIAL");
+                           }
+                       });
+                   }
+                });
+            } else if(data.type === "DESTROYED"){
+                console.log(`${data.type}: ${JSON.stringify(data)}`);
+                scene.children.forEach(child => {
+                   if(child.userId === data.userId){
+                       // remove from scene if its not already removed
+                       scene.remove(child);
+                   }
+                });
+            } else {
+                // update scene with pertinent info
+                let found = false;
+                sceneSubjects.forEach(subject => {
+                    if(subject.mesh && subject.mesh.userId === data.userId){
+                        scene.children.forEach(child => {
+                            if(child.userId === data.userId){
+                                found = true;
+                                // console.log(`update object in scene`);
+                                child.position.set(data.data.position.x, data.data.position.y, data.data.position.z);
+                                child.rotation.setFromVector3(new THREE.Vector3(data.data.rotation._x, data.data.rotation._y, data.data.rotation._z));
+                                child.scale.set(data.data.scale.x, data.data.scale.y, data.data.scale.z);
+                            }
+                        });
+                    }
+                });
+                if(!found){
+                    // add to scene
+                    eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, data);
+                }
+            }
+        });
+
+        eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL_END, (userId) => {
+           // cleanup sceneObjects
+           sceneSubjects.forEach((subject,i) => {
+              if(subject.mesh) {
+                  console.log(subject);
+                  scene.remove(subject.mesh);
+              }
+           });
+           sceneSubjects = [];
+        });
+
+    } else {
+        const sc = createSceneSubjects(scene, sceneConstants, camera, audio);
+        sceneSubjects = sc.sceneSubjects;
+        controls = sc.controls;
+    }
 
     const datGui = new dat.GUI();
 
@@ -115,6 +221,38 @@ export default canvas => {
         return playerShips;
     }
 
+    function createSceneMultiPlayerSubjects(scene, sceneConstants, camera, audio, player, playerConfig) {
+        const floorConfig = sceneConstants.floor;
+        const floor = Floor(scene, floorConfig);
+
+        // static collision manager
+        const collisionManager = CollisionManager([floor]);
+        const laser = LaserCannons(scene, player.mesh.position, sceneConstants.weapons[0], collisionManager, audio, playerConfig);
+        let controls;
+        if(sceneConstants.controls.flightControls){
+            controls = createFlightControls(player.mesh, camera, renderer, collisionManager, laser, audio, playerConfig);
+        } else {
+            controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
+        }
+
+        const explosion = Explosion(scene, "EXPLOSION", audio);
+
+        const sceneSubjects = [
+            GeneralLights(scene),
+            floor,
+            laser,
+            controls,
+            explosion,
+        ];
+
+        weaponsCollision = WeaponsCollisionManager([laser]);
+
+        return {
+            sceneSubjects,
+            controls
+        };
+    }
+
     function createSceneSubjects(scene, sceneConstants, camera, audio) {
         const floorConfig = sceneConstants.floor;
         const floor = Floor(scene, floorConfig);
@@ -155,11 +293,17 @@ export default canvas => {
 
     function update() {
         const elapsedTime = clock.getElapsedTime();
-        weaponsCollision.checkCollision(sceneSubjects);
-        for(let i = 0; i < sceneSubjects.length; i++) {
-            sceneSubjects[i].update(elapsedTime);
-        }
+        if(sceneSubjects.length > 0){
+            if(weaponsCollision){
+                weaponsCollision.checkCollision(sceneSubjects);
+                for(let i = 0; i < sceneSubjects.length; i++) {
+                    sceneSubjects[i].update(elapsedTime);
 
+
+
+                }
+            }
+        }
         renderer.render(scene, camera);
     }
 
@@ -176,11 +320,15 @@ export default canvas => {
     }
 
     function onKeyDown(keyCode, duration) {
-        controls.onKeyDown(keyCode, duration);
+        if(controls){
+            controls.onKeyDown(keyCode, duration);
+        }
     }
 
     function onKeyUp(keyCode) {
-        controls.onKeyUp(keyCode);
+        if(controls){
+            controls.onKeyUp(keyCode);
+        }
     }
 
     return {

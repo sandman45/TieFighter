@@ -14,6 +14,7 @@ export default (scene, type, audio) => {
     const geometry = new THREE.PlaneGeometry(4, 4, 4);
     const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true});
     const mesh = new THREE.Mesh( geometry, material );
+    mesh.name = "EXPLOSION";
     scene.add(mesh);
     mesh.visible = false;
 

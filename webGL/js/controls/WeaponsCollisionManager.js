@@ -1,3 +1,4 @@
+import eventBus from '../eventBus/EventBus.js'
 import eventType from "../eventBus/events.js"
 
 export default (weapons) => {
@@ -12,7 +13,7 @@ export default (weapons) => {
                         console.log(`lasers collided with ${obj.mesh.name}`);
                         console.log(`trigger: explosion at ${JSON.stringify(obj.mesh.position)}`);
                         // trigger explosion
-                        triggerEvent(sceneObjects, obj.mesh.position, eventType.EXPLOSION);
+                        triggerEvent(sceneObjects, obj, eventType.EXPLOSION);
                         return true;
                     }
                 }
@@ -20,10 +21,22 @@ export default (weapons) => {
         }
     }
 
-    function triggerEvent(sceneObjects, position, event) {
+    function triggerEvent(sceneObjects, obj, event) {
         for(let i=0; i<sceneObjects.length; i++){
             if(event === eventType.EXPLOSION && sceneObjects[i].name === event){
-                sceneObjects[i].trigger(position);
+                // new file that handles all this stuff?
+                obj.mesh.hull = obj.mesh.hull - 25;
+                console.log(`Update ${obj.mesh.name} Hull: ${obj.mesh.hull}`);
+                sceneObjects[i].trigger(obj.mesh.position);
+                if(obj.mesh.hull <= 0){
+                    console.log(`${obj.mesh.name} has been destroyed!`);
+                    eventBus.post(eventType.GAME_STATE, {
+                        position: obj.mesh.position,
+                        rotation: obj.mesh.rotation,
+                        scale: obj.mesh.scale,
+                        type: "DESTROYED",
+                    });
+                }
             }
         }
     }

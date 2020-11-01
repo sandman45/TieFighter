@@ -2,6 +2,8 @@
  * @author James Baicoianu / http://www.baicoianu.com/
  */
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
+import eventBus from "../eventBus/EventBus.js";
+import eventBusEvents from "../eventBus/events.js";
 // import * as THREE from '../../node_modules/three/build/three.module.js';
 
 function bind( scope, fn ) {
@@ -239,8 +241,18 @@ export default class FlyControls {
     fireCannons = function(mesh) {
         // move / translate them on the game world
         // console.log(`firing lasers`);
-        this.laser.fire(mesh, 2);
+        this.laser.fire(mesh, 2, mesh.name === "PLAYER2" ? "REBELLION" : "IMPERIAL");
+        this.updateServer(mesh,"LASERS");
         // collision for lazers
+    };
+
+    updateServer = function(mesh, type){
+        eventBus.post(eventBusEvents.GAME_STATE, {
+            position: mesh.position,
+            rotation: mesh.rotation,
+            scale: mesh.scale,
+            type,
+        });
     };
 
     update = function( delta ) {
@@ -269,6 +281,7 @@ export default class FlyControls {
             if(this.moveState.forward === 1) {
                 this.audio.playSound(this.object,"FLYBY");
             }
+            this.updateServer(this.object, "PLAYER");
         } else {
             this.autoForward = false;
         }

@@ -1,10 +1,16 @@
 const config = {
+    multiPlayer: {
+      room: "Game",
+      connect: false,
+      start: false,
+      active: true
+    },
     controls: {
         flightControls: true,
         controls: false,
     },
     audio: {
-        music: true,
+        music: false,
         musicVolume: 20,
         sfx: true,
         sfxVolume: 30,
@@ -18,11 +24,26 @@ const config = {
     },
     players:[
         {
-            name: 'TIE_DEFENDER',
+            playerName: "PLAYER1",
+            name: 'TIE_FIGHTER',
+            hull: 100,
+            shields: 0,
             position: { x: 10, y: 1, z: 10 },
             rotation: { y: 3.15, x:0, z:0 },
-            speed: 1,
-            scale: 3,
+            speed: 1.5,
+            scale: .25,
+            rollSpeed: .009,
+            autoForward: false
+        },
+        {
+            playerName: "PLAYER2",
+            name: 'X_WING',
+            hull: 100,
+            shields: 100,
+            position: { x: 10, y: 1, z: -30 },
+            rotation: { y: 3.15, x:0, z:0 },
+            speed: .6,
+            scale: 4,
             rollSpeed: .009,
             autoForward: false
         },
@@ -38,7 +59,7 @@ const config = {
             autoForward: false
         },
         {
-            name: 'TIE',
+            name: 'TIE_FIGHTER',
             position: { x: 10, y: 1, z: 1 },
             rotation: { y: 3.15, x:0, z:0 },
             speed: .7,
