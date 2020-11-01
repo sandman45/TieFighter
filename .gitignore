@@ -2,3 +2,4 @@
 /server/src/.env
 /webGL/node_modules
 
+/node_modules/
