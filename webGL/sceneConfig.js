@@ -181,7 +181,7 @@ const config = {
         controls: false,
     },
     audio: {
-        music: false,
+        music: true,
         musicVolume: 20,
         sfx: true,
         sfxVolume: 30,

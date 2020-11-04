@@ -10,7 +10,7 @@ let userId = "tempId";
 let room = "room";
 export default () => {
     // subscribe to socket events
-    const socket = io.connect("http://localhost:3001");
+    const socket = io.connect("http://localhost:3000");
 
     socket.on( 'disconnect', () => {
         console.log("server disconnected")
