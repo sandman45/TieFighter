@@ -6,72 +6,120 @@ const ObjectType = {
     PLAYER: "PLAYER"
 };
 
-export default (onKeyUp, onKeyDown) => {
-    const socket = io();
+let userId = "tempId";
+let room = "room";
+export default () => {
+    // subscribe to socket events
+    const socket = io.connect("http://localhost:3000");
 
-    socket.on( 'moveForward', duration => moveForward(duration) );
-    socket.on( 'moveBackward', duration => moveBackward(duration) );
-    socket.on( 'turnRight', duration => turnRight(duration) );
-    socket.on( 'turnLeft', duration => turnLeft(duration) );
-    socket.on( 'fireCannons', duration => fire(duration));
-    socket.on( 'alarm', stopMoving );
+    socket.on( 'disconnect', () => {
+        console.log("server disconnected")
+    } );
+    socket.on( 'connect', () => {
+        console.log(`server connected ? ${socket.connected}, UserId: ${socket.id}`);
+        userId = socket.id;
+    });
+    socket.on( eventBusEvents.GAME_STATE, (data) => {
+        // console.log(`client: ${eventBusEvents.GAME_STATE} data: ${JSON.stringify(data)}`);
+        // tell my client the info coming from server
+        eventBus.post(eventBusEvents.GAME_STATE_LOCAL, data.data);
+    });
 
-    socket.on( 'disconnect', () => console.log("server disconnected") );
+    socket.on(eventBusEvents.UPDATES, (update) => {
+        console.log(`You are: ${userId}`);
+        console.log(`${eventBusEvents.UPDATES} ${JSON.stringify(update)}`);
+    });
 
-    eventBus.subscribe( eventBusEvents.collision, objectName => {
-        console.log(`collision: ${JSON.stringify(objectName)}`);
+    socket.on(eventBusEvents.START_GAME, (update) => {
+        console.log(`START GAME:  with users = ${JSON.stringify(update)}`);
+
+        Object.keys(update.data.players).forEach(player => {
+            // add opponents
+            if(update.data.players[player].id !== userId) {
+                console.log(`add ${update.data.players[player].name}:${update.data.players[player].id}`);
+                eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, update.data.players[player]);
+            }
+        });
+    });
+
+    socket.on(eventBusEvents.PLAYER_SELECTION_READY, (update) => {
+        console.log(`${update.message}`);
+        // add opponent
+
+        // console.log(`add ${update.data.name}:${update.data.id} selection: ${update.data.selection}`);
+        // eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, update.data);
+    });
+
+
+    // SUBSCRIBE to client events
+    eventBus.subscribe( eventBusEvents.GAME_STATE, (data) => {
+        if(data.type === "LASERS"){
+            // console.log(`${data.type}: ${JSON.stringify(data)}`);
+        }
+
+        if(data.type === "DESTROYED") {
+            console.log('destroyed event emitting to all');
+        }
+        // send my info to server
+        socket.emit(eventBusEvents.GAME_STATE, {
+            room,
+            userId: userId,
+            type: data.type,
+            data,
+        });
+    });
+
+    eventBus.subscribe( eventBusEvents.COLLISION, objectName => {
+        // console.log(`collision: ${JSON.stringify(objectName)}`);
         // if player hits object call stopMoving;
         if(objectName.source === ObjectType.PLAYER){
-            console.log(`SocketIO: collision - Stop Moving Player: ${JSON.stringify(objectName)}`);
-            socket.emit('collision', objectName); stopMoving();
+            // console.log(`SocketIO: collision - Stop Moving Player: ${JSON.stringify(objectName)}`);
+            socket.emit(eventBusEvents.COLLISION, objectName); stopMoving();
         } else {
-            console.log(`SocketIO: collision: ${JSON.stringify(objectName)}`);
+            // console.log(`SocketIO: collision: ${JSON.stringify(objectName)}`);
         }
     });
 
-    const keycodes = {
-        W: 87,
-        A: 65,
-        S: 83,
-        D: 68,
-        R: 82,
-        F: 70,
-        Q: 81,
-        E: 69,
-        V: 86,
-        B: 66,
-        SPACE: 32
-    };
+    eventBus.subscribe( eventBusEvents.LEAVE_ROOM, data => {
+        console.log(`Socket Emit ${eventBusEvents.LEAVE_ROOM}`);
+        eventBus.post(eventBusEvents.GAME_STATE_LOCAL_END, userId);
+        socket.emit(eventBusEvents.LEAVE_ROOM, {
+            room: data,
+            userId: userId
+        });
+    });
 
-    let moveForwardTimeoutId;
-    let moveBackwardTimeoutId;
+    eventBus.subscribe( eventBusEvents.JOIN_ROOM, d => {
+        console.log("Socket Emit JOIN_ROOM");
+        room = d;
+        socket.emit("JOIN_ROOM", {
+            room: d,
+            userId: userId
+        });
+    });
 
-    function moveForward(duration) {
-        clearTimeout(moveForwardTimeoutId);
-        onKeyDown( { keyCode: keycodes.W } );
-        if(duration >= 0) moveForwardTimeoutId = setTimeout( () => onKeyUp( { keyCode: keycodes.W } ), duration );
-    }
+    eventBus.subscribe( eventBusEvents.PLAYER_SELECTION_READY, d => {
+        // load yourself
+        console.log(`add self: ${userId} to game: ${eventBusEvents.GAME_STATE_LOCAL}`);
+        eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT, {
+            userId: userId,
+            selection: d.selection
+        });
 
-    function moveBackward(duration) {
-        clearTimeout(moveBackwardTimeoutId);
-        onKeyDown( { keyCode: keycodes.S } );
-        if(duration >= 0) moveBackwardTimeoutId = setTimeout( () => onKeyUp( { keyCode: keycodes.S } ), duration );
-    }
+        console.log("Socket Emit PLAYER SELECTION READY");
+        socket.emit("PLAYER_SELECTION_READY", {
+            room: d.room,
+            selection: d.selection,
+            userId: userId
+        });
+    });
 
-    function turnRight(duration) {
-        onKeyDown( { keyCode: keycodes.R }, duration );
-    }
-
-    function turnLeft(duration) {
-        onKeyDown( { keyCode: keycodes.F }, duration );
-    }
-
-    function stopMoving() {
-        onKeyUp( { keyCode: keycodes.W } );
-        onKeyUp( { keyCode: keycodes.S } );
-    }
-
-    function fire() {
-        onKeyDown( { keyCode: keycodes.SPACE }, duration );
-    }
+    eventBus.subscribe( eventBusEvents.START_GAME, d => {
+        console.log("Socket Emit START GAME");
+        room = d;
+        socket.emit("START_GAME", {
+            room: d,
+            userId: userId
+        });
+    });
 }

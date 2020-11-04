@@ -1,11 +1,24 @@
 // import * as THREE from '../../../node_modules/three/build/three.module.js'
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
-export default (scene, sourceShipPosition, config, collisionManager, audio) => {
+
+function exemptions(type) {
+    // need to update this so if its your own
+    // lasers then ignore the collision if there is one
+    const types = {
+        EXPLOSION: "EXPLOSION",
+    };
+
+    return types[type];
+}
+const LASER_TYPES = {
+    IMPERIAL: "green",
+    REBELLION: "red"
+};
+export default (scene, config, collisionManager, audio) => {
 
     const lasers = [];
-
-    function fire(sourceShipMesh, numberOfLasers) {
-        const l = new Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager);
+    function fire(sourceShipMesh, numberOfLasers, laserType) {
+        const l = new Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, laserType);
         // trigger sound
         audio.playSound(l.laserSet[0], "BLAST");
         lasers.push(l);
@@ -19,10 +32,13 @@ export default (scene, sourceShipPosition, config, collisionManager, audio) => {
 
     function checkCollision(obj) {
        for(let i=0; i<lasers.length; i++){
-           if(obj.name !== "TIE_DEFENDER"){
-               const collisionCheck = lasers[i].checkCollision(obj.position, obj.name);
-               if(collisionCheck.collision){
-                   return collisionCheck;
+           // was i the source of the laser?
+           if(obj.name !== lasers[i].sourceMesh.name){
+               if(!exemptions(obj.name)){
+                   const collisionCheck = lasers[i].checkCollision(obj.position, obj.name, obj.designation);
+                   if(collisionCheck.collision){
+                       return collisionCheck;
+                   }
                }
            }
        }
@@ -36,10 +52,10 @@ export default (scene, sourceShipPosition, config, collisionManager, audio) => {
     }
 }
 
-function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager) {
+function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, laserType) {
     let sourceMesh;
     let laserSet = [];
-    const ballMaterial = new THREE.MeshPhongMaterial( { color: 'green' } );
+    const ballMaterial = new THREE.MeshPhongMaterial( { color: LASER_TYPES[laserType] } );
     // create laser/projectile
     sourceMesh = sourceShipMesh.clone();
     // console.log(`sourceMesh Rotation: ${JSON.stringify(sourceMesh.rotation)}`);
@@ -61,7 +77,7 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager) 
             zPos = l === 0 ? sourceMesh.position.z - .5 : sourceMesh.position.z + .5;
         }
         const laser = new THREE.Mesh( new THREE.SphereBufferGeometry( laserRadius, 14, 10), ballMaterial );
-        console.log('Firing Laser');
+        // console.log('Firing Laser');
         scene.add(laser);
 
         laser.position.set(xPos, yPos, zPos);
@@ -77,8 +93,8 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager) 
         moveLaser(time);
     }
 
-    function checkCollision(pos, name) {
-        if(pos && name !== "TIE_DEFENDER"){
+    function checkCollision(pos, name, designation) {
+        if(pos && !exemptions(sourceMesh.name)){
             const position = pos;
             const spread = 2;
             let collisionRes = {};
@@ -87,23 +103,21 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager) 
                    (laser.laser.position.y >= (position.y - spread) && laser.laser.position.y <= (position.y + spread)) &&
                    (laser.laser.position.z >= (position.z - spread) && laser.laser.position.z <= (position.z + spread))
                ){
-                   console.log(`object position: ${JSON.stringify(position)}`);
-                   console.log(`laser HIT ${name}: at position: ${JSON.stringify(laser.laser.position)}`);
+                   console.log(`laser HIT ${name}: ${designation} at position: ${JSON.stringify(laser.laser.position)}`);
                    cleanup(laser.laser, i);
                    collisionRes = { collision: true, name: 'Laser-hit' };
                }
            });
            return collisionRes;
         }
-
         return { collision: false };
     }
 
     function calculateDirectionVector(sourceShipMesh) {
-        // console.log(`source ship mesh Vector`);
+        let directionVector;
         const matrix = new THREE.Matrix4();
         matrix.extractRotation(sourceShipMesh.matrix);
-        const directionVector = new THREE.Vector3( 0, 0, 1 );
+        directionVector = new THREE.Vector3( 0, 0, 1 );
         directionVector.applyMatrix4(matrix);
         return directionVector;
     }
@@ -123,7 +137,7 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager) 
     }
 
     function cleanup(obj, i) {
-        console.log(`Clean up object laser`);
+        // console.log(`Clean up object laser`);
         // const index = lasers.indexOf(obj);
         scene.remove(obj);
         // remove from array?

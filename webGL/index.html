@@ -4,11 +4,20 @@
 		<meta charset="UTF-8">
 		<title>WebGLScene</title>
 		<link rel="stylesheet" href="./css/style.css">
+		<link rel="stylesheet" href="./css/loading.css">
 		<script src="/socket.io/socket.io.js"></script>
 	</head>
 
 	<body>
 		<canvas id="canvas"></canvas>
+		<div id="loading">
+			<div>
+				<div >...loading...</div>
+				<div class="progress">
+					<div id="progressbar"></div>
+				</div>
+			</div>
+		</div>
 		<script src="./js/utils/utils.js"></script>
 		<script src="./js/libs/Tween.js"></script>
 		<script type="module" src="./js/main.js"></script>

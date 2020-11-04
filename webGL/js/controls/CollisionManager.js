@@ -7,8 +7,8 @@ export default colliders => {
             const collisionCheck = colliders[i].checkCollision(obj);
 
             if(collisionCheck.collision) {
-                console.log(`Collision detected: ${obj.name} at ${JSON.stringify(obj.position)} with ${collisionCheck.name}`);
-                eventBus.post(eventBusEvents.collision, { target: collisionCheck.name, source: obj.name });
+                // console.log(`Collision detected: ${obj.name} at ${JSON.stringify(obj.position)} with ${collisionCheck.name}`);
+                eventBus.post(eventBusEvents.COLLISION, { target: collisionCheck.name, source: obj.name });
                 return true;
             }
         }
