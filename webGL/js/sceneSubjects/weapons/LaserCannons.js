@@ -14,11 +14,11 @@ const LASER_TYPES = {
     IMPERIAL: "green",
     REBELLION: "red"
 };
-export default (scene, sourceShipPosition, config, collisionManager, audio, playerConfig) => {
+export default (scene, config, collisionManager, audio) => {
 
     const lasers = [];
     function fire(sourceShipMesh, numberOfLasers, laserType) {
-        const l = new Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, playerConfig, laserType);
+        const l = new Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, laserType);
         // trigger sound
         audio.playSound(l.laserSet[0], "BLAST");
         lasers.push(l);
@@ -35,7 +35,7 @@ export default (scene, sourceShipPosition, config, collisionManager, audio, play
            // was i the source of the laser?
            if(obj.name !== lasers[i].sourceMesh.name){
                if(!exemptions(obj.name)){
-                   const collisionCheck = lasers[i].checkCollision(obj.position, obj.name);
+                   const collisionCheck = lasers[i].checkCollision(obj.position, obj.name, obj.designation);
                    if(collisionCheck.collision){
                        return collisionCheck;
                    }
@@ -52,7 +52,7 @@ export default (scene, sourceShipPosition, config, collisionManager, audio, play
     }
 }
 
-function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, playerConfig, laserType) {
+function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, laserType) {
     let sourceMesh;
     let laserSet = [];
     const ballMaterial = new THREE.MeshPhongMaterial( { color: LASER_TYPES[laserType] } );
@@ -93,7 +93,7 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
         moveLaser(time);
     }
 
-    function checkCollision(pos, name) {
+    function checkCollision(pos, name, designation) {
         if(pos && !exemptions(sourceMesh.name)){
             const position = pos;
             const spread = 2;
@@ -103,8 +103,7 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
                    (laser.laser.position.y >= (position.y - spread) && laser.laser.position.y <= (position.y + spread)) &&
                    (laser.laser.position.z >= (position.z - spread) && laser.laser.position.z <= (position.z + spread))
                ){
-                   // console.log(`object position: ${JSON.stringify(position)}`);
-                   console.log(`laser HIT ${name}: at position: ${JSON.stringify(laser.laser.position)}`);
+                   console.log(`laser HIT ${name}: ${designation} at position: ${JSON.stringify(laser.laser.position)}`);
                    cleanup(laser.laser, i);
                    collisionRes = { collision: true, name: 'Laser-hit' };
                }

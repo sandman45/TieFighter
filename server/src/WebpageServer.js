@@ -136,30 +136,41 @@ function initSocketIOServer(callbacks) {
                         };
                     }
                     const players = Object.keys(gameState[data.room].players);
-                    if(checkPlayers(data.room) === "PLAYER1"){
-                        gameState[data.room].players[socket.id] = {
-                            id: socket.id,
-                            name: "PLAYER1",
-                            data: {}
-                        };
-                    } else if(checkPlayers(data.room) === "PLAYER2") {
-                        gameState[data.room].players[socket.id] = {
-                            id: socket.id,
-                            name: "PLAYER2",
-                            data: {}
-                        };
-                    } else {
-                        gameState[data.room].players[socket.id] = {
-                            id: socket.id,
-                            name: `Spectator${players.length - 2}`,
-                            data: {}
-                        }
+                    // if(checkPlayers(data.room) === "PLAYER1"){
+                    //     gameState[data.room].players[socket.id] = {
+                    //         id: socket.id,
+                    //         name: "PLAYER1",
+                    //         data: {}
+                    //     };
+                    // } else if(checkPlayers(data.room) === "PLAYER2") {
+                    //     gameState[data.room].players[socket.id] = {
+                    //         id: socket.id,
+                    //         name: "PLAYER2",
+                    //         data: {}
+                    //     };
+                    // } else {
+                    gameState[data.room].players[socket.id] = {
+                        id: socket.id,
+                        name: `PLAYER${players.length}`,
+                        data: {}
+                        // }
                     }
                     console.log(`${gameState[data.room].players[socket.id].name}:${socket.id} has joined room ${data.room}`);
                     socketIO.in(data.room).emit(events.UPDATES, {
                         message:`${gameState[data.room].players[socket.id].name}:${socket.id} has joined Room ${data.room}`,
                         data: gameState[data.room].players[socket.id]
                     });
+                });
+            }
+        });
+
+        socket.on(events.PLAYER_SELECTION_READY, data => {
+            console.log(JSON.stringify(data));
+            if(gameState[data.room] && gameState[data.room].players[data.userId]){
+                gameState[data.room].players[data.userId].selection = data.selection;
+                socket.to(data.room).emit(events.PLAYER_SELECTION_READY, {
+                    message: `${gameState[data.room].players[socket.id].name}:${socket.id} has selected ${data.selection}`,
+                    data: gameState[data.room].players[data.userId]
                 });
             }
         });
@@ -193,7 +204,7 @@ function initSocketIOServer(callbacks) {
         socket.on(events.GAME_STATE, data => {
             if(gameState[data.room] && gameState[data.room].players[socket.id]){
                 if(data.type === "DESTROYED"){
-                    console.log(`user: ${gameState[data.room].players[socket.id].name}, data: ${JSON.stringify(data)}`);
+                    console.log(`user: ${data.data.userNameDestroyed}:${data.data.userIdDestroyed} has been ${data.type}`);
                 }
 
                 gameState[data.room].players[socket.id].type = data.type;

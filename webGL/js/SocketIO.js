@@ -32,21 +32,24 @@ export default () => {
 
     socket.on(eventBusEvents.START_GAME, (update) => {
         console.log(`START GAME:  with users = ${JSON.stringify(update)}`);
-        // add self
 
         Object.keys(update.data.players).forEach(player => {
-            if(update.data.players[player].id === userId) {
-                console.log(`add self: ${userId} to game: ${eventBusEvents.GAME_STATE_LOCAL}`);
-                eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT, update.data.players[player]);
-            }
-
-            // add opponent
+            // add opponents
             if(update.data.players[player].id !== userId) {
                 console.log(`add ${update.data.players[player].name}:${update.data.players[player].id}`);
                 eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, update.data.players[player]);
             }
         });
     });
+
+    socket.on(eventBusEvents.PLAYER_SELECTION_READY, (update) => {
+        console.log(`${update.message}`);
+        // add opponent
+
+        // console.log(`add ${update.data.name}:${update.data.id} selection: ${update.data.selection}`);
+        // eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, update.data);
+    });
+
 
     // SUBSCRIBE to client events
     eventBus.subscribe( eventBusEvents.GAME_STATE, (data) => {
@@ -91,6 +94,22 @@ export default () => {
         room = d;
         socket.emit("JOIN_ROOM", {
             room: d,
+            userId: userId
+        });
+    });
+
+    eventBus.subscribe( eventBusEvents.PLAYER_SELECTION_READY, d => {
+        // load yourself
+        console.log(`add self: ${userId} to game: ${eventBusEvents.GAME_STATE_LOCAL}`);
+        eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT, {
+            userId: userId,
+            selection: d.selection
+        });
+
+        console.log("Socket Emit PLAYER SELECTION READY");
+        socket.emit("PLAYER_SELECTION_READY", {
+            room: d.room,
+            selection: d.selection,
             userId: userId
         });
     });

@@ -48,24 +48,33 @@ export function mapConfigurationToGUI(sceneConstants, sceneConfiguration, contro
 
                 if(sceneConfiguration.multiPlayer.start){
                     EventBus.post(events.START_GAME, sceneConfiguration.multiPlayer.room);
-                } else {
-                    if(sceneConfiguration.multiPlayer.connect){
-                        // connect to room
-                        EventBus.post(events.JOIN_ROOM, sceneConfiguration.multiPlayer.room);
-                    } else if (!sceneConfiguration.multiPlayer.connect){
-                        EventBus.post(events.LEAVE_ROOM, sceneConfiguration.multiPlayer.room);
+                } else if (sceneConfiguration.multiPlayer.connect) {
+
+                    let selection = null;
+                    Object.keys(sceneConfiguration.multiPlayer.selection).forEach(ship => {
+                        if(sceneConfiguration.multiPlayer.selection[ship]){
+                            selection = ship;
+                        }
+                    });
+                    if(selection){
+                        EventBus.post(events.PLAYER_SELECTION_READY, {
+                            selection,
+                            room: sceneConfiguration.multiPlayer.room,
+                        });
+                    } else {
+                        if(sceneConfiguration.multiPlayer.connect && !selection){
+                            // connect to room
+                            EventBus.post(events.JOIN_ROOM, sceneConfiguration.multiPlayer.room);
+                        } else if (!sceneConfiguration.multiPlayer.connect){
+                            EventBus.post(events.LEAVE_ROOM, sceneConfiguration.multiPlayer.room);
+                        }
                     }
                 }
-
 
                 // if(controls) {
                 //     controls.resetPosition();
                 // }
-
-
-
-                // TODO: need to update the other ships position
-            })
+            });
         }
     }
 }
