@@ -130,7 +130,6 @@ const config = {
           ],
           imperials: [
               {
-                  designation: "ALPHA_ONE",
                   name: 'TIE_FIGHTER',
                   position: { x: 10, y: 1, z: 1 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -142,7 +141,6 @@ const config = {
                   autoForward: false
               },
               {
-                  designation: "ALPHA_TWO",
                   name: 'TIE_INTERCEPTOR',
                   position: { x: 20, y: 1, z: 1 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -154,7 +152,6 @@ const config = {
                   autoForward: false
               },
               {
-                  designation: "ALPHA_THREE",
                   name: 'TIE_ADVANCED',
                   position: { x: 20, y: 1, z: -10 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -166,7 +163,6 @@ const config = {
                   autoForward: false
               },
               {
-                  designation: "ALPHA_FOUR",
                   name: 'TIE_DEFENDER',
                   position: { x: 40, y: 1, z: 40 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -178,7 +174,6 @@ const config = {
                   autoForward: false
               },
               {
-                  designation: "ALPHA_FIVE",
                   name: 'TIE_BOMBER',
                   position: { x: 40, y: 1, z: 10 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -192,7 +187,6 @@ const config = {
           ],
           rebels: [
               {
-                  designation: "RED_ONE",
                   name: 'A_WING',
                   position: { x: -60, y: 1, z: -80 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -204,7 +198,6 @@ const config = {
                   autoForward: false
               },
               {
-                  designation: "RED_TWO",
                   name: 'X_WING',
                   position: { x: -50, y: 1, z: -50 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -216,7 +209,6 @@ const config = {
                   autoForward: false
               },
               {
-                  designation: "RED_THREE",
                   name: 'B_WING',
                   position: { x: -90, y: 1, z: -90 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -228,7 +220,6 @@ const config = {
                   autoForward: false
               },
               {
-                  designation: "RED_FOUR",
                   name: 'Y_WING',
                   position: { x: -100, y: 1, z: -100 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -246,10 +237,10 @@ const config = {
         controls: false,
     },
     audio: {
-        music: true,
+        music: false,
         musicVolume: 20,
-        sfx: true,
-        sfxVolume: 30,
+        sfx: false,
+        sfxVolume: 20,
     },
     floor: {
         size: { x: 1000, y: 1000, z: 1000 },

@@ -6,7 +6,7 @@ import {parseConfiguration} from "../../utils/SceneConfigUtils.js";
 import sceneConfiguration from "../../../sceneConfig.js";
 import GameAudio from "../../utils/Audio.js";
 import SkyBox from "../../sceneSubjects/SkyBox.js";
-import ModelLoader, {Model, ModelType} from "../../utils/ModelLoader.js";
+import ModelLoader, { Model } from "../../utils/ModelLoader.js";
 
 export default (canvas, screenDimensions, models) => {
     const sceneConstants = parseConfiguration(sceneConfiguration);
@@ -25,7 +25,7 @@ export default (canvas, screenDimensions, models) => {
     audio.playSound("MUSIC", camera);
 
     Object.keys(models).forEach(model => {
-        sceneSubjects.push(ModelLoader(scene, models[model].config, ModelType.GLTF, Model[model], null, models[model].gltf));
+        sceneSubjects.push(ModelLoader(scene, models[model].config, Model[model], null, models[model].gltf));
     });
     let obj;
 

@@ -33,9 +33,9 @@ export default (scene, config, collisionManager, audio) => {
     function checkCollision(obj) {
        for(let i=0; i<lasers.length; i++){
            // was i the source of the laser?
-           if(obj.name !== lasers[i].sourceMesh.name){
+           if(obj.userId !== lasers[i].sourceMesh.userId){
                if(!exemptions(obj.name)){
-                   const collisionCheck = lasers[i].checkCollision(obj.position, obj.name, obj.designation);
+                   const collisionCheck = lasers[i].checkCollision(obj.position, obj.name, obj.userId);
                    if(collisionCheck.collision){
                        return collisionCheck;
                    }
@@ -58,6 +58,7 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
     const ballMaterial = new THREE.MeshPhongMaterial( { color: LASER_TYPES[laserType] } );
     // create laser/projectile
     sourceMesh = sourceShipMesh.clone();
+    sourceMesh.userId = sourceShipMesh.userId;
     // console.log(`sourceMesh Rotation: ${JSON.stringify(sourceMesh.rotation)}`);
     const angle = sourceMesh.rotation.y * 180/Math.PI;
     // console.log(`rotation angle: ${angle}`);
@@ -93,7 +94,7 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
         moveLaser(time);
     }
 
-    function checkCollision(pos, name, designation) {
+    function checkCollision(pos, name, id) {
         if(pos && !exemptions(sourceMesh.name)){
             const position = pos;
             const spread = 2;
@@ -103,7 +104,10 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
                    (laser.laser.position.y >= (position.y - spread) && laser.laser.position.y <= (position.y + spread)) &&
                    (laser.laser.position.z >= (position.z - spread) && laser.laser.position.z <= (position.z + spread))
                ){
-                   console.log(`laser HIT ${name}: ${designation} at position: ${JSON.stringify(laser.laser.position)}`);
+                   console.log(`laser HIT ${name}: ${id} at position: ${JSON.stringify(laser.laser.position)}`);
+                   if(laser.sourceMesh.userId === id){
+                       console.log(`we should skip this and not return true`);
+                   }
                    cleanup(laser.laser, i);
                    collisionRes = { collision: true, name: 'Laser-hit' };
                }

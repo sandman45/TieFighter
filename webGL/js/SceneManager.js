@@ -43,15 +43,14 @@ export default canvas => {
      * MULTIPLAYER STUFF
      */
     else if(sceneConstants.multiPlayer.active) {
-        Manager(sceneConstants, (message, models) => {
-            mp = MultiPlayer(canvas, screenDimensions, models, sceneSubjects);
-            weaponsCollision = mp.weaponsCollision;
-            mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
-            scene = mp.scene;
-            renderer = mp.renderer;
-            camera = mp.camera;
-            sceneReady = true;
-        });
+        mp = MultiPlayer(canvas, screenDimensions, sceneSubjects);
+        weaponsCollision = mp.weaponsCollision;
+        mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
+        scene = mp.scene;
+        renderer = mp.renderer;
+        camera = mp.camera;
+        weaponsCollision = mp.getWeaponsCollision();
+        sceneReady = true;
     }
     /**
      * Mission ONE!

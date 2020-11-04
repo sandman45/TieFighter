@@ -42,14 +42,14 @@ export default (modelConfig, callback) => {
     const models = {};
     if(modelConfig.multiPlayer.active){
         modelConfig.multiPlayer.imperials.forEach((imp => {
-            models[imp.designation] = {
+            models[imp.name] = {
                 url: modelTypes[imp.name].url,
                 config: imp
             };
         }));
 
         modelConfig.multiPlayer.rebels.forEach((rebel => {
-            models[rebel.designation] = {
+            models[rebel.name] = {
                 url: modelTypes[rebel.name].url,
                 config: rebel
             };

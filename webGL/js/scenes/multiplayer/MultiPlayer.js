@@ -8,7 +8,7 @@ import GameAudio from "../../utils/Audio.js";
 import SkyBox from "../../sceneSubjects/SkyBox.js";
 import eventBus from "../../eventBus/EventBus.js";
 import eventBusEvents from "../../eventBus/events.js";
-import ModelLoader, {Model, ModelType} from "../../utils/ModelLoader.js";
+import ModelLoader, { Model } from "../../utils/ModelLoader.js";
 import CollisionManager from "../../controls/CollisionManager.js";
 import LaserCannons from "../../sceneSubjects/weapons/LaserCannons.js";
 import PlayerControls from "../../controls/PlayerControls.js";
@@ -16,7 +16,7 @@ import Explosion from "../../particles/Explosion.js";
 import WeaponsCollisionManager from "../../controls/WeaponsCollisionManager.js";
 import FlyControls from "../../controls/FlyControls.js";
 
-export default (canvas, screenDimensions, models, sceneSubjects) => {
+export default (canvas, screenDimensions, sceneSubjects) => {
     const sceneConstants = parseConfiguration(sceneConfiguration);
     const scene = buildScene(sceneConstants);
     const renderer = buildRender(screenDimensions);
@@ -43,44 +43,48 @@ export default (canvas, screenDimensions, models, sceneSubjects) => {
 
     sceneSubjects.push(explosion);
 
+    const loadingElem = document.querySelector('#loading');
+    loadingElem.style.display = 'none';
+
     eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL_INIT, (data) => {
         userId = data.userId;
         let selection = null;
-        Object.keys(models).forEach(model => {
-           if(models[model].config.name === data.selection) {
-               selection = models[model];
-           }
+        const models = sceneConstants.multiPlayer.imperials.concat(sceneConstants.multiPlayer.rebels);
+        models.forEach(model => {
+            if(model.name === data.selection) {
+                selection = model;
+            }
         });
+        console.log(`adding you to game as ${data.selection}: userId: ${data.userId}`);
 
-        console.log(`adding you to game as ${selection.config.name}: ${selection.config.designation}, userId: ${data.userId}`);
+        playerConfig = selection;
+        playerConfig.userId = data.userId;
+        player = ModelLoader(scene, playerConfig, Model[playerConfig.name], null);
+            if(sceneConstants.controls.flightControls){
+                controls = createFlightControls(player.mesh, camera, renderer, collisionManager, laser, audio, playerConfig);
+            } else {
+                controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
+            }
 
-        playerConfig = selection.config;
-        player = ModelLoader(scene, playerConfig, ModelType.GLTF, Model[playerConfig.name], null, selection.gltf);
-
-        if(sceneConstants.controls.flightControls){
-            controls = createFlightControls(player.mesh, camera, renderer, collisionManager, laser, audio, playerConfig);
-        } else {
-            controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
-        }
-
-        weaponsCollision = WeaponsCollisionManager([laser], userId, scene, sceneConstants);
-        sceneSubjects.push(player);
-        sceneSubjects.push(controls);
-        sceneSubjects.push(laser);
+            weaponsCollision = WeaponsCollisionManager([laser], userId, scene, sceneConstants);
+            sceneSubjects.push(player);
+            sceneSubjects.push(controls);
+            sceneSubjects.push(laser);
     });
 
     eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, (data) => {
         let selection = null;
-        Object.keys(models).forEach(model => {
-            if(models[model].config.name === data.selection) {
-                selection = models[model];
+        const models = sceneConstants.multiPlayer.imperials.concat(sceneConstants.multiPlayer.rebels);
+        models.forEach(model => {
+            if(model.name === data.selection) {
+                selection = model;
             }
         });
 
-        console.log(`adding opponent to game as ${selection.config.name}: ${selection.config.designation}, userId: ${data.userId}`);
-        const opponentConfig = selection.config;
+        console.log(`adding opponent to game as ${selection.name}: userId: ${data.userId}`);
+        const opponentConfig = selection;
         opponentConfig.userId = data.userId;
-        const opponent = ModelLoader(scene, opponentConfig, ModelType.GLTF, Model[opponentConfig.name], null, selection.gltf);
+        const opponent = ModelLoader(scene, opponentConfig, Model[opponentConfig.name], null);
         sceneSubjects.push(opponent);
     });
 
