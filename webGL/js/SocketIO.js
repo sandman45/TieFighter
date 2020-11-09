@@ -1,5 +1,6 @@
 import eventBus from './eventBus/EventBus.js';
 import eventBusEvents from './eventBus/events.js';
+import LocalStorage from "./localStorage/localStorage.js";
 
 const ObjectType = {
     LASER: "LASER",
@@ -18,6 +19,7 @@ export default () => {
     socket.on( 'connect', () => {
         console.log(`server connected ? ${socket.connected}, UserId: ${socket.id}`);
         userId = socket.id;
+        LocalStorage.setItem("SOCKET_ID", socket.id);
     });
     socket.on( eventBusEvents.GAME_STATE, (data) => {
         // console.log(`client: ${eventBusEvents.GAME_STATE} data: ${JSON.stringify(data)}`);
@@ -26,8 +28,11 @@ export default () => {
     });
 
     socket.on(eventBusEvents.UPDATES, (update) => {
-        console.log(`You are: ${userId}`);
         console.log(`${eventBusEvents.UPDATES} ${JSON.stringify(update)}`);
+        if(update.data.type === "DISCONNECT") {
+            // remove from game they disconnected
+            eventBus.post(eventBusEvents.GAME_STATE_OPPONENT_LEFT_GAME, update.data);
+        }
     });
 
     socket.on(eventBusEvents.START_GAME, (update) => {
@@ -46,8 +51,8 @@ export default () => {
         console.log(`${update.message}`);
         // add opponent
 
-        // console.log(`add ${update.data.name}:${update.data.id} selection: ${update.data.selection}`);
-        // eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, update.data);
+        console.log(`add ${update.data.name}:${update.data.id} selection: ${update.data.selection}`);
+        eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, update.data);
     });
 
 
@@ -101,12 +106,12 @@ export default () => {
     eventBus.subscribe( eventBusEvents.PLAYER_SELECTION_READY, d => {
         // load yourself
         console.log(`add self: ${userId} to game: ${eventBusEvents.GAME_STATE_LOCAL}`);
-        eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT, {
-            userId: userId,
-            selection: d.selection
-        });
+        // dont need this part anymore because of new game menu etc
+        // eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT, {
+        //     userId: userId,
+        //     selection: d.selection
+        // });
 
-        console.log("Socket Emit PLAYER SELECTION READY");
         socket.emit("PLAYER_SELECTION_READY", {
             room: d.room,
             selection: d.selection,

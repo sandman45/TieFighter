@@ -1,10 +1,5 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
-
-export const ModelType = {
-    JSON: "JSON",
-    OBJECT: "OBJECT",
-    GLTF: "GLTF"
-};
+import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/loaders/GLTFLoader.js';
 
 export const Model = {
     TIE_FIGHTER: "models/tie-fighter/tie.glb",
@@ -20,13 +15,7 @@ export const Model = {
     Y_WING: "models/y-wing.glb"
 };
 
-export default (scene, modelConfiguration, modelType, model, position, modelGltf) => {
-    const playerPosition = {
-        x: position ? position.x : modelConfiguration.position.x,
-        y: position ? position.y : modelConfiguration.position.y,
-        z: position ? position.z : modelConfiguration.position.z,
-    };
-    console.log(`player POS: ${JSON.stringify(playerPosition)}`);
+export default (scene, modelConfiguration, model, modelGltf) => {
     let loader;
     let mixer;
     let clip;
@@ -39,11 +28,54 @@ export default (scene, modelConfiguration, modelType, model, position, modelGltf
     group.name = modelConfiguration.name;
     group.userId = modelConfiguration.userId;
     group.designation = modelConfiguration.designation;
-    group.position.set(playerPosition.x, playerPosition.y, playerPosition.z);
-    loadGLTFObject(modelGltf);
+    group.position.set(modelConfiguration.position.x, modelConfiguration.position.y, modelConfiguration.position.z);
+
+    if(modelGltf) {
+        configureGLTFObject(modelGltf);
+
+    } else {
+        loadGLTFModel(Model[modelConfiguration.name]);
+    }
     scene.add(group);
 
-    function loadGLTFObject(modelGltf) {
+    /**
+     * loadGLTFModel
+     * @description this will load the GLTF model
+     * from file and sets it up
+     * @param modelGltf
+     */
+    function loadGLTFModel(modelGltf) {
+        loader = new GLTFLoader();
+        loader.load(modelGltf, function(gltf, err) {
+            if(err){
+                console.log(`${JSON.stringify(err)}`);
+            }
+            const root = gltf.scene;
+            root.rotation.y = modelConfiguration.rotation.y;
+            root.scale.x = modelConfiguration.scale;
+            root.scale.y = modelConfiguration.scale;
+            root.scale.z = modelConfiguration.scale;
+            root.name = modelConfiguration.name;
+            if(gltf.animations.length > 0){
+                mixer = new THREE.AnimationMixer(gltf.scene);
+                const clips = gltf.animations;
+                clip = THREE.AnimationClip.findByName( gltf.animations, 'Take 01' );
+                action = mixer.clipAction( clip );
+                action.play();
+            }
+            modelReady = true;
+            group.add(root);
+        });
+    }
+
+    /**
+     * configureGLTFObject
+     * @description this takes a gltf model already loaded
+     * by the manager and configures it before adding it to the group which
+     * has already been added to the scene
+     * @param modelGltf
+     */
+    function configureGLTFObject(modelGltf) {
         const root = modelGltf.scene;
         root.rotation.y = modelConfiguration.rotation.y;
         root.scale.x = modelConfiguration.scale;
@@ -51,11 +83,11 @@ export default (scene, modelConfiguration, modelType, model, position, modelGltf
         root.scale.z = modelConfiguration.scale;
         root.name = modelConfiguration.name;
 
-        if(modelGltf.animations.length > 0){
+        if (modelGltf.animations.length > 0) {
             mixer = new THREE.AnimationMixer(modelGltf.scene);
             const clips = modelGltf.animations;
-            clip = THREE.AnimationClip.findByName( modelGltf.animations, 'Take 01' );
-            action = mixer.clipAction( clip );
+            clip = THREE.AnimationClip.findByName(modelGltf.animations, 'Take 01');
+            action = mixer.clipAction(clip);
             action.play();
         }
         modelReady = true;

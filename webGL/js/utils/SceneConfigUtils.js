@@ -3,15 +3,8 @@ import events from "../eventBus/events.js";
 
 export function parseConfiguration(config) {
     const clone = JSON.parse(JSON.stringify(config));
-    const { floor, players, sonars, movingObstacles, staticObstacles, weapons } = clone;
 
     checkConfigValidity(clone);
-
-    players.forEach( player => {
-        // player.position.x = ( player.position.x - 0.5 ) * floor.size.x;
-        // player.position.y = ( player.position.y - 0.5 ) * floor.size.y;
-        // player.position.z = player.position.z;
-    });
 
     return clone
 }
@@ -39,41 +32,33 @@ export function mapConfigurationToGUI(sceneConstants, sceneConfiguration, contro
                 // sceneConstants are previous values and sceneConfiguration are the newly changed value
                 updateSceneConstants(sceneConstants, parseConfiguration(sceneConfiguration));
                 // updates player position
-                // if(sceneConstants.controls.flightControls) {
-                //     // switch to flight controls
+
+
+                // if(sceneConfiguration.multiPlayer.start){
+                //     EventBus.post(events.START_GAME, sceneConfiguration.multiPlayer.room);
+                // } else if (sceneConfiguration.multiPlayer.connect) {
                 //
-                // } else {
-                //     // switch to other controls
+                //     let selection = null;
+                //     Object.keys(sceneConfiguration.multiPlayer.selection).forEach(ship => {
+                //         if(sceneConfiguration.multiPlayer.selection[ship]){
+                //             selection = ship;
+                //         }
+                //     });
+                //     if(selection){
+                //         EventBus.post(events.PLAYER_SELECTION_READY, {
+                //             selection,
+                //             room: sceneConfiguration.multiPlayer.room,
+                //         });
+                //     } else {
+                //         if(sceneConfiguration.multiPlayer.connect && !selection){
+                //             // connect to room
+                //             EventBus.post(events.JOIN_ROOM, sceneConfiguration.multiPlayer.room);
+                //         } else if (!sceneConfiguration.multiPlayer.connect){
+                //             EventBus.post(events.LEAVE_ROOM, sceneConfiguration.multiPlayer.room);
+                //         }
+                //     }
                 // }
 
-                if(sceneConfiguration.multiPlayer.start){
-                    EventBus.post(events.START_GAME, sceneConfiguration.multiPlayer.room);
-                } else if (sceneConfiguration.multiPlayer.connect) {
-
-                    let selection = null;
-                    Object.keys(sceneConfiguration.multiPlayer.selection).forEach(ship => {
-                        if(sceneConfiguration.multiPlayer.selection[ship]){
-                            selection = ship;
-                        }
-                    });
-                    if(selection){
-                        EventBus.post(events.PLAYER_SELECTION_READY, {
-                            selection,
-                            room: sceneConfiguration.multiPlayer.room,
-                        });
-                    } else {
-                        if(sceneConfiguration.multiPlayer.connect && !selection){
-                            // connect to room
-                            EventBus.post(events.JOIN_ROOM, sceneConfiguration.multiPlayer.room);
-                        } else if (!sceneConfiguration.multiPlayer.connect){
-                            EventBus.post(events.LEAVE_ROOM, sceneConfiguration.multiPlayer.room);
-                        }
-                    }
-                }
-
-                // if(controls) {
-                //     controls.resetPosition();
-                // }
             });
         }
     }
@@ -83,14 +68,12 @@ function checkConfigValidity(config) {
     checkJsonStructure(config);
     const { floor, players, weapons } = config;
 
-    players.forEach( checkPositionIsInRange );
+    // players.forEach( checkPositionIsInRange );
 
     function checkJsonStructure(config) {
         const { floor, players, sonars, movingObstacles, staticObstacles, weapons } = config;
         if(!floor)
             throw new Error('Config file malformed: floor not defined');
-        if(!players)
-            throw new Error('Config file malformed: player not defined');
         if(!weapons)
             throw new Error('Config file malformed: weapons not defined');
     }

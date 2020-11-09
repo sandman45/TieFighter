@@ -7,7 +7,7 @@ import PlayerControls from "../../controls/PlayerControls.js";
 import Explosion from "../../particles/Explosion.js";
 import GeneralLights from "../../sceneSubjects/GeneralLights.js";
 import WeaponsCollisionManager from "../../controls/WeaponsCollisionManager.js";
-import ModelLoader, {Model, ModelType} from "../../utils/ModelLoader.js";
+import ModelLoader, { Model } from "../../utils/ModelLoader.js";
 import FlyControls from "../../controls/FlyControls.js";
 import {parseConfiguration} from "../../utils/SceneConfigUtils.js";
 import sceneConfiguration from "../../../sceneConfig.js";
@@ -72,7 +72,7 @@ export default (canvas, screenDimensions, models) => {
     function addShips(scene, models){
         const ships = [];
         Object.keys(models).forEach(model => {
-            ships.push(ModelLoader(scene, models[model].config, ModelType.GLTF, Model[model], null, models[model].gltf));
+            ships.push(ModelLoader(scene, models[model].config, Model[model], null, models[model].gltf));
         });
         return ships;
     }

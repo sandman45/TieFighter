@@ -1,6 +1,237 @@
 const config = {
     // working need to make it a real menu etc
-    menu: false,
+    menu: {
+        imperials: [
+            // {
+            //     name: 'TIE_ADVANCED',
+            //     position: { x: 10, y: 1, z: -10 },
+            //     rotation: { y: 3.15, x:0, z:0 },
+            //     speed: .9,
+            //     scale: 3,
+            //     hull: 100,
+            //     shields: 100,
+            //     rollSpeed: .009,
+            //     autoForward: false
+            // },
+            {
+                name: 'TIE_FIGHTER',
+                position: { x: 10, y: 1, z: 1 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .7,
+                scale: .25,
+                hull: 100,
+                shields: 0,
+                rollSpeed: .009,
+                autoForward: false
+            },
+            // {
+            //     name: 'TIE_BOMBER',
+            //     position: { x: 15, y: 1, z: 1 },
+            //     rotation: { y: 3.15, x:0, z:0 },
+            //     speed: .5,
+            //     scale: 3,
+            //     hull: 200,
+            //     shields: 0,
+            //     rollSpeed: .009,
+            //     autoForward: false
+            // },
+            // {
+            //     name: 'ISD',
+            //     position: { x: 20, y: 40, z: 10 },
+            //     rotation: { y: 0, x:0, z:0 },
+            //     speed: .2,
+            //     scale: 20,
+            //     hull: 10000,
+            //     shields: 1000,
+            //     rollSpeed: .009,
+            //     autoForward: false
+            // },
+            // {
+            //     name: 'TIE_INTERCEPTOR',
+            //     position: { x: 5, y: 1, z: -5 },
+            //     rotation: { y: 3.15, x:0, z:0 },
+            //     speed: .8,
+            //     scale: 3,
+            //     hull: 150,
+            //     shields: 0,
+            //     rollSpeed: .009,
+            //     autoForward: false
+            // },
+            // {
+            //     name: 'SHUTTLE',
+            //     position: { x: 20, y: 15, z: -20 },
+            //     rotation: { y: 3.15, x:0, z:0 },
+            //     speed: .4,
+            //     scale: 3,
+            //     hull: 100,
+            //     shields: 100,
+            //     rollSpeed: .009,
+            //     autoForward: false
+            // },
+            // {
+            //     name: 'TIE_DEFENDER',
+            //     position: { x: 10, y: 1, z: 20 },
+            //     rotation: { y: 3.15, x:0, z:0 },
+            //     speed: .8,
+            //     scale: 3,
+            //     hull: 150,
+            //     shields: 150,
+            //     rollSpeed: .009,
+            //     autoForward: false
+            // },
+        ],
+        rebels: [
+            {
+                name: 'A_WING',
+                position: { x: -20, y: 1, z: -20 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .9,
+                scale: 3,
+                hull: 100,
+                shields: 100,
+                rollSpeed: .009,
+                autoForward: false
+            },
+            {
+                name: 'B_WING',
+                position: { x: -25, y: 1, z: -25 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .7,
+                scale: 5,
+                hull: 150,
+                shields: 150,
+                rollSpeed: .009,
+                autoForward: false
+            },
+            {
+                name: 'X_WING',
+                position: { x: -30, y: 1, z: -30 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .6,
+                hull: 125,
+                shields: 100,
+                scale: 4,
+                rollSpeed: .009,
+                autoForward: false
+            },
+            {
+                name: 'Y_WING',
+                position: { x: -35, y: 1, z: -35 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .5,
+                scale: 5,
+                hull: 150,
+                shields: 125,
+                rollSpeed: .009,
+                autoForward: false
+            },
+        ],
+    },
+    shipSelect: {
+        imperials: [
+            {
+                name: 'TIE_FIGHTER',
+                position: { x: 0, y: 1, z: 0 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .7,
+                scale: .25,
+                hull: 100,
+                shields: 0,
+                rollSpeed: .009,
+                autoForward: false
+            },
+            {
+                name: 'TIE_INTERCEPTOR',
+                position: { x: 10, y: 1, z: 0 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .8,
+                scale: 3,
+                hull: 150,
+                shields: 0,
+                rollSpeed: .009,
+                autoForward: false
+            },
+            {
+                name: 'TIE_ADVANCED',
+                position: { x: 20, y: 1, z: 0 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .9,
+                scale: 3,
+                hull: 100,
+                shields: 100,
+                rollSpeed: .009,
+                autoForward: false
+            },
+            {
+                name: 'TIE_DEFENDER',
+                position: { x: 30, y: 1, z: 0 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .8,
+                scale: 3,
+                hull: 150,
+                shields: 150,
+                rollSpeed: .009,
+                autoForward: false
+            },
+            {
+                name: 'TIE_BOMBER',
+                position: { x: 40, y: 1, z: 0 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .5,
+                scale: 3,
+                hull: 200,
+                shields: 0,
+                rollSpeed: .009,
+                autoForward: false
+            },
+        ],
+        rebels: [
+            {
+                name: 'A_WING',
+                position: { x: -60, y: 1, z: -80 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .9,
+                scale: 3,
+                hull: 100,
+                shields: 100,
+                rollSpeed: .009,
+                autoForward: false
+            },
+            {
+                name: 'X_WING',
+                position: { x: -50, y: 1, z: -50 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .6,
+                hull: 125,
+                shields: 100,
+                scale: 4,
+                rollSpeed: .009,
+                autoForward: false
+            },
+            {
+                name: 'B_WING',
+                position: { x: -90, y: 1, z: -90 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .7,
+                scale: 5,
+                hull: 150,
+                shields: 150,
+                rollSpeed: .009,
+                autoForward: false
+            },
+            {
+                name: 'Y_WING',
+                position: { x: -100, y: 1, z: -100 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .5,
+                scale: 5,
+                hull: 150,
+                shields: 125,
+                rollSpeed: .009,
+                autoForward: false
+            },
+        ]
+    },
     campaign: {
         // working need to give enemy ships some AI
         missionOne: {
@@ -102,7 +333,7 @@ const config = {
           room: "Game",
           connect: false,
           start: false,
-          active: true,
+          active: false,
           selection: {
               TIE_FIGHTER: false,
               TIE_BOMBER: false,
@@ -130,7 +361,6 @@ const config = {
           ],
           imperials: [
               {
-                  designation: "ALPHA_ONE",
                   name: 'TIE_FIGHTER',
                   position: { x: 10, y: 1, z: 1 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -142,7 +372,6 @@ const config = {
                   autoForward: false
               },
               {
-                  designation: "ALPHA_TWO",
                   name: 'TIE_INTERCEPTOR',
                   position: { x: 20, y: 1, z: 1 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -154,7 +383,6 @@ const config = {
                   autoForward: false
               },
               {
-                  designation: "ALPHA_THREE",
                   name: 'TIE_ADVANCED',
                   position: { x: 20, y: 1, z: -10 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -166,7 +394,6 @@ const config = {
                   autoForward: false
               },
               {
-                  designation: "ALPHA_FOUR",
                   name: 'TIE_DEFENDER',
                   position: { x: 40, y: 1, z: 40 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -178,7 +405,6 @@ const config = {
                   autoForward: false
               },
               {
-                  designation: "ALPHA_FIVE",
                   name: 'TIE_BOMBER',
                   position: { x: 40, y: 1, z: 10 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -192,7 +418,6 @@ const config = {
           ],
           rebels: [
               {
-                  designation: "RED_ONE",
                   name: 'A_WING',
                   position: { x: -60, y: 1, z: -80 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -204,7 +429,6 @@ const config = {
                   autoForward: false
               },
               {
-                  designation: "RED_TWO",
                   name: 'X_WING',
                   position: { x: -50, y: 1, z: -50 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -216,7 +440,6 @@ const config = {
                   autoForward: false
               },
               {
-                  designation: "RED_THREE",
                   name: 'B_WING',
                   position: { x: -90, y: 1, z: -90 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -228,7 +451,6 @@ const config = {
                   autoForward: false
               },
               {
-                  designation: "RED_FOUR",
                   name: 'Y_WING',
                   position: { x: -100, y: 1, z: -100 },
                   rotation: { y: 3.15, x:0, z:0 },
@@ -246,10 +468,10 @@ const config = {
         controls: false,
     },
     audio: {
-        music: true,
+        music: false,
         musicVolume: 20,
-        sfx: true,
-        sfxVolume: 30,
+        sfx: false,
+        sfxVolume: 20,
     },
     floor: {
         size: { x: 1000, y: 1000, z: 1000 },
@@ -258,157 +480,6 @@ const config = {
     skyBox: {
         size: { x: 2000, y: 2000, z: 2000},
     },
-    players:[
-        {
-            playerName: "PLAYER1",
-            name: 'TIE_FIGHTER',
-            hull: 100,
-            shields: 0,
-            position: { x: 10, y: 1, z: 10 },
-            rotation: { y: 3.15, x:0, z:0 },
-            speed: 1.5,
-            scale: .25,
-            rollSpeed: .009,
-            autoForward: false
-        },
-        {
-            playerName: "PLAYER2",
-            name: 'X_WING',
-            hull: 100,
-            shields: 100,
-            position: { x: 10, y: 1, z: -30 },
-            rotation: { y: 3.15, x:0, z:0 },
-            speed: .6,
-            scale: 4,
-            rollSpeed: .009,
-            autoForward: false
-        },
-    ],
-    imperials: [
-        {
-            name: 'TIE_ADVANCED',
-            position: { x: 10, y: 1, z: -10 },
-            rotation: { y: 3.15, x:0, z:0 },
-            speed: .9,
-            scale: 3,
-            hull: 100,
-            shields: 100,
-            rollSpeed: .009,
-            autoForward: false
-        },
-        {
-            name: 'TIE_FIGHTER',
-            position: { x: 10, y: 1, z: 1 },
-            rotation: { y: 3.15, x:0, z:0 },
-            speed: .7,
-            scale: .25,
-            hull: 100,
-            shields: 0,
-            rollSpeed: .009,
-            autoForward: false
-        },
-        {
-            name: 'TIE_BOMBER',
-            position: { x: 15, y: 1, z: 1 },
-            rotation: { y: 3.15, x:0, z:0 },
-            speed: .5,
-            scale: 3,
-            hull: 200,
-            shields: 0,
-            rollSpeed: .009,
-            autoForward: false
-        },
-        {
-            name: 'ISD',
-            position: { x: 20, y: 40, z: 10 },
-            rotation: { y: 0, x:0, z:0 },
-            speed: .2,
-            scale: 20,
-            hull: 10000,
-            shields: 1000,
-            rollSpeed: .009,
-            autoForward: false
-        },
-        {
-            name: 'TIE_INTERCEPTOR',
-            position: { x: 5, y: 1, z: -5 },
-            rotation: { y: 3.15, x:0, z:0 },
-            speed: .8,
-            scale: 3,
-            hull: 150,
-            shields: 0,
-            rollSpeed: .009,
-            autoForward: false
-        },
-        {
-            name: 'SHUTTLE',
-            position: { x: 20, y: 15, z: -20 },
-            rotation: { y: 3.15, x:0, z:0 },
-            speed: .4,
-            scale: 3,
-            hull: 100,
-            shields: 100,
-            rollSpeed: .009,
-            autoForward: false
-        },
-        {
-            name: 'TIE_DEFENDER',
-            position: { x: 10, y: 1, z: 20 },
-            rotation: { y: 3.15, x:0, z:0 },
-            speed: .8,
-            scale: 3,
-            hull: 150,
-            shields: 150,
-            rollSpeed: .009,
-            autoForward: false
-        },
-    ],
-    rebels: [
-        {
-            name: 'A_WING',
-            position: { x: -20, y: 1, z: -20 },
-            rotation: { y: 3.15, x:0, z:0 },
-            speed: .9,
-            scale: 3,
-            hull: 100,
-            shields: 100,
-            rollSpeed: .009,
-            autoForward: false
-        },
-        {
-            name: 'B_WING',
-            position: { x: -25, y: 1, z: -25 },
-            rotation: { y: 3.15, x:0, z:0 },
-            speed: .7,
-            scale: 5,
-            hull: 150,
-            shields: 150,
-            rollSpeed: .009,
-            autoForward: false
-        },
-        {
-            name: 'X_WING',
-            position: { x: -30, y: 1, z: -30 },
-            rotation: { y: 3.15, x:0, z:0 },
-            speed: .6,
-            hull: 125,
-            shields: 100,
-            scale: 4,
-            rollSpeed: .009,
-            autoForward: false
-        },
-        {
-            name: 'Y_WING',
-            position: { x: -35, y: 1, z: -35 },
-            rotation: { y: 3.15, x:0, z:0 },
-            speed: .5,
-            scale: 5,
-            hull: 150,
-            shields: 125,
-            rollSpeed: .009,
-            autoForward: false
-        },
-    ],
     weapons: [
         {
             name: "laser",

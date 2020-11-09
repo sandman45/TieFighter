@@ -70,30 +70,6 @@ function cleanUpUsersInRooms(id) {
     return ret;
 }
 
-function checkPlayers(room){
-    let player = "SPECTATOR";
-    if(gameState[room]){
-        const players = Object.keys(gameState[room].players);
-        if(players.length === 0){
-            player = "PLAYER1";
-            return player;
-        } else if(players.length > 1) {
-            return player;
-        } else {
-            let pName = "PLAYER1";
-            players.forEach(player => {
-                pName = gameState[room].players[player].name;
-            });
-            if(pName === "PLAYER1"){
-                player = "PLAYER2";
-            } else if(pName === "PLAYER2"){
-                player = "PLAYER1";
-            }
-            return player;
-        }
-    }
-}
-
 function initSocketIOServer(callbacks) {
     socketIO.on('connection', socket => {
         socketCount++;
@@ -110,7 +86,12 @@ function initSocketIOServer(callbacks) {
                // emite message to room they disconnected
                 socket.to(clean.room).emit(events.UPDATES, {
                     message: `${clean.user.name}:${socket.id} has been disconnected from ${clean.room}`,
-                    data: {}
+                    data: {
+                        room: clean.room,
+                        userId: socket.id,
+                        name: clean.user.name,
+                        type: "DISCONNECT"
+                    }
                 });
             }
             delete sockets[key];
@@ -136,25 +117,13 @@ function initSocketIOServer(callbacks) {
                         };
                     }
                     const players = Object.keys(gameState[data.room].players);
-                    // if(checkPlayers(data.room) === "PLAYER1"){
-                    //     gameState[data.room].players[socket.id] = {
-                    //         id: socket.id,
-                    //         name: "PLAYER1",
-                    //         data: {}
-                    //     };
-                    // } else if(checkPlayers(data.room) === "PLAYER2") {
-                    //     gameState[data.room].players[socket.id] = {
-                    //         id: socket.id,
-                    //         name: "PLAYER2",
-                    //         data: {}
-                    //     };
-                    // } else {
+
                     gameState[data.room].players[socket.id] = {
                         id: socket.id,
-                        name: `PLAYER${players.length}`,
+                        name: `PLAYER_${players.length}`,
+                        number: players.length,
                         data: {}
-                        // }
-                    }
+                    };
                     console.log(`${gameState[data.room].players[socket.id].name}:${socket.id} has joined room ${data.room}`);
                     socketIO.in(data.room).emit(events.UPDATES, {
                         message:`${gameState[data.room].players[socket.id].name}:${socket.id} has joined Room ${data.room}`,
@@ -164,26 +133,32 @@ function initSocketIOServer(callbacks) {
             }
         });
 
-        socket.on(events.PLAYER_SELECTION_READY, data => {
-            console.log(JSON.stringify(data));
-            if(gameState[data.room] && gameState[data.room].players[data.userId]){
-                gameState[data.room].players[data.userId].selection = data.selection;
-                socket.to(data.room).emit(events.PLAYER_SELECTION_READY, {
-                    message: `${gameState[data.room].players[socket.id].name}:${socket.id} has selected ${data.selection}`,
-                    data: gameState[data.room].players[data.userId]
-                });
-            }
-        });
-
         socket.on(events.LEAVE_ROOM, data => {
             socket.leave(data.room, () => {
                 console.log(`${gameState[data.room].players[socket.id].name}:${socket.id} has left room ${data.room}`);
+                gameState[data.room].players[socket.id].type = "DISCONNECT";
                 socket.to(data.room).emit(events.UPDATES, {
-                     message: `${gameState[data.room].players[socket.id].name}:${socket.id} has left room`,
-                     data: gameState[data.room].players[socket.id]
+                    message: `${gameState[data.room].players[socket.id].name}:${socket.id} has left room`,
+                    data: gameState[data.room].players[socket.id]
                 });
                 delete gameState[data.room].players[socket.id];
             });
+        });
+
+        socket.on(events.PLAYER_SELECTION_READY, data => {
+            if(gameState[data.room] && gameState[data.room].players[data.userId]){
+                gameState[data.room].players[data.userId].selection = data.selection;
+                if(data.selection.search("TIE") > -1){
+                    gameState[data.room].players[data.userId].designation = `ALPHA_${gameState[data.room].players[data.userId].id}`;
+                } else {
+                    gameState[data.room].players[data.userId].designation = `RED_${gameState[data.room].players[data.userId].id}`;
+                }
+                console.log(`${gameState[data.room].players[socket.id].name}:${socket.id} has selected ${data.selection} designation: ${gameState[data.room].players[socket.id].designation}`);
+                socket.to(data.room).emit(events.PLAYER_SELECTION_READY, {
+                    message: `${gameState[data.room].players[socket.id].name}:${socket.id} has selected ${data.selection} designation: ${gameState[data.room].players[socket.id].designation}`,
+                    data: gameState[data.room].players[data.userId]
+                });
+            }
         });
 
         socket.on(events.START_GAME, data => {

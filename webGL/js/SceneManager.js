@@ -3,12 +3,13 @@ import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threej
 import Manager from './utils/Manager.js';
 import sceneConfiguration from '../sceneConfig.js';
 import { parseConfiguration, mapConfigurationToGUI } from './utils/SceneConfigUtils.js';
-import dat from '../node_modules/dat.gui/build/dat.gui.module.js';
+// import dat from '../node_modules/dat.gui/build/dat.gui.module.js';
 import MainMenu from "./scenes/menu/MainMenu.js";
 import MissionOne from "./scenes/campaign/MissionOne.js";
 import MultiPlayer from "./scenes/multiplayer/MultiPlayer.js";
+import ShipSelect from "./scenes/multiplayer/ShipSelect.js";
 
-export default canvas => {
+export default (canvas, screen) => {
     const sceneConstants = parseConfiguration(sceneConfiguration);
     const clock = new THREE.Clock();
 
@@ -17,19 +18,21 @@ export default canvas => {
         height: canvas.height
     };
     let mp;
+    let ss;
     let scene;
     let sceneSubjects = [];
     let controls;
     let weaponsCollision;
+    let myWeaponsCollision;
     let renderer;
     let camera;
     let sceneReady = false;
-    const datGui = new dat.GUI();
+    // const datGui = new dat.GUI();
     /**
      * LOADING SCREEN MENU
      * */
-    if(sceneConstants.menu) {
-        Manager(sceneConstants, (message, models) => {
+    if(screen === "menu") {
+        Manager(sceneConstants.menu, (message, models) => {
             const menu = MainMenu(canvas, screenDimensions, models);
             sceneSubjects = sceneSubjects.concat(menu.sceneSubjects);
             controls = menu.controls;
@@ -37,33 +40,56 @@ export default canvas => {
             renderer = menu.renderer;
             camera = menu.camera;
             sceneReady = true;
+            menu.getWeaponsCollision = () => {
+                return null;
+            };
+            // show btn container
+            const element = document.getElementById("menu");
+            element.style.visibility = "visible";
+        });
+    }
+    /**
+     * SHIPSELECT STUFF
+     */
+    else if(screen === "shipselect") {
+        Manager(sceneConstants.shipSelect, (message, models) => {
+            ss = ShipSelect(canvas, screenDimensions, models);
+            sceneSubjects = sceneSubjects.concat(ss.sceneSubjects);
+            weaponsCollision = ss.weaponsCollision;
+            scene = ss.scene;
+            renderer = ss.renderer;
+            camera = ss.camera;
+            sceneReady = true;
+            controls = {
+              onKeyDown: ss.onKeyDown,
+              onKeyUp: ss.onKeyUp
+            };
         });
     }
     /**
      * MULTIPLAYER STUFF
      */
-    else if(sceneConstants.multiPlayer.active) {
-        Manager(sceneConstants, (message, models) => {
-            mp = MultiPlayer(canvas, screenDimensions, models, sceneSubjects);
-            weaponsCollision = mp.weaponsCollision;
-            mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
-            scene = mp.scene;
-            renderer = mp.renderer;
-            camera = mp.camera;
-            sceneReady = true;
-        });
+    else if(screen === "multiplayer") {
+        mp = MultiPlayer(canvas, screenDimensions, sceneSubjects);
+        weaponsCollision = mp.weaponsCollision;
+        // mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
+        scene = mp.scene;
+        renderer = mp.renderer;
+        camera = mp.camera;
+        weaponsCollision = mp.getWeaponsCollision();
+        sceneReady = true;
     }
     /**
      * Mission ONE!
      */
-    else if(sceneConstants.campaign.missionOne.active) {
+    else if(screen === "missionone") {
         Manager(sceneConstants, (message, models) => {
             const missionOne = MissionOne(canvas, screenDimensions, models);
             sceneSubjects = missionOne.sceneSubjects;
             controls = missionOne.controls;
             weaponsCollision = missionOne.weaponsCollision;
 
-            mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
+            // mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
             scene = missionOne.scene;
             renderer = missionOne.renderer;
             camera = missionOne.camera;
@@ -75,7 +101,10 @@ export default canvas => {
         if(sceneReady){
             const elapsedTime = clock.getElapsedTime();
             if(sceneSubjects.length > 0){
-                const myWeaponsCollision = mp.getWeaponsCollision();
+                if(mp){
+                    myWeaponsCollision = mp.getWeaponsCollision();
+                    sceneSubjects = mp.getSceneSubjects();
+                }
                 if(weaponsCollision){
                     weaponsCollision.checkCollision(sceneSubjects);
                 } else if(myWeaponsCollision) {
@@ -107,27 +136,33 @@ export default canvas => {
     }
 
     function onKeyDown(keyCode, duration) {
-        const myControls = mp.getControls();
+        if(mp){
+            controls = mp.getControls();
+        }
+
         if(controls){
             controls.onKeyDown(keyCode, duration);
-        } else if(myControls){
-            myControls.onKeyDown(keyCode, duration);
         }
     }
 
     function onKeyUp(keyCode) {
-        const myControls = mp.getControls();
-        if(controls){
-            controls.onKeyUp(keyCode);
-        } else if(myControls){
-            myControls.onKeyUp(keyCode);
+        if(mp){
+            controls = mp.getControls();
         }
+        if(controls) {
+            controls.onKeyUp(keyCode);
+        }
+    }
+
+    function btnClickFromMenu() {
+        ss.onSelect();
     }
 
     return {
         update,
         onWindowResize,
         onKeyDown,
-        onKeyUp
+        onKeyUp,
+        btnClickFromMenu
       }
 }

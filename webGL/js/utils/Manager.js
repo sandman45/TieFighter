@@ -40,40 +40,72 @@ export default (modelConfig, callback) => {
     };
 
     const models = {};
-    if(modelConfig.multiPlayer.active){
-        modelConfig.multiPlayer.imperials.forEach((imp => {
-            models[imp.designation] = {
-                url: modelTypes[imp.name].url,
-                config: imp
-            };
-        }));
-
-        modelConfig.multiPlayer.rebels.forEach((rebel => {
-            models[rebel.designation] = {
-                url: modelTypes[rebel.name].url,
-                config: rebel
-            };
-        }));
-    } else {
-        models[modelConfig.campaign.missionOne.player.designation] = {
-            url: modelTypes[modelConfig.campaign.missionOne.player.name].url,
-            config: modelConfig.campaign.missionOne.player
+    // if(modelConfig.multiPlayer.active){
+    //     modelConfig.multiPlayer.imperials.forEach((imp => {
+    //         models[imp.name] = {
+    //             url: modelTypes[imp.name].url,
+    //             config: imp
+    //         };
+    //     }));
+    //
+    //     modelConfig.multiPlayer.rebels.forEach((rebel => {
+    //         models[rebel.name] = {
+    //             url: modelTypes[rebel.name].url,
+    //             config: rebel
+    //         };
+    //     }));
+    // } else if(modelConfig.shipSelect.active){
+    //     modelConfig.shipSelect.imperials.forEach((imp => {
+    //         models[imp.name] = {
+    //             url: modelTypes[imp.name].url,
+    //             config: imp
+    //         };
+    //     }));
+    //
+    //     modelConfig.shipSelect.rebels.forEach((rebel => {
+    //         models[rebel.name] = {
+    //             url: modelTypes[rebel.name].url,
+    //             config: rebel
+    //         };
+    //     }));
+    // }
+    // TODO: maybe just put it all in ships? and have a field that
+    // designates rebel or empire
+    modelConfig.imperials.forEach((imp => {
+        models[imp.name] = {
+            url: modelTypes[imp.name].url,
+            config: imp
         };
+    }));
 
-        modelConfig.campaign.missionOne.imperials.forEach((imp => {
-            models[imp.designation] = {
-                url: modelTypes[imp.name].url,
-                config: imp
-            };
-        }));
+    modelConfig.rebels.forEach((rebel => {
+        models[rebel.name] = {
+            url: modelTypes[rebel.name].url,
+            config: rebel
+        };
+    }));
 
-        modelConfig.campaign.missionOne.rebels.forEach((rebel => {
-            models[rebel.designation] = {
-                url: modelTypes[rebel.name].url,
-                config: rebel
-            };
-        }));
-    }
+
+    // else {
+    //     models[modelConfig.campaign.missionOne.player.designation] = {
+    //         url: modelTypes[modelConfig.campaign.missionOne.player.name].url,
+    //         config: modelConfig.campaign.missionOne.player
+    //     };
+    //
+    //     modelConfig.campaign.missionOne.imperials.forEach((imp => {
+    //         models[imp.designation] = {
+    //             url: modelTypes[imp.name].url,
+    //             config: imp
+    //         };
+    //     }));
+    //
+    //     modelConfig.campaign.missionOne.rebels.forEach((rebel => {
+    //         models[rebel.designation] = {
+    //             url: modelTypes[rebel.name].url,
+    //             config: rebel
+    //         };
+    //     }));
+    // }
 
     const manager = new THREE.LoadingManager();
     manager.onLoad = completed;
@@ -98,7 +130,7 @@ export default (modelConfig, callback) => {
     function progress(url, itemsLoaded, itemsTotal) {
 
         progressbarElem.style.width = `${itemsLoaded / itemsTotal * 100 | 0}%`;
-        console.log(`Loading file: ${url} .\nLoaded ${itemsLoaded} of ${itemsTotal} files.`);
+        // console.log(`Loading file: ${url} .\nLoaded ${itemsLoaded} of ${itemsTotal} files.`);
 
     }
 }

@@ -30,7 +30,7 @@ export default (weapons, userId, scene, sceneConstants) => {
                 sceneObjects[i].trigger(obj.mesh.position);
                 if(obj.mesh.hull <= 0){
                     if(sceneConstants.multiPlayer.active){
-                        console.log(`${obj.mesh.name} has been destroyed!`);
+                        console.log(`${obj.mesh.name}: ${obj.mesh.userId} has been destroyed!`);
                         if(obj.mesh.userId === userId){
                             console.log(`I died as ${userId} ending game`);
                             eventBus.post(eventType.GAME_STATE_LOCAL_END, obj.mesh.userId);
@@ -38,8 +38,8 @@ export default (weapons, userId, scene, sceneConstants) => {
                             // remove mesh from game
                             // search through scene to make sure we kill the right one and remove the group too
                             scene.children.forEach(child => {
-                                if(child.designation === obj.mesh.designation){
-                                    console.log(`${child.name}: ${child.designation} userId ${obj.mesh.userId} has been destroyed!`);
+                                if(child.userId === obj.mesh.userId){
+                                    console.log(`${child.name}: ${obj.mesh.userId} userId has been destroyed!`);
                                     scene.remove(child);
                                     sceneObjects.splice(sceneObjects.indexOf(obj), 1);
                                 }
@@ -57,8 +57,8 @@ export default (weapons, userId, scene, sceneConstants) => {
                         // remove mesh from game
                         // search through scene to make sure we kill the right one and remove the group too
                         scene.children.forEach(child => {
-                            if(child.designation === obj.mesh.designation){
-                               console.log(`${child.name}: ${child.designation} has been destroyed!`);
+                            if(child.userId === obj.mesh.userId){
+                               console.log(`${child.name}: ${child.userId} has been destroyed!`);
                                scene.remove(child);
                                sceneObjects.splice(sceneObjects.indexOf(obj), 1);
                             }

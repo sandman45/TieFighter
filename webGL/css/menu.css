@@ -1,0 +1,128 @@
+/* main menu  */
+#menu {
+    z-index: 999999;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: xx-large;
+    font-family: sans-serif;
+    visibility: hidden;
+}
+
+.menu-item {
+    padding: 12px;
+    background-color: grey;
+    color: white;
+    border: solid white;
+    cursor: pointer;
+}
+
+.menu-item:hover{
+    color: black;
+    border: solid black;
+}
+
+
+
+/* sub menu  */
+#sub-menu{
+    z-index: 999999;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    font-size: xx-large;
+    font-family: sans-serif;
+    visibility: hidden;
+}
+
+.sub-menu-items {
+    visibility: hidden;
+}
+
+.sub-menu-item {
+    padding: 12px;
+    background-color: grey;
+    color: white;
+    border: solid white;
+    cursor: pointer;
+}
+
+.sub-menu-item:hover{
+    color: black;
+    border: solid black;
+}
+
+.spacer {
+    height: 4%;
+    width: 100%;
+}
+
+
+
+/* bottom button container */
+.btn-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    visibility: hidden;
+}
+
+.btn-item {
+    flex: 1 auto;
+    padding: 12px;
+    background-color: grey;
+    color: white;
+    border: solid white;
+    cursor: pointer;
+}
+
+.btn-item:hover{
+    color: black;
+    border: solid black;
+}
+
+#shipInfo{
+    padding-top: 20px;
+    padding-bottom: 20px;
+    visibility: hidden;
+    display: flex;
+    height: 40%;
+    width: 80%;
+}
+
+.ship-info-left {
+    padding-left: 20px;
+    flex: 1;
+    background-color: #888888;
+    visibility: hidden;
+}
+
+.ship-info-left p {
+    padding: 10px;
+    display: inline-block;
+    font-weight: lighter;
+    font-size: x-large;
+    font-family: system-ui;
+}
+
+.ship-info-left img {
+    height: 200px;
+}
+
+.ship-info-right {
+    flex: 1;
+    visibility: hidden;
+}
