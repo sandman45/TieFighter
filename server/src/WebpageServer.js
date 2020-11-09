@@ -86,7 +86,12 @@ function initSocketIOServer(callbacks) {
                // emite message to room they disconnected
                 socket.to(clean.room).emit(events.UPDATES, {
                     message: `${clean.user.name}:${socket.id} has been disconnected from ${clean.room}`,
-                    data: {}
+                    data: {
+                        room: clean.room,
+                        id: socket.id,
+                        name: clean.user.name,
+                        type: "DISCONNECT"
+                    }
                 });
             }
             delete sockets[key];
@@ -128,6 +133,18 @@ function initSocketIOServer(callbacks) {
             }
         });
 
+        socket.on(events.LEAVE_ROOM, data => {
+            socket.leave(data.room, () => {
+                console.log(`${gameState[data.room].players[socket.id].name}:${socket.id} has left room ${data.room}`);
+                gameState[data.room].players[socket.id].type = "DISCONNECT";
+                socket.to(data.room).emit(events.UPDATES, {
+                    message: `${gameState[data.room].players[socket.id].name}:${socket.id} has left room`,
+                    data: gameState[data.room].players[socket.id]
+                });
+                delete gameState[data.room].players[socket.id];
+            });
+        });
+
         socket.on(events.PLAYER_SELECTION_READY, data => {
             if(gameState[data.room] && gameState[data.room].players[data.userId]){
                 gameState[data.room].players[data.userId].selection = data.selection;
@@ -142,17 +159,6 @@ function initSocketIOServer(callbacks) {
                     data: gameState[data.room].players[data.userId]
                 });
             }
-        });
-
-        socket.on(events.LEAVE_ROOM, data => {
-            socket.leave(data.room, () => {
-                console.log(`${gameState[data.room].players[socket.id].name}:${socket.id} has left room ${data.room}`);
-                socket.to(data.room).emit(events.UPDATES, {
-                     message: `${gameState[data.room].players[socket.id].name}:${socket.id} has left room`,
-                     data: gameState[data.room].players[socket.id]
-                });
-                delete gameState[data.room].players[socket.id];
-            });
         });
 
         socket.on(events.START_GAME, data => {

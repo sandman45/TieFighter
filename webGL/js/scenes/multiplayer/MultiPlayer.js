@@ -15,6 +15,7 @@ import PlayerControls from "../../controls/PlayerControls.js";
 import Explosion from "../../particles/Explosion.js";
 import WeaponsCollisionManager from "../../controls/WeaponsCollisionManager.js";
 import FlyControls from "../../controls/FlyControls.js";
+import LocalStorage from "../../localStorage/localStorage.js"
 
 export default (canvas, screenDimensions, sceneSubjects) => {
     const sceneConstants = parseConfiguration(sceneConfiguration);
@@ -46,33 +47,50 @@ export default (canvas, screenDimensions, sceneSubjects) => {
     const loadingElem = document.querySelector('#loading');
     loadingElem.style.display = 'none';
 
-    eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL_INIT, (data) => {
-        userId = data.userId;
+    const selection = LocalStorage.getItem("SELECTED_SHIP");
+    const room = LocalStorage.getItem("SOCKET_ROOM");
+
+    initPlayer();
+
+    eventBus.post(eventBusEvents.PLAYER_SELECTION_READY, {
+        selection,
+        room: room,
+    });
+
+    function initPlayer(){
+        console.log(`MULTI PLAYER: ${eventBusEvents.GAME_STATE_LOCAL_INIT}`);
+        const selectedShip = LocalStorage.getItem("SELECTED_SHIP");
+        const socketId = LocalStorage.getItem("SOCKET_ID");
+        console.log(`selectedShip: ${selectedShip}`);
+        console.log(`socketId: ${socketId}`);
+        userId = socketId;
         let selection = null;
         const models = sceneConstants.multiPlayer.imperials.concat(sceneConstants.multiPlayer.rebels);
         models.forEach(model => {
-            if(model.name === data.selection) {
+            if(model.name === selectedShip) {
                 selection = model;
             }
         });
-        console.log(`adding you to game as ${data.selection}: userId: ${data.userId}`);
+        console.log(`adding you to game as ${selectedShip}: userId: ${userId}`);
 
         playerConfig = selection;
-        playerConfig.userId = data.userId;
+        playerConfig.userId = socketId;
         player = ModelLoader(scene, playerConfig, Model[playerConfig.name], null);
-            if(sceneConstants.controls.flightControls){
-                controls = createFlightControls(player.mesh, camera, renderer, collisionManager, laser, audio, playerConfig);
-            } else {
-                controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
-            }
+        if(sceneConstants.controls.flightControls){
+            controls = createFlightControls(player.mesh, camera, renderer, collisionManager, laser, audio, playerConfig);
+        } else {
+            controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
+        }
 
-            weaponsCollision = WeaponsCollisionManager([laser], userId, scene, sceneConstants);
-            sceneSubjects.push(player);
-            sceneSubjects.push(controls);
-            sceneSubjects.push(laser);
-    });
+        weaponsCollision = WeaponsCollisionManager([laser], userId, scene, sceneConstants);
+        sceneSubjects.push(player);
+        sceneSubjects.push(controls);
+        sceneSubjects.push(laser);
+    }
 
     eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, (data) => {
+        let add = true;
+        // check and make sure he isnt already added
         let selection = null;
         const models = sceneConstants.multiPlayer.imperials.concat(sceneConstants.multiPlayer.rebels);
         models.forEach(model => {
@@ -84,8 +102,17 @@ export default (canvas, screenDimensions, sceneSubjects) => {
         console.log(`adding opponent to game as ${selection.name}: userId: ${data.userId}`);
         const opponentConfig = selection;
         opponentConfig.userId = data.userId;
-        const opponent = ModelLoader(scene, opponentConfig, Model[opponentConfig.name], null);
-        sceneSubjects.push(opponent);
+
+        sceneSubjects.forEach(sub => {
+            if(sub.mesh && sub.mesh.userId === data.userId){
+                console.log(`Opponent ${data.userId} is already in the game as ${selection.name} skipping adding opponent`)
+                add = false;
+            }
+        });
+        if(add){
+            const opponent = ModelLoader(scene, opponentConfig, Model[opponentConfig.name], null);
+            sceneSubjects.push(opponent);
+        }
     });
 
     eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL, (data) => {
@@ -126,6 +153,17 @@ export default (canvas, screenDimensions, sceneSubjects) => {
                 }
             });
         }
+    });
+
+    eventBus.subscribe(eventBusEvents.GAME_STATE_OPPONENT_LEFT_GAME, data => {
+       console.log(`Opponent left.. cleaning up their mess`);
+        scene.children.forEach(child => {
+            if(child.userId === data.userId){
+                console.log(`${child.name}: ${data.userId} userId has been removed from game!`);
+                scene.remove(child);
+                sceneSubjects.splice(sceneSubjects.indexOf(child), 1);
+            }
+        });
     });
 
     eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL_END, (userId) => {
@@ -208,6 +246,7 @@ export default (canvas, screenDimensions, sceneSubjects) => {
         camera,
         renderer,
         getControls,
+        getSceneSubjects,
         getWeaponsCollision
     };
 }
