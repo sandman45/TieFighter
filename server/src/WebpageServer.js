@@ -88,7 +88,7 @@ function initSocketIOServer(callbacks) {
                     message: `${clean.user.name}:${socket.id} has been disconnected from ${clean.room}`,
                     data: {
                         room: clean.room,
-                        id: socket.id,
+                        userId: socket.id,
                         name: clean.user.name,
                         type: "DISCONNECT"
                     }
