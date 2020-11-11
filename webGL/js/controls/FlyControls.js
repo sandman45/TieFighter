@@ -279,7 +279,7 @@ export default class FlyControls {
             this.object.translateY( this.moveVector.y * moveMult );
             this.object.translateZ( this.moveVector.z * moveMult );
             if(this.moveState.forward === 1) {
-                this.audio.playSound(this.object,"FLYBY");
+                this.audio.playSound("FLYBY", this.object);
             }
             this.updateServer(this.object, "PLAYER");
         } else {

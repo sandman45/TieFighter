@@ -13,7 +13,9 @@ export default (canvas, screenDimensions, models) => {
     const scene = buildScene(sceneConstants);
     const renderer = buildRender(screenDimensions);
     const camera = buildCamera(screenDimensions);
-    const audio = new GameAudio(camera, sceneConfiguration.audio);
+    const audio = GameAudio(camera, sceneConfiguration.audio, () => {
+        audio.playSound("MUSIC_MENU", camera);
+    });
     buildLight(scene);
 
     const floorConfig = sceneConstants.floor;
@@ -22,7 +24,7 @@ export default (canvas, screenDimensions, models) => {
         GeneralLights(scene),
         floor,
     ];
-    audio.playSound("MUSIC", camera);
+    // audio.playSound("MUSIC_MENU", camera);
 
     Object.keys(models).forEach(model => {
         sceneSubjects.push(ModelLoader(scene, models[model].config, Model[model], null, models[model].gltf));

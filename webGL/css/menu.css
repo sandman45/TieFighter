@@ -1,6 +1,6 @@
 /* main menu  */
 #menu {
-    z-index: 999999;
+    z-index: 999;
     position: absolute;
     left: 0;
     top: 0;
@@ -33,7 +33,7 @@
 
 /* sub menu  */
 #sub-menu{
-    z-index: 999999;
+    z-index: 999;
     position: absolute;
     left: 0;
     top: 0;
@@ -54,6 +54,7 @@
 
 .sub-menu-item {
     padding: 12px;
+    width: 200px;
     background-color: grey;
     color: white;
     border: solid white;
@@ -65,12 +66,16 @@
     border: solid black;
 }
 
+.sub-menu-item:disabled {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+}
+
 .spacer {
     height: 4%;
     width: 100%;
 }
-
-
 
 /* bottom button container */
 .btn-container {
@@ -94,6 +99,12 @@
     border: solid black;
 }
 
+.btn-item:disabled {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+}
+
 #shipInfo{
     padding-top: 20px;
     padding-bottom: 20px;
@@ -104,17 +115,15 @@
 }
 
 .ship-info-left {
-    padding-left: 20px;
     flex: 1;
     background-color: #888888;
     visibility: hidden;
 }
 
 .ship-info-left p {
-    padding: 10px;
     display: inline-block;
     font-weight: lighter;
-    font-size: x-large;
+    font-size: medium;
     font-family: system-ui;
 }
 
