@@ -15,7 +15,9 @@ export default (canvas, screenDimensions, models) => {
     const scene = buildScene(sceneConstants);
     const renderer = buildRender(screenDimensions);
     const camera = buildCamera(screenDimensions);
-    const audio = new GameAudio(camera, sceneConfiguration.audio);
+    const audio = GameAudio(camera, sceneConfiguration.audio, () => {
+        audio.playSound("MUSIC_SELECT", camera);
+    });
     buildLight(scene);
     let moving = false;
     let shipInfo = false;
@@ -25,7 +27,7 @@ export default (canvas, screenDimensions, models) => {
         GeneralLights(scene),
         floor,
     ];
-    // audio.playSound("MUSIC_SELECT", camera);
+
 
     Object.keys(models).forEach(model => {
         sceneSubjects.push(ModelLoader(scene, models[model].config, Model[model], null, models[model].gltf));

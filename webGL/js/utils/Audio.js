@@ -2,152 +2,164 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 
 const AudioType = {
-  BLAST: {
-      type: "BLAST",
-      url: "../assets/audio/blast.mp3",
-      sound: null
-  },
-  BLAST2: {
-      type: "BLAST2",
-      url: "../assets/audio/blast-2.mp3",
-      sound: null
-  },
-  BLAST3: {
-      type: "BLAST3",
-      url: "../assets/audio/blast-3.mp3",
-      sound: null
-  },
-  FLYBY: {
-      type: "FLYBY",
-      url: "../assets/audio/fly-by.mp3",
-      sound: null
-  },
-  FLYBY2: {
-      type: "FLYBY",
-      url: "../assets/audio/fly-by-2.mp3",
-      sound: null
-  },
-  FLYBY3: {
-      type: "FLYBY",
-      url: "../assets/audio/fly-by-3.mp3",
-      sound: null
-  },
-  MUSIC: {
-      type: "MUSIC",
-      url: "../assets/audio/Imperial-March.mp3",
-      sound: null
-  },
-  HIT: {
-      type: "HIT",
-      url: "../assets/audio/TIE fighter explode.mp3"
-  },
-  HIT2: {
-      type: "HIT2",
-      url: "../assets/audio/XWing explode.mp3"
-  }
+    BLAST: {
+        name: "BLAST",
+        type: "SFX",
+        url: "../assets/audio/blast.mp3",
+        sound: null
+    },
+    BLAST2: {
+        name: "BLAST2",
+        type: "SFX",
+        url: "../assets/audio/blast-2.mp3",
+        sound: null
+    },
+    BLAST3: {
+        name: "BLAST3",
+        type: "SFX",
+        url: "../assets/audio/blast-3.mp3",
+        sound: null
+    },
+    FLYBY: {
+        name: "FLYBY",
+        type: "SFX",
+        url: "../assets/audio/fly-by.mp3",
+        sound: null
+    },
+    FLYBY2: {
+        name: "FLYBY",
+        type: "SFX",
+        url: "../assets/audio/fly-by-2.mp3",
+        sound: null
+    },
+    FLYBY3: {
+        name: "FLYBY",
+        type: "SFX",
+        url: "../assets/audio/fly-by-3.mp3",
+        sound: null
+    },
+    MUSIC: {
+        name: "MARCH",
+        type: "MUSIC",
+        url: "../assets/audio/imp-march.mp3",
+        sound: null
+    },
+    MUSIC_FALCON: {
+        name: "MARCH",
+        type: "MUSIC",
+        url: "../assets/audio/falcon-v-ties.mp3",
+        sound: null
+    },
+    MUSIC_MENU: {
+        name: "MUSIC_MENU",
+        type: "MUSIC",
+        url: "../assets/audio/main-menu.mp3",
+        sound: null
+    },
+    MUSIC_SELECT: {
+        name: "MUSIC_SELECT",
+        type: "MUSIC",
+        url: "../assets/audio/register.mp3",
+        sound: null
+    },
+    HIT: {
+        name: "HIT",
+        type: "SFX",
+        url: "../assets/audio/TIE fighter explode.mp3",
+        sound: null
+    },
+    HIT2: {
+        name: "HIT2",
+        type: "SFX",
+        url: "../assets/audio/XWing explode.mp3",
+        sound: null
+    }
 };
 
 let listener;
 let gameCamera;
 let audioLoader;
-let sfxVolume = 40;
-let musicVolume = 40;
+let sfxVolume = 1;
+let musicVolume = 1;
 let audioConfig;
-export default class GameAudio {
+let audioReady = false;
 
-    constructor(camera, config) {
-        audioConfig = config;
-        if(audioConfig.music) {
-            listener = new THREE.AudioListener();
-            gameCamera = camera;
-            gameCamera.add(listener);
-            audioLoader = new THREE.AudioLoader();
+export default (camera, config, callback) => {
+    audioConfig = config;
+    if(audioConfig.music) {
+        listener = new THREE.AudioListener();
+        gameCamera = camera;
+        gameCamera.add(listener);
 
-            audioLoader.load(AudioType.MUSIC.url, (buffer) => {
-                AudioType.MUSIC.sound = new THREE.PositionalAudio(listener);
-                AudioType.MUSIC.sound.setBuffer(buffer);
-                AudioType.MUSIC.sound.setVolume(config.musicVolume ? config.musicVolume : musicVolume);
-                AudioType.BLAST.sound.setVolume(config.sfxVolume ? config.sfxVolume : sfxVolume);
-                AudioType.MUSIC.sound.play(musicVolume);
-            });
+        const manager = new THREE.LoadingManager();
+        manager.onLoad = completed;
+        manager.onProgress = onProgress;
+        manager.onError = onError;
+        audioLoader = new THREE.AudioLoader(manager);
 
-            audioLoader.load(AudioType.BLAST.url, (buffer) => {
-                AudioType.BLAST.sound = new THREE.PositionalAudio(listener);
-                AudioType.BLAST.sound.setBuffer(buffer);
-                AudioType.BLAST.sound.setVolume(config.sfxVolume ? config.sfxVolume : sfxVolume);
-            });
+        Object.keys(AudioType).forEach(audio => {
+            if(!AudioType[audio].sound) {
+                audioLoader.load(AudioType[audio].url, (buffer) => {
+                    if (AudioType[audio].type === "SFX") {
+                        AudioType[audio].sound = new THREE.PositionalAudio(listener);
+                    } else {
+                        AudioType[audio].sound = new THREE.Audio(listener);
+                    }
 
-            audioLoader.load(AudioType.BLAST2.url, (buffer) => {
-                AudioType.BLAST2.sound = new THREE.PositionalAudio(listener);
-                AudioType.BLAST2.sound.setBuffer(buffer);
-                AudioType.BLAST2.sound.setVolume(config.sfxVolume ? config.sfxVolume : sfxVolume);
-            });
+                    AudioType[audio].sound.setBuffer(buffer);
 
-            audioLoader.load(AudioType.BLAST3.url, (buffer) => {
-                AudioType.BLAST3.sound = new THREE.PositionalAudio(listener);
-                AudioType.BLAST3.sound.setBuffer(buffer);
-                AudioType.BLAST3.sound.setVolume(config.sfxVolume ? config.sfxVolume : sfxVolume);
-            });
+                    if (AudioType[audio].type === "SFX") {
+                        AudioType[audio].sound.setVolume(config.sfxVolume ? config.sfxVolume : sfxVolume);
+                    } else {
+                        AudioType[audio].sound.setVolume(config.musicVolume ? config.musicVolume : musicVolume);
+                        AudioType[audio].sound.setLoop(true);
+                    }
+                });
+            } else {
+                // already loaded stop all music for last scene
+                stopPlaying();
+            }
+        });
+    }
 
-            audioLoader.load(AudioType.FLYBY.url, (buffer) => {
-                AudioType.FLYBY.sound = new THREE.PositionalAudio(listener);
-                AudioType.FLYBY.sound.setBuffer(buffer);
-                AudioType.BLAST.sound.setVolume(config.sfxVolume ? config.sfxVolume : sfxVolume);
-            });
+    function completed() {
+        audioReady = true;
+        callback(`completed loading audio! ${AudioType}`);
+    }
 
-            audioLoader.load(AudioType.FLYBY2.url, (buffer) => {
-                AudioType.FLYBY2.sound = new THREE.PositionalAudio(listener);
-                AudioType.FLYBY2.sound.setBuffer(buffer);
-                AudioType.FLYBY2.sound.setVolume(config.sfxVolume ? config.sfxVolume : sfxVolume);
-            });
+    function onProgress(url, itemsLoaded, itemsTotal) {
+        console.log(`${(itemsLoaded/itemsTotal)*100}% loaded`);
+    }
 
-            audioLoader.load(AudioType.FLYBY3.url, (buffer) => {
-                AudioType.FLYBY3.sound = new THREE.PositionalAudio(listener);
-                AudioType.FLYBY3.sound.setBuffer(buffer);
-                AudioType.FLYBY3.sound.setVolume(config.sfxVolume ? config.sfxVolume : sfxVolume);
-            });
+    function onError(err){
+        console.log(`Error: ${err}`);
+    }
 
-            audioLoader.load(AudioType.HIT.url, (buffer) => {
-                AudioType.HIT.sound = new THREE.PositionalAudio(listener);
-                AudioType.HIT.sound.setBuffer(buffer);
-                AudioType.HIT.sound.setVolume(config.sfxVolume ? config.sfxVolume : sfxVolume);
-            });
-
-            audioLoader.load(AudioType.HIT2.url, (buffer) => {
-                AudioType.HIT2.sound = new THREE.PositionalAudio(listener);
-                AudioType.HIT2.sound.setBuffer(buffer);
-                AudioType.HIT2.sound.setVolume(config.sfxVolume ? config.sfxVolume : sfxVolume);
-            });
+    function playSound(type, obj) {
+        if(audioReady) {
+            if(AudioType[type].sound.isPlaying) {
+                if(AudioType[`${type}2`].sound.isPlaying){
+                    if(!AudioType[`${type}3`].sound.isPlaying){
+                        AudioType[`${type}3`].sound.play();
+                    }
+                } else {
+                    AudioType[`${type}2`].sound.play();
+                }
+            } else {
+                AudioType[type].sound.play();
+            }
         }
     }
 
-    playSound(obj, type) {
-        if (audioConfig.music) {
-            if (type === AudioType.BLAST.type) {
-                if (!AudioType.BLAST.sound.isPlaying) {
-                    AudioType.BLAST.sound.play();
-                } else if (!AudioType.BLAST2.sound.isPlaying) {
-                    AudioType.BLAST2.sound.play();
-                } else if (!AudioType.BLAST3.sound.isPlaying) {
-                    AudioType.BLAST3.sound.play();
-                }
-            } else if (type === AudioType.FLYBY.type) {
-                if (!AudioType.FLYBY.sound.isPlaying) {
-                    AudioType.FLYBY.sound.play();
-                } else if (!AudioType.FLYBY2.sound.isPlaying) {
-                    AudioType.FLYBY2.sound.play();
-                } else if (!AudioType.FLYBY3.sound.isPlaying) {
-                    AudioType.FLYBY3.sound.play();
-                }
-            } else if (type === AudioType.HIT.type) {
-                if (!AudioType.HIT.sound.isPlaying) {
-                    AudioType.HIT.sound.play();
-                } else if (!AudioType.HIT.sound.isPlaying) {
-                    AudioType.HIT.sound.play();
-                } else if (!AudioType.HIT.sound.isPlaying) {
-                    AudioType.HIT.sound.play();
-                }
+    function stopPlaying() {
+        Object.keys(AudioType).forEach(audio => {
+            if(AudioType[audio].type === "MUSIC" && AudioType[audio].sound.isPlaying) {
+                AudioType[audio].sound.stop();
             }
-        }
+        });
+    }
+
+    return {
+        playSound
     }
 }

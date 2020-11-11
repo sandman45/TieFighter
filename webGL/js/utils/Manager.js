@@ -111,7 +111,7 @@ export default (modelConfig, callback) => {
     manager.onLoad = completed;
     manager.onProgress = progress;
 
-    const progressbarElem = document.querySelector('#progressbar');
+    const progressbarElem = document.getElementById('progressbar');
 
     const gltfLoader = new GLTFLoader(manager);
     for (const model of Object.values(models)) {
@@ -122,8 +122,8 @@ export default (modelConfig, callback) => {
 
     function completed() {
         // hide the loading bar
-        const loadingElem = document.querySelector('#loading');
-        loadingElem.style.display = 'none';
+        const loadingElem = document.getElementById('loading');
+        loadingElem.style.visibility = 'hidden';
         callback("completed loading models!", models);
     }
 

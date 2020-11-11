@@ -2,8 +2,7 @@ import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threej
 
 import Manager from './utils/Manager.js';
 import sceneConfiguration from '../sceneConfig.js';
-import { parseConfiguration, mapConfigurationToGUI } from './utils/SceneConfigUtils.js';
-// import dat from '../node_modules/dat.gui/build/dat.gui.module.js';
+import { parseConfiguration } from './utils/SceneConfigUtils.js';
 import MainMenu from "./scenes/menu/MainMenu.js";
 import MissionOne from "./scenes/campaign/MissionOne.js";
 import MultiPlayer from "./scenes/multiplayer/MultiPlayer.js";
@@ -27,7 +26,7 @@ export default (canvas, screen) => {
     let renderer;
     let camera;
     let sceneReady = false;
-    // const datGui = new dat.GUI();
+
     /**
      * LOADING SCREEN MENU
      * */
@@ -52,6 +51,8 @@ export default (canvas, screen) => {
      * SHIPSELECT STUFF
      */
     else if(screen === "shipselect") {
+        const loadingElem = document.getElementById('loading');
+        loadingElem.style.visibility = 'visible';
         Manager(sceneConstants.shipSelect, (message, models) => {
             ss = ShipSelect(canvas, screenDimensions, models);
             sceneSubjects = sceneSubjects.concat(ss.sceneSubjects);

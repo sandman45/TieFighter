@@ -22,7 +22,9 @@ export default (canvas, screenDimensions, sceneSubjects) => {
     const scene = buildScene(sceneConstants);
     const renderer = buildRender(screenDimensions);
     const camera = buildCamera(screenDimensions);
-    const audio = new GameAudio(camera, sceneConfiguration.audio);
+    const audio = GameAudio(camera, sceneConfiguration.audio, () => {
+        audio.playSound("MUSIC", camera);
+    });
     let userId = null;
     let player = null;
     let playerConfig = null;

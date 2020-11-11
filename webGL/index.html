@@ -22,36 +22,30 @@
 		<div id="menu">
 			<div class="menu">
 				<div class="menu-item" name="shipselect">MULTI-PLAYER</div>
-				<div class="menu-item" name="campaign">CAMPAIGN</div>
+<!--				<div class="menu-item" name="campaign">CAMPAIGN</div>-->
 			</div>
 		</div>
 		<div id="sub-menu" class="sub-menu-items">
-				<div class="sub-menu-item" name="pilotname">
-					<input id="pilotName" type="text" value="ALPHA_1">
-					<button id="pilotNameBtn">SET</button>
-				</div>
-				<div class="sub-menu-item" name="servername">
-					<input id="serverRoom" type="text" value="Game">
-					<button id="connectBtn">Connect</button>
-				</div>
-				<div class="sub-menu-item" name="joinserver">JOIN SERVER</div>
-				<div class="sub-menu-item" name="leaveserver">LEAVE SERVER</div>
-
-				<div class="sub-menu-item" name="startgame">Start Game</div>
-
+				<button id="back" class="sub-menu-item" name="back">
+					MAIN MENU
+				</button>
+				<button id="connect" class="sub-menu-item" name="connect">
+					CONNECT
+				</button>
+				<button id="leaveServer" class="sub-menu-item" name="leaveserver" disabled="true">LEAVE SERVER</button>
+				<button id="start" class="sub-menu-item" name="start" disabled="true">START</button>
 			<div id="shipInfo">
 				<div id="shipInfoLeft" class="ship-info-left" >
-					<h3>TIE/LN FIGHTER</h3>
+					<h5>TIE/LN FIGHTER</h5>
 					<p>The TIE/ln space superiority starfighter, also known as the TIE/LN starfighter and commonly called the TIE fighter, was the signature starfighter of the Galactic Empire and de facto symbol of Imperial space superiority.</p>
 					<p>Its official production name was the Twin Ion Engine "line edition" space superiority starfighter. Instantly recognizable from the roar of its engines as well as its unique design, the TIE/ln exuded Imperial power and prestige across the galaxy, seeing use throughout the Empire's political existence.</p>
 					<img alt="tie fighter" src="public/TIE_Fighter.png">
 				</div>
 				<div class="ship-info-right"></div>
 			</div>
-
 			<div id="btn-container" class="btn-container">
-				<div id="infoBtn" value="info" class="btn-item">INFO</div>
-				<div id="selectBtn" value="select" class="btn-item">SELECT</div>
+				<button id="infoBtn" value="info" class="btn-item" >INFO</button>
+				<button id="selectBtn" value="select" class="btn-item" disabled="true">SELECT</button>
 			</div>
 		</div>
 

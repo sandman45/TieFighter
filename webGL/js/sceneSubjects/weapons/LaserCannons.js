@@ -20,7 +20,7 @@ export default (scene, config, collisionManager, audio) => {
     function fire(sourceShipMesh, numberOfLasers, laserType) {
         const l = new Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, laserType);
         // trigger sound
-        audio.playSound(l.laserSet[0], "BLAST");
+        audio.playSound("BLAST", l.laserSet[0]);
         lasers.push(l);
     }
 

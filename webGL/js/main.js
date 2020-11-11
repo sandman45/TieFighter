@@ -26,11 +26,11 @@ function bindEventListeners() {
 		subMenuItems[i].onclick = onSubMenuItemClick;
 	}
 
-	const btn = document.getElementById("connectBtn");
-	btn.onclick = handler.connectToServer;
+	// const btn = document.getElementById("connectBtn");
+	// btn.onclick = handler.connectToServer;
 
-	const pilotNameBtn = document.getElementById("pilotNameBtn");
-	pilotNameBtn.onclick = handler.pilotName;
+	// const pilotNameBtn = document.getElementById("pilotNameBtn");
+	// pilotNameBtn.onclick = handler.pilotName;
 
 	// for select ship btn
 	const btn2 = document.getElementById("selectBtn");
@@ -93,17 +93,18 @@ function onSubMenuItemClick(event) {
 		const element = document.getElementById("btn-container");
 		element.style.visibility = "visible";
 
+		const loadingElem = document.getElementById('loading');
+		loadingElem.style.visibility = 'visible';
 		// load scene
 		sceneManager = SceneManager(canvas, subMenuItem);
 		bindEventListeners();
 		startRenderLoop();
-	} else if(subMenuItem === "joinserver") {
+	} else if(subMenuItem === "start") {
 		// clear canvas
 		const canvas = document.getElementById('canvas');
 		canvas.innerHTML = "";
 
 		// hide menus //
-		// show btn container
 		const element = document.getElementById("btn-container");
 		element.style.visibility = "hidden";
 
@@ -111,7 +112,7 @@ function onSubMenuItemClick(event) {
 		element2.style.visibility = "hidden";
 
 		const element3 = document.getElementById("sub-menu");
-		element3.style.visibility = "visible";
+		element3.style.visibility = "hidden";
 
 		const element4 = document.getElementById("shipInfo");
 		element4.style.visibility = "hidden";
@@ -119,14 +120,20 @@ function onSubMenuItemClick(event) {
 		const element5 = document.getElementById("shipInfoLeft");
 		element5.style.visibility = "hidden";
 
+        document.getElementById("start").disabled = true;
+
 		// load scene
 		sceneManager = SceneManager(canvas, "multiplayer");
 		bindEventListeners();
 		startRenderLoop();
-	} else if(subMenuItem === "startgame") {
-		const element3 = document.getElementById("sub-menu");
-		element3.style.visibility = "hidden";
-		handler.startGame();
+        handler.startGame();
+	} else if(subMenuItem === "connect") {
+		// const element3 = document.getElementById("start");
+		// element3.style.disabled = false;
+        document.getElementById("leaveServer").disabled = false;
+        document.getElementById("connect").disabled = true;
+        document.getElementById("selectBtn").disabled = false;
+		handler.connectToServer();
 	} else if(subMenuItem === "leaveserver") {
 		// clear canvas
 		const canvas = document.getElementById('canvas');
@@ -141,8 +148,38 @@ function onSubMenuItemClick(event) {
 		// show btn container
 		const element = document.getElementById("btn-container");
 		element.style.visibility = "visible";
+
+        document.getElementById("connect").disabled = false;
+        document.getElementById("selectBtn").disabled = true;
+        document.getElementById("leaveServer").disabled = true;
 		// load scene
 		sceneManager = SceneManager(canvas, "shipselect");
+		bindEventListeners();
+		startRenderLoop();
+	} else if(subMenuItem === "back") {
+		const canvas = document.getElementById('canvas');
+		canvas.innerHTML = "";
+
+		// hide all except menu
+		const element = document.getElementById("btn-container");
+		element.style.visibility = "hidden";
+
+		const element2 = document.getElementById("menu");
+		element2.style.visibility = "visible";
+
+		const element3 = document.getElementById("sub-menu");
+		element3.style.visibility = "hidden";
+
+		const element4 = document.getElementById("shipInfo");
+		element4.style.visibility = "hidden";
+
+		const element5 = document.getElementById("shipInfoLeft");
+		element5.style.visibility = "hidden";
+
+		const loadingElem = document.getElementById('loading');
+		loadingElem.style.visibility = 'visible';
+
+		sceneManager = SceneManager(canvas, "menu");
 		bindEventListeners();
 		startRenderLoop();
 	}

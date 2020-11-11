@@ -11,6 +11,7 @@ function btnClickFromMenu(event, sceneManager) {
         const selection = LocalStorage.getItem("SELECTED_SHIP");
         const room = LocalStorage.getItem("SOCKET_ROOM");
         console.log(`${selection} selected.`);
+        document.getElementById("start").disabled = false;
         EventBus.post(events.PLAYER_SELECTION_READY, {
             selection,
             room: room,
@@ -26,7 +27,8 @@ function onSubMenuItemClick(event) {
 }
 
 function connectToServer() {
-    const room = document.getElementById("serverRoom").getAttribute("value");
+    // const room = document.getElementById("serverRoom").getAttribute("value");
+    const room = "Game";
     console.log(`joined => ${room}`);
     LocalStorage.setItem("SOCKET_ROOM", room);
     EventBus.post(events.JOIN_ROOM, room);
