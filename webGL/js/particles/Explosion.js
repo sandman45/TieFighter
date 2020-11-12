@@ -32,7 +32,7 @@ export default (scene, type, audio) => {
     }
 
     function trigger(position){
-        audio.playSound(null, "HIT");
+        audio.playSound("HIT",null);
         mesh.position.set(position.x, position.y, position.z);
         mesh.visible = true;
     }

@@ -101,13 +101,13 @@ export default (canvas, screenDimensions, sceneSubjects) => {
             }
         });
 
-        console.log(`adding opponent to game as ${selection.name}: userId: ${data.userId}`);
+        console.log(`adding opponent to game as ${selection.name}: userId: ${data.userId}: id: ${data.id}`);
         const opponentConfig = selection;
-        opponentConfig.userId = data.userId;
+        opponentConfig.userId = data.id;
 
         sceneSubjects.forEach(sub => {
             if(sub.mesh && sub.mesh.userId === data.userId){
-                console.log(`Opponent ${data.userId} is already in the game as ${selection.name} skipping adding opponent`)
+                console.log(`Opponent ${data.userId} : ${data.id} is already in the game as ${selection.name} skipping adding opponent`);
                 add = false;
             }
         });

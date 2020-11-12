@@ -36,7 +36,9 @@ export default () => {
     });
 
     socket.on(eventBusEvents.START_GAME, (update) => {
-        console.log(`START GAME:  with users = ${JSON.stringify(update)}`);
+        Object.keys(update.data.players, (player) => {
+            console.log(`START GAME:  with users = ${player.name}: ${player.id}: ${player.userId} ${player.selection}`);
+        });
 
         Object.keys(update.data.players).forEach(player => {
             // add opponents
@@ -51,8 +53,8 @@ export default () => {
         console.log(`${update.message}`);
         // add opponent
 
-        console.log(`add ${update.data.name}:${update.data.id} selection: ${update.data.selection}`);
-        eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, update.data);
+        console.log(`${update.data.name}:${update.data.id} selection: ${update.data.selection}`);
+        // eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, update.data);
     });
 
 
@@ -105,7 +107,7 @@ export default () => {
 
     eventBus.subscribe( eventBusEvents.PLAYER_SELECTION_READY, d => {
         // load yourself
-        console.log(`add self: ${userId} to game: ${eventBusEvents.GAME_STATE_LOCAL}`);
+        console.log(`${eventBusEvents.PLAYER_SELECTION_READY}: ${userId} to game: ${eventBusEvents.GAME_STATE_LOCAL}`);
         // dont need this part anymore because of new game menu etc
         // eventBus.post(eventBusEvents.GAME_STATE_LOCAL_INIT, {
         //     userId: userId,
