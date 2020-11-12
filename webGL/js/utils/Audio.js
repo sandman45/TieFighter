@@ -73,6 +73,12 @@ const AudioType = {
         type: "SFX",
         url: "../assets/audio/XWing explode.mp3",
         sound: null
+    },
+    HIT3: {
+        name: "HIT3",
+        type: "SFX",
+        url: "../assets/audio/XWing explode.mp3",
+        sound: null
     }
 };
 
@@ -139,7 +145,9 @@ export default (camera, config, callback) => {
         if(audioReady) {
             if(AudioType[type].sound.isPlaying) {
                 if(AudioType[`${type}2`].sound.isPlaying){
-                    if(!AudioType[`${type}3`].sound.isPlaying){
+                    if(AudioType[`${type}3`].sound.isPlaying){
+                        // dont play anything
+                    } else {
                         AudioType[`${type}3`].sound.play();
                     }
                 } else {
