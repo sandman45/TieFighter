@@ -120,6 +120,7 @@ function initSocketIOServer(callbacks) {
 
                     gameState[data.room].players[socket.id] = {
                         id: socket.id,
+                        userId: socket.id,
                         name: `PLAYER_${players.length}`,
                         number: players.length,
                         data: {}
