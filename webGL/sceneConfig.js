@@ -468,7 +468,7 @@ const config = {
         controls: false,
     },
     audio: {
-        music: false,
+        music: true,
         musicVolume: .5,
         sfx: true,
         sfxVolume: 5,
