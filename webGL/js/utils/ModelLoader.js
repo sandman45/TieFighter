@@ -64,9 +64,9 @@ export default (scene, modelConfiguration, model, modelGltf) => {
                 clip = THREE.AnimationClip.findByName( gltf.animations, 'Take 01' );
                 action = mixer.clipAction(clip);
                 action.loop = THREE.LoopOnce;
-                action.clampWhenFinished = false;
-                action.enable = true;
-                action.play();
+                // action.clampWhenFinished = false;
+                // action.enable = true;
+                // action.play();
             }
             modelReady = true;
             group.add(root);
@@ -94,9 +94,9 @@ export default (scene, modelConfiguration, model, modelGltf) => {
             clip = THREE.AnimationClip.findByName(modelGltf.animations, 'Take 01');
             action = mixer.clipAction(clip);
             action.loop = THREE.LoopOnce;
-            action.clampWhenFinished = false;
-            action.enable = true;
-            action.play();
+            // action.clampWhenFinished = false;
+            // action.enable = true;
+            // action.play();
         }
         modelReady = true;
         group.add(root);
@@ -118,13 +118,12 @@ export default (scene, modelConfiguration, model, modelGltf) => {
         if(mixer){
             // Play all animations
             // mixer.update(1000);
-            action.loop = THREE.LoopOnce;
-            action.clampWhenFinished = false;
+            action.reset();
             action.enable = true;
+            // action.time = 0.0;
+            action.weight = 1;
             action.play();
-            // clips.forEach( function ( clip ) {
-            //     mixer.clipAction( clip ).play();
-            // } );
+
         }
     }
 
