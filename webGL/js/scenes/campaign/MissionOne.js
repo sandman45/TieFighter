@@ -10,38 +10,40 @@ import WeaponsCollisionManager from "../../controls/WeaponsCollisionManager.js";
 import ModelLoader, { Model } from "../../utils/ModelLoader.js";
 import FlyControls from "../../controls/FlyControls.js";
 import {parseConfiguration} from "../../utils/SceneConfigUtils.js";
-import sceneConfiguration from "../../../sceneConfig.js";
+import globalConfiguration from "../../../sceneConfig.js";
 import GameAudio from "../../utils/Audio.js";
 import SkyBox from "../../sceneSubjects/SkyBox.js";
 
-export default (canvas, screenDimensions, models) => {
-    const sceneConstants = parseConfiguration(sceneConfiguration);
-    const scene = buildScene(sceneConstants);
+export default (canvas, screenDimensions, models, campaignConfiguration) => {
+    const sceneGlobalConstants = parseConfiguration(globalConfiguration);
+    const scene = buildScene(sceneGlobalConstants);
     const renderer = buildRender(screenDimensions);
     const camera = buildCamera(screenDimensions);
-    const audio = new GameAudio(camera, sceneConfiguration.audio);
+    const audio = GameAudio(camera, sceneGlobalConstants.audio, () => {
+        audio.playSound("MUSIC", camera);
+    });
     buildLight(scene);
 
-    const floorConfig = sceneConstants.floor;
+    const floorConfig = sceneGlobalConstants.floor;
     const floor = Floor(scene, floorConfig);
     // static collision manager
     const collisionManager = CollisionManager([floor]);
 
     // Ships
-    const ships = addShips(scene, models);
+    const ships = addShips(scene, models, campaignConfiguration);
     let playerShip = {};
     ships.forEach(ship => {
-        if(ship.mesh.designation === sceneConstants.campaign.missionOne.player.designation){
+        if(ship.mesh.designation === campaignConfiguration.player.designation){
             playerShip = ship;
         }
     });
 
-    const laser = LaserCannons(scene, sceneConstants.campaign.missionOne.weapons[0], collisionManager, audio);
+    const laser = LaserCannons(scene, campaignConfiguration.weapons[0], collisionManager, audio);
     let controls;
-    if(sceneConstants.controls.flightControls){
-        controls = createFlightControls(playerShip.mesh, camera, renderer, collisionManager, laser, audio, sceneConstants.campaign.missionOne.player);
+    if(sceneGlobalConstants.controls.flightControls){
+        controls = createFlightControls(playerShip.mesh, camera, renderer, collisionManager, laser, audio, campaignConfiguration.player);
     } else {
-        controls = PlayerControls(playerShip.mesh, laser, camera, sceneConstants.campaign.missionOne.player, collisionManager, audio);
+        controls = PlayerControls(playerShip.mesh, laser, camera, campaignConfiguration.player, collisionManager, audio);
     }
     let sceneSubjects = [];
 
@@ -57,7 +59,7 @@ export default (canvas, screenDimensions, models) => {
         ...sceneSubjects
     ];
 
-    const weaponsCollision = WeaponsCollisionManager([laser], null, scene, sceneConstants);
+    const weaponsCollision = WeaponsCollisionManager([laser], null, scene, sceneGlobalConstants);
 
     function createFlightControls(mesh, camera, renderer, collisionManager, laser, audio, config) {
         const flightControls = new FlyControls( mesh, camera, renderer.domElement, collisionManager, laser, audio, config );
@@ -72,14 +74,14 @@ export default (canvas, screenDimensions, models) => {
     function addShips(scene, models){
         const ships = [];
         Object.keys(models).forEach(model => {
-            ships.push(ModelLoader(scene, models[model].config, Model[model], null, models[model].gltf));
+            ships.push(ModelLoader(scene, models[model].config, Model[model], models[model].gltf));
         });
         return ships;
     }
 
-    function buildScene(sceneConstants) {
+    function buildScene(sceneGlobalConstants) {
         const scene = new THREE.Scene();
-        SkyBox(scene, sceneConstants);
+        SkyBox(scene, sceneGlobalConstants);
         return scene;
     }
 

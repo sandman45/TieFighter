@@ -1,6 +1,7 @@
 import SceneManager from './SceneManager.js';
 import initSocketIO from './SocketIO.js';
 import handler from './menuHandler.js';
+import CampaignMenu from "./campaignMenu/CampaignMenu.js";
 import EventBus from "./eventBus/EventBus.js";
 import events from "./eventBus/events.js";
 import LocalStorage from "./localStorage/localStorage.js";
@@ -25,12 +26,6 @@ function bindEventListeners() {
 	for(let i=0; i<subMenuItems.length; i++){
 		subMenuItems[i].onclick = onSubMenuItemClick;
 	}
-
-	// const btn = document.getElementById("connectBtn");
-	// btn.onclick = handler.connectToServer;
-
-	// const pilotNameBtn = document.getElementById("pilotNameBtn");
-	// pilotNameBtn.onclick = handler.pilotName;
 
 	// for select ship btn
 	const btn2 = document.getElementById("selectBtn");
@@ -58,24 +53,39 @@ function resizeCanvas() {
 }
 
 function onMenuItemClick(event) {
-	// hide btn container
-	const btnContainer = document.getElementById("btn-container");
-	btnContainer.style.visibility = "visible";
-
-	// hide main menu
-	const menu = document.getElementById("menu");
-	menu.style.visibility = "hidden";
-
 	// clear canvas
 	const canvas = document.getElementById('canvas');
 	canvas.innerHTML = "";
 
-	// show subMenu
-	const subMenu = document.getElementById("sub-menu");
-	subMenu.style.visibility = "visible";
-
-	// load scene
 	const menuItem = event.currentTarget.getAttribute("name");
+	if(menuItem === "shipselect"){
+		// hide btn container
+		const btnContainer = document.getElementById("btn-container");
+		btnContainer.style.visibility = "visible";
+
+		// hide main menu
+		const menu = document.getElementById("menu");
+		menu.style.visibility = "hidden";
+
+		// clear canvas
+		const canvas = document.getElementById('canvas');
+		canvas.innerHTML = "";
+
+		// show subMenu
+		const subMenu = document.getElementById("sub-menu");
+		subMenu.style.visibility = "visible";
+	} else {
+		// hide main menu
+		const menu = document.getElementById("menu");
+		menu.style.visibility = "hidden";
+
+		// show campaign-menu
+		const subMenu = document.getElementById("campaign-menu");
+		subMenu.style.visibility = "visible";
+
+		CampaignMenu.buildMenu();
+	}
+	// load scene
 	sceneManager = SceneManager(canvas, menuItem);
 	bindEventListeners();
 	startRenderLoop();

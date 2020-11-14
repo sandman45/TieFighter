@@ -83,7 +83,7 @@ export default (canvas, screenDimensions, sceneSubjects) => {
         } else {
             controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
         }
-
+        controls.dragToLook = true;
         weaponsCollision = WeaponsCollisionManager([laser], userId, scene, sceneConstants);
         sceneSubjects.push(player);
         sceneSubjects.push(controls);
@@ -125,7 +125,7 @@ export default (canvas, screenDimensions, sceneSubjects) => {
                     //grab mesh from player in scene
                     scene.children.forEach(child => {
                         if(child.userId === data.userId){
-                            subject.fire(child, 2, child.name === "PLAYER2" ? "REBELLION" : "IMPERIAL");
+                            subject.fire(child, 2, child.faction);
                         }
                     });
                 }

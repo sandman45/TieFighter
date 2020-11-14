@@ -61,7 +61,7 @@ export default (mesh, laser, camera, config, collisionManager, audio) => {
 
     function fireCannons(mesh) {
         // move / translate them on the game world
-        laser.fire(mesh, 2, mesh.name === "PLAYER2" ? "REBELLION" : "IMPERIAL");
+        laser.fire(mesh, 2, mesh.faction);
         // collision for lazers
     }
 

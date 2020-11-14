@@ -35,9 +35,8 @@ export default class FlyControls {
         if (domElement) this.domElement.setAttribute('tabindex', -1);
         // API
 
-        this.movementSpeed = 0;
-        this.rollSpeed = 0.005;
-        this.dragToLook = false;
+        this.rollSpeed = config.rollSpeed;
+        this.dragToLook = true;
         this.autoForward = false;
 
         // disable default target object behavior
@@ -122,10 +121,11 @@ export default class FlyControls {
             case 81: /*Q*/ this.moveState.rollLeft = 1; break;
             case 69: /*E*/ this.moveState.rollRight = 1; break;
             case 187: /*+/=*/
-                if(parseFloat(this.throttle) < 1){
+                if(parseFloat(this.throttle) < this.config.speed){
                     this.throttle = (parseFloat(this.throttle) + 0.1).toFixed(1);
                 }
                 console.log(`throttle: ${this.throttle}`);
+                // console.log(`rollSpeed: ${this.rollSpeed}`);
                 break;
             case 189: /*-*/
                 if(parseFloat(this.throttle) > 0){
@@ -200,12 +200,13 @@ export default class FlyControls {
     mousemove = function( event ) {
         if ( ! this.dragToLook || this.mouseStatus > 0 ) {
             const container = this.getContainerDimensions();
+
             const halfWidth  = container.size[ 0 ] / 2;
             const halfHeight = container.size[ 1 ] / 2;
-
+            // console.log(`container: halfWidth: ${halfWidth}, halfHeight: ${halfHeight}`);
             this.moveState.yawLeft   = - ( ( event.pageX - container.offset[ 0 ] ) - halfWidth  ) / halfWidth;
             this.moveState.pitchDown =   ( ( event.pageY - container.offset[ 1 ] ) - halfHeight ) / halfHeight;
-
+            // console.log(`yawLeft: ${this.moveState.yawLeft}, pitchDown: ${this.moveState.pitchDown}`);
             this.updateRotationVector();
 
         }
@@ -241,7 +242,7 @@ export default class FlyControls {
     fireCannons = function(mesh) {
         // move / translate them on the game world
         // console.log(`firing lasers`);
-        this.laser.fire(mesh, 2, mesh.name === "PLAYER2" ? "REBELLION" : "IMPERIAL");
+        this.laser.fire(mesh, 2, mesh.faction);
         this.updateServer(mesh,"LASERS");
         // collision for lazers
     };
