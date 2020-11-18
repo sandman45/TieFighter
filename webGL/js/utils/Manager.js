@@ -41,41 +41,35 @@ export default (modelConfig, callback) => {
 
     const models = {};
 
-    modelConfig.imperials.forEach((imp => {
-        models[imp.designation] = {
-            url: modelTypes[imp.name].url,
-            config: imp
-        };
-    }));
+    if(modelConfig.type === "CAMPAIGN") {
+        modelConfig.imperials.forEach((imp => {
+            models[imp.designation] = {
+                url: modelTypes[imp.name].url,
+                config: imp
+            };
+        }));
 
-    modelConfig.rebels.forEach((rebel => {
-        models[rebel.designation] = {
-            url: modelTypes[rebel.name].url,
-            config: rebel
-        };
-    }));
+        modelConfig.rebels.forEach((rebel => {
+            models[rebel.designation] = {
+                url: modelTypes[rebel.name].url,
+                config: rebel
+            };
+        }));
+    } else {
+        modelConfig.imperials.forEach((imp => {
+            models[imp.name] = {
+                url: modelTypes[imp.name].url,
+                config: imp
+            };
+        }));
 
-
-    // else {
-    //     models[modelConfig.campaign.missionOne.player.designation] = {
-    //         url: modelTypes[modelConfig.campaign.missionOne.player.name].url,
-    //         config: modelConfig.campaign.missionOne.player
-    //     };
-    //
-    //     modelConfig.campaign.missionOne.imperials.forEach((imp => {
-    //         models[imp.designation] = {
-    //             url: modelTypes[imp.name].url,
-    //             config: imp
-    //         };
-    //     }));
-    //
-    //     modelConfig.campaign.missionOne.rebels.forEach((rebel => {
-    //         models[rebel.designation] = {
-    //             url: modelTypes[rebel.name].url,
-    //             config: rebel
-    //         };
-    //     }));
-    // }
+        modelConfig.rebels.forEach((rebel => {
+            models[rebel.name] = {
+                url: modelTypes[rebel.name].url,
+                config: rebel
+            };
+        }));
+    }
 
     const manager = new THREE.LoadingManager();
     manager.onLoad = completed;

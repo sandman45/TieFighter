@@ -12,7 +12,8 @@ const canvas = document.getElementById('canvas');
 let sceneManager = SceneManager(canvas, "menu");
 bindEventListeners();
 startRenderLoop();
-let showMenu;
+let showMenu = false;
+let campaignMenu = false;
 function bindEventListeners() {
 	handler.currentSelectionInView();
 	window.onresize = resizeCanvas;
@@ -71,6 +72,8 @@ function onMenuItemClick(event) {
 		const canvas = document.getElementById('canvas');
 		canvas.innerHTML = "";
 
+		campaignMenu = false;
+
 		// show subMenu
 		const subMenu = document.getElementById("sub-menu");
 		subMenu.style.visibility = "visible";
@@ -82,18 +85,19 @@ function onMenuItemClick(event) {
 		// show campaign-menu
 		const subMenu = document.getElementById("campaign-menu");
 		subMenu.style.visibility = "visible";
-
+		campaignMenu = true;
 		CampaignMenu.buildMenu();
 	}
 	// load scene
 	sceneManager = SceneManager(canvas, menuItem);
 	bindEventListeners();
-	startRenderLoop();
 }
 
 function onSubMenuItemClick(event) {
 	const subMenuItem = event.currentTarget.getAttribute("name");
 	console.log(`sub menu item: ${subMenuItem}`);
+	const mission = subMenuItem.search("mission");
+	console.log(`has mission? ${mission}`);
 	if(subMenuItem === "shipselect"){
 		// clear canvas
 		const canvas = document.getElementById('canvas');
@@ -108,7 +112,6 @@ function onSubMenuItemClick(event) {
 		// load scene
 		sceneManager = SceneManager(canvas, subMenuItem);
 		bindEventListeners();
-		startRenderLoop();
 	} else if(subMenuItem === "start") {
 		// clear canvas
 		const canvas = document.getElementById('canvas');
@@ -135,7 +138,6 @@ function onSubMenuItemClick(event) {
 		// load scene
 		sceneManager = SceneManager(canvas, "multiplayer");
 		bindEventListeners();
-		startRenderLoop();
         handler.startGame();
 	} else if(subMenuItem === "connect") {
 		// const element3 = document.getElementById("start");
@@ -162,10 +164,13 @@ function onSubMenuItemClick(event) {
         document.getElementById("connect").disabled = false;
         document.getElementById("selectBtn").disabled = true;
         document.getElementById("leaveServer").disabled = true;
+
+		const loadingElem = document.getElementById('loading');
+		loadingElem.style.visibility = 'visible';
+
 		// load scene
 		sceneManager = SceneManager(canvas, "shipselect");
 		bindEventListeners();
-		startRenderLoop();
 	} else if(subMenuItem === "back") {
 		const canvas = document.getElementById('canvas');
 		canvas.innerHTML = "";
@@ -186,12 +191,39 @@ function onSubMenuItemClick(event) {
 		const element5 = document.getElementById("shipInfoLeft");
 		element5.style.visibility = "hidden";
 
+		const element6 = document.getElementById("campaign-menu");
+		element6.style.visibility = "hidden";
+
 		const loadingElem = document.getElementById('loading');
 		loadingElem.style.visibility = 'visible';
 
 		sceneManager = SceneManager(canvas, "menu");
 		bindEventListeners();
-		startRenderLoop();
+	} else if (mission > -1) {
+		// hide all except menu
+		const element = document.getElementById("btn-container");
+		element.style.visibility = "hidden";
+
+		const element2 = document.getElementById("menu");
+		element2.style.visibility = "hidden";
+
+		const element3 = document.getElementById("sub-menu");
+		element3.style.visibility = "hidden";
+
+		const element4 = document.getElementById("shipInfo");
+		element4.style.visibility = "hidden";
+
+		const element5 = document.getElementById("shipInfoLeft");
+		element5.style.visibility = "hidden";
+
+		const element6 = document.getElementById("campaign-menu");
+		element6.style.visibility = "hidden";
+
+		const loadingElem = document.getElementById('loading');
+		loadingElem.style.visibility = 'visible';
+
+		sceneManager = SceneManager(canvas, subMenuItem);
+		bindEventListeners();
 	}
 }
 
@@ -199,13 +231,23 @@ function onKeyDown(event, duration) {
 	if(event.keyCode === 27){
 		const element3 = document.getElementById("sub-menu");
 		// show menu
-		if(showMenu){
+		if(showMenu && !campaignMenu){
 			element3.style.visibility = "visible";
 			showMenu = false;
-		} else {
+		} else if(!showMenu && !campaignMenu) {
 			element3.style.visibility = "hidden";
 			showMenu = true;
 		}
+		const element = document.getElementById("campaign-menu");
+		// show campaign menu
+		if(showMenu && campaignMenu){
+			element.style.visibility = "visible";
+			showMenu = false;
+		} else if(!showMenu && campaignMenu) {
+			element.style.visibility = "hidden";
+			showMenu = true;
+		}
+
 	} else {
 		sceneManager.onKeyDown(event.keyCode, duration);
 	}

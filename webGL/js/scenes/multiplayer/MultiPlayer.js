@@ -83,7 +83,7 @@ export default (canvas, screenDimensions, sceneSubjects) => {
         } else {
             controls = PlayerControls(player.mesh, laser, camera, playerConfig, collisionManager, audio);
         }
-        controls.dragToLook = true;
+        controls.dragToLook = false;
         weaponsCollision = WeaponsCollisionManager([laser], userId, scene, sceneConstants);
         sceneSubjects.push(player);
         sceneSubjects.push(controls);
