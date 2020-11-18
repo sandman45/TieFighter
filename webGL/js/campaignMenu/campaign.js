@@ -1,5 +1,7 @@
 export default {
     missionOne: {
+        active: true,
+        type: "CAMPAIGN",
         menuName: "Mission One",
         title: "Skirmish at Outpost D-34",
         prelude: "Following the recent Rebel defeat on the planet Hoth, freighter traffic began to increase in the Javin sector. Imperial Intelligence suspected a connection and believed that the Rebels would try to pass through this checkpoint. One of their pilots, Maarek Stele, who had been stationed there following Admiral Mordon's death would prove that hypothesis.",
@@ -119,6 +121,7 @@ export default {
         ]
     },
   missionTwo: {
+      active: false,
       menuName: "Mission Two",
       title: "First Battle of Javin",
       prelude: "Following the capture of BFF-1 bulk freighter Onece 3, the Imperials realized that the Rebels would retaliate by destroying Outpost D-34, so they sent three TIE/LN starfighters from Alpha, Beta, and Gamma squadrons. They were to patrol the station and hold of any Rebel attack until the Imperial-class Star Destroyer Hammer, under the command of Admiral Flanken would arrive to relieve them. Flanken planned to not arrive until much later believing that the initial attack was either a feint or they're testing the situation, once they would commence the full force he would hit them with full power.",

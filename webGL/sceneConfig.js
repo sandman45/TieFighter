@@ -132,6 +132,7 @@ const config = {
         ],
     },
     shipSelect: {
+        type: "SHIP_SELECT",
         imperials: [
             {
                 name: 'TIE_FIGHTER',
@@ -256,13 +257,13 @@ const config = {
             {
                 name: "laser",
                 color: "green",
-                speed: 2.2,
+                speed: 3,
                 position: { x: 0.5, y: 0.5 },
             },
             {
                 name: "laser",
                 color: "red",
-                speed: 2.2,
+                speed: 3,
                 position: { x: 0.5, y: 0.5 },
             }
           ],
@@ -271,11 +272,11 @@ const config = {
                   name: 'TIE_FIGHTER',
                   position: { x: 10, y: 1, z: 1 },
                   rotation: { y: 3.15, x:0, z:0 },
-                  speed: .3,
+                  speed: .5,
                   scale: .25,
                   hull: 100,
                   shields: 0,
-                  rollSpeed: .005,
+                  rollSpeed: .007,
                   autoForward: false,
                   faction: "IMPERIAL"
               },
@@ -283,11 +284,11 @@ const config = {
                   name: 'TIE_INTERCEPTOR',
                   position: { x: 20, y: 1, z: 1 },
                   rotation: { y: 3.15, x:0, z:0 },
-                  speed: .4,
+                  speed: .6,
                   scale: 3,
                   hull: 150,
                   shields: 0,
-                  rollSpeed: .007,
+                  rollSpeed: .008,
                   autoForward: false,
                   faction: "IMPERIAL"
               },
@@ -295,7 +296,7 @@ const config = {
                   name: 'TIE_ADVANCED',
                   position: { x: 20, y: 1, z: -10 },
                   rotation: { y: 3.15, x:0, z:0 },
-                  speed: .5,
+                  speed: .7,
                   scale: 3,
                   hull: 100,
                   shields: 100,
@@ -307,7 +308,7 @@ const config = {
                   name: 'TIE_DEFENDER',
                   position: { x: 40, y: 1, z: 40 },
                   rotation: { y: 3.15, x:0, z:0 },
-                  speed: .6,
+                  speed: .9,
                   scale: 3,
                   hull: 150,
                   shields: 150,
@@ -319,11 +320,11 @@ const config = {
                   name: 'TIE_BOMBER',
                   position: { x: 40, y: 1, z: 10 },
                   rotation: { y: 3.15, x:0, z:0 },
-                  speed: .2,
+                  speed: .4,
                   scale: 3,
                   hull: 200,
                   shields: 0,
-                  rollSpeed: .004,
+                  rollSpeed: .006,
                   autoForward: false,
                   faction: "IMPERIAL"
               },
@@ -385,7 +386,7 @@ const config = {
     },
     audio: {
         music: true,
-        musicVolume: .5,
+        musicVolume: 5,
         sfx: true,
         sfxVolume: 5,
     },

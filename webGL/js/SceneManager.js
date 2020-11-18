@@ -21,16 +21,24 @@ export default (canvas, screen) => {
     let ss;
     let scene;
     let sceneSubjects = [];
-    let controls;
-    let weaponsCollision;
-    let myWeaponsCollision;
-    let renderer;
-    let camera;
+    let controls = null;
+    let weaponsCollision = null;
+    let myWeaponsCollision = null;
+    let renderer = null;
+    let camera = null;
     let sceneReady = false;
-
+    const mission = screen.search("mission");
     /**
      * LOADING SCREEN MENU
      * */
+    if(sceneSubjects.length > 0){
+        sceneSubjects = [];
+        controls = null;
+        weaponsCollision = null;
+        myWeaponsCollision = null;
+        renderer = null;
+        camera = null;
+    }
     if(screen === "menu") {
         Manager(sceneConstants.menu, (message, models) => {
             const menu = MainMenu(canvas, screenDimensions, models);
@@ -82,13 +90,30 @@ export default (canvas, screen) => {
         sceneReady = true;
     }
     /**
-     * Mission ONE!
+     * Campaign Screen!
      */
     else if(screen === "campaign") {
-        // TODO: use existing ship select? or create a new one that pulls in
-        // data from the JSON
+        // TODO: campaign screen with some cool animations ships flying by
+        // TODO: relative to campaign story etc
+        // const campaignConfig = campaign.missionOne;
+        // Manager(campaignConfig, (message, models) => {
+        //     const missionOne = MissionOne(canvas, screenDimensions, models, campaignConfig);
+        //     sceneSubjects = missionOne.sceneSubjects;
+        //     controls = missionOne.controls;
+        //     weaponsCollision = missionOne.weaponsCollision;
+        //
+        //     // mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
+        //     scene = missionOne.scene;
+        //     renderer = missionOne.renderer;
+        //     camera = missionOne.camera;
+        //     sceneReady = true;
+        // });
+    } /**
+     * Mission ONE!
+     */
+    else if(mission > -1) {
         // TODO: dynamically create from object/json based on mission selection
-        const campaignConfig = campaign.missionOne;
+        const campaignConfig = campaign[screen];
         Manager(campaignConfig, (message, models) => {
             const missionOne = MissionOne(canvas, screenDimensions, models, campaignConfig);
             sceneSubjects = missionOne.sceneSubjects;
