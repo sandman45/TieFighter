@@ -59,14 +59,7 @@ export default (scene, modelConfiguration, model, modelGltf) => {
             root.scale.z = modelConfiguration.scale;
             root.name = modelConfiguration.name;
             if(gltf.animations.length > 0){
-                mixer = new THREE.AnimationMixer(gltf.scene);
-                clips = gltf.animations;
-                clip = THREE.AnimationClip.findByName( gltf.animations, 'Take 01' );
-                action = mixer.clipAction(clip);
-                action.loop = THREE.LoopOnce;
-                // action.clampWhenFinished = false;
-                // action.enable = true;
-                // action.play();
+               animations(gltf);
             }
             modelReady = true;
             group.add(root);
@@ -89,23 +82,27 @@ export default (scene, modelConfiguration, model, modelGltf) => {
         root.name = modelConfiguration.name;
 
         if (modelGltf.animations.length > 0) {
-            mixer = new THREE.AnimationMixer(modelGltf.scene);
-            clips = modelGltf.animations;
-            clip = THREE.AnimationClip.findByName(modelGltf.animations, 'Take 01');
-            action = mixer.clipAction(clip);
-            action.loop = THREE.LoopOnce;
-            // action.clampWhenFinished = false;
-            // action.enable = true;
-            // action.play();
+            animations(modelGltf);
         }
         modelReady = true;
         group.add(root);
     }
 
+    function animations(gltf) {
+        mixer = new THREE.AnimationMixer(gltf.scene);
+        // clips = modelGltf.animations;
+        clip = THREE.AnimationClip.findByName(gltf.animations, 'Take 01');
+        action = mixer.clipAction(clip);
+        // action.loop = THREE.LoopRepeat;
+        action.clampWhenFinished = true;
+        action.timeScale = 1/15;
+        // action.play();
+    }
+
     function update(time) {
 
-        if(mixer && time){
-            mixer.update(time);
+        if(mixer && time && modelReady){
+            mixer.update(250);
         }
 
         // this makes the ship look like its floating
@@ -116,14 +113,13 @@ export default (scene, modelConfiguration, model, modelGltf) => {
 
     function playAnimations() {
         if(mixer){
-            // Play all animations
-            // mixer.update(1000);
-            action.reset();
-            action.enable = true;
-            // action.time = 0.0;
-            action.weight = 1;
-            action.play();
-
+            modelReady = !modelReady;
+            if(modelReady){
+                action.play();
+                action.paused = false;
+            } else {
+                action.paused = true;
+            }
         }
     }
 
