@@ -7,7 +7,7 @@ const explosion = "../images/explosion/sprite-explosion2.png";
 const explosion2 = "../images/explosion/explosion-4x4.jpg"; // works.. want to use the other one because it is transparent
 const smokeParticle = "../images/explosion/smokeparticle.png";
 
-export default (scene, type, audio) => {
+export default (scene, type, audio, camera) => {
     const textureLoader = new THREE.TextureLoader();
     const texture = textureLoader.load(explosion2);
     const explode = new TextureAnimator(texture, 4, 4, 16, 55, destroy);
@@ -34,6 +34,7 @@ export default (scene, type, audio) => {
     function trigger(position){
         audio.playSound("HIT",null);
         mesh.position.set(position.x, position.y, position.z);
+        mesh.quaternion.copy(camera.quaternion);
         mesh.visible = true;
     }
 

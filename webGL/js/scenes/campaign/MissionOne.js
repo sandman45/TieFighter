@@ -47,7 +47,7 @@ export default (canvas, screenDimensions, models, campaignConfiguration) => {
     }
     let sceneSubjects = [];
 
-    const explosion = Explosion(scene, "EXPLOSION", audio);
+    const explosion = Explosion(scene, "EXPLOSION", audio, camera);
 
     const sc = [
         GeneralLights(scene),
