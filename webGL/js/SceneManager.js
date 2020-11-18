@@ -7,6 +7,7 @@ import MainMenu from "./scenes/menu/MainMenu.js";
 import MissionOne from "./scenes/campaign/MissionOne.js";
 import MultiPlayer from "./scenes/multiplayer/MultiPlayer.js";
 import ShipSelect from "./scenes/multiplayer/ShipSelect.js";
+import campaign from "./campaignMenu/campaign.js";
 
 export default (canvas, screen) => {
     const sceneConstants = parseConfiguration(sceneConfiguration);
@@ -83,9 +84,13 @@ export default (canvas, screen) => {
     /**
      * Mission ONE!
      */
-    else if(screen === "missionone") {
-        Manager(sceneConstants, (message, models) => {
-            const missionOne = MissionOne(canvas, screenDimensions, models);
+    else if(screen === "campaign") {
+        // TODO: use existing ship select? or create a new one that pulls in
+        // data from the JSON
+        // TODO: dynamically create from object/json based on mission selection
+        const campaignConfig = campaign.missionOne;
+        Manager(campaignConfig, (message, models) => {
+            const missionOne = MissionOne(canvas, screenDimensions, models, campaignConfig);
             sceneSubjects = missionOne.sceneSubjects;
             controls = missionOne.controls;
             weaponsCollision = missionOne.weaponsCollision;
@@ -140,7 +145,13 @@ export default (canvas, screen) => {
         if(mp){
             controls = mp.getControls();
         }
-
+        if(keyCode === 88){
+            sceneSubjects.forEach(sub=>{
+                if(sub.playAnimations){
+                    sub.playAnimations();
+                }
+            });
+        }
         if(controls){
             controls.onKeyDown(keyCode, duration);
         }

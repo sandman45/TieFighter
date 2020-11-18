@@ -19,15 +19,17 @@ export default (scene, modelConfiguration, model, modelGltf) => {
     let loader;
     let mixer;
     let clip;
-    let clips;
+    let clips = [];
     let action;
+    let actions;
     let modelReady = false;
     const group = new THREE.Group();
     group.hull = modelConfiguration.hull;
     group.shields = modelConfiguration.shields;
     group.name = modelConfiguration.name;
-    group.userId = modelConfiguration.userId;
+    group.userId = modelConfiguration.userId ? modelConfiguration.userId : modelConfiguration.designation;
     group.designation = modelConfiguration.designation;
+    group.faction = modelConfiguration.faction;
     group.position.set(modelConfiguration.position.x, modelConfiguration.position.y, modelConfiguration.position.z);
 
     if(modelGltf) {
@@ -58,10 +60,13 @@ export default (scene, modelConfiguration, model, modelGltf) => {
             root.name = modelConfiguration.name;
             if(gltf.animations.length > 0){
                 mixer = new THREE.AnimationMixer(gltf.scene);
-                const clips = gltf.animations;
+                clips = gltf.animations;
                 clip = THREE.AnimationClip.findByName( gltf.animations, 'Take 01' );
-                action = mixer.clipAction( clip );
-                action.play();
+                action = mixer.clipAction(clip);
+                action.loop = THREE.LoopOnce;
+                // action.clampWhenFinished = false;
+                // action.enable = true;
+                // action.play();
             }
             modelReady = true;
             group.add(root);
@@ -85,38 +90,46 @@ export default (scene, modelConfiguration, model, modelGltf) => {
 
         if (modelGltf.animations.length > 0) {
             mixer = new THREE.AnimationMixer(modelGltf.scene);
-            const clips = modelGltf.animations;
+            clips = modelGltf.animations;
             clip = THREE.AnimationClip.findByName(modelGltf.animations, 'Take 01');
             action = mixer.clipAction(clip);
-            action.play();
+            action.loop = THREE.LoopOnce;
+            // action.clampWhenFinished = false;
+            // action.enable = true;
+            // action.play();
         }
         modelReady = true;
         group.add(root);
     }
 
     function update(time) {
-        // const scale = (Math.sin(time)+4)/5;
-        // const positionY = Math.sin(time)/2;
-        if(modelReady && mixer){
+
+        if(mixer && time){
             mixer.update(time);
-            if(clips){
-                playAnimations();
-            }
         }
 
         // this makes the ship look like its floating
+        // const scale = (Math.sin(time)+4)/5;
+        // const positionY = Math.sin(time)/2;
         // group.position.y = playerPosition.y + positionY;
     }
 
     function playAnimations() {
-        // Play all animations
-        clips.forEach( function ( clip ) {
-            mixer.clipAction( clip ).play();
-        } );
+        if(mixer){
+            // Play all animations
+            // mixer.update(1000);
+            action.reset();
+            action.enable = true;
+            // action.time = 0.0;
+            action.weight = 1;
+            action.play();
+
+        }
     }
 
     return {
         mesh: group,
-        update
+        update,
+        playAnimations
     }
 }
