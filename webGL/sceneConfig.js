@@ -193,7 +193,7 @@ const config = {
         rebels: [
             {
                 name: 'A_WING',
-                position: { x: -60, y: 1, z: -80 },
+                position: { x: -10, y: 1, z: 0 },
                 rotation: { y: 3.15, x:0, z:0 },
                 speed: .9,
                 scale: 3,
@@ -204,7 +204,7 @@ const config = {
             },
             {
                 name: 'X_WING',
-                position: { x: -50, y: 1, z: -50 },
+                position: { x: -20, y: 1, z: 0 },
                 rotation: { y: 3.15, x:0, z:0 },
                 speed: .6,
                 hull: 125,
@@ -215,7 +215,7 @@ const config = {
             },
             {
                 name: 'B_WING',
-                position: { x: -90, y: 1, z: -90 },
+                position: { x: -30, y: 1, z: 0 },
                 rotation: { y: 3.15, x:0, z:0 },
                 speed: .7,
                 scale: 5,
@@ -226,7 +226,7 @@ const config = {
             },
             {
                 name: 'Y_WING',
-                position: { x: -100, y: 1, z: -100 },
+                position: { x: -40, y: 1, z: 0 },
                 rotation: { y: 3.15, x:0, z:0 },
                 speed: .5,
                 scale: 5,

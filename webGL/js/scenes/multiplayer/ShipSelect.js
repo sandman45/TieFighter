@@ -157,7 +157,7 @@ export default (canvas, screenDimensions, models) => {
             //move camera left
             finalPos = camera.position.x + 10;
             tweenObj = { x: finalPos };
-        } else if(keycode === 39 && camera.position.x > 1){
+        } else if(keycode === 39 && camera.position.x > -40){
             //move camera right
             finalPos = camera.position.x - 10;
             tweenObj = { x: finalPos };
