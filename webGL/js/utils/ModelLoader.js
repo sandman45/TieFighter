@@ -1,5 +1,6 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/loaders/GLTFLoader.js';
+import FiniteStateMachine from "./FiniteStateMachine.js";
 
 export const Model = {
     TIE_FIGHTER: "models/tie-fighter/tie.glb",
@@ -16,12 +17,11 @@ export const Model = {
 };
 
 export default (scene, modelConfiguration, model, modelGltf) => {
+    let fsm;
     let loader;
     let mixer;
     let clip;
-    let clips = [];
     let action;
-    let actions;
     let modelReady = false;
     const group = new THREE.Group();
     group.hull = modelConfiguration.hull;
@@ -38,7 +38,58 @@ export default (scene, modelConfiguration, model, modelGltf) => {
     } else {
         loadGLTFModel(Model[modelConfiguration.name]);
     }
+    if(!modelConfiguration.playerName){
+        initFiniteStateMachine();
+    }
     scene.add(group);
+
+    function addHistory() {
+        const targetGO = globals.congaLine[targetNdx];
+        const newTargetPos = new THREE.Vector3();
+        newTargetPos.copy(targetGO.transform.position);
+        targetHistory.push(newTargetPos);
+    }
+
+    function initFiniteStateMachine() {
+        fsm = new FiniteStateMachine({
+            patrol: {
+                enter: () => {
+                    console.log(`enter finite state machine`);
+                    console.log(`start patrol`);
+                },
+                update: () => {
+                    // console.log(`update patrol`);
+                }
+            },
+            returnToBase: {},
+            goToLast: {
+                update: () => {
+                    addHistory();
+
+                    const targetPosition = targetHistory[0];
+                    const maxVelocity = .5;
+                    const turnSpeed = .5;
+                    const distance = aimTowardAndGetDistance(transform, targetPosition, turnSpeed);
+                    const velocity = distance;
+                    transform.translateOnAxis(kForward, Math.min(velocity, maxVelocity));
+                    if (distance <= maxVelocity) {
+                        fsm.transition("follow");
+                    }
+
+                }
+            },
+            follow: {
+                update: () => {
+                    addHistory();
+                    // remove the oldest history and just put ourselves there.
+                    const targetPos = targetHistory.shift();
+                    transform.position.copy(targetPos);
+                    const deltaTurnSpeed = maxTurnSpeed * globals.deltaTime;
+                    aimTowardAndGetDistance(transform, targetHistory[0], deltaTurnSpeed);
+                },
+            }
+        }, "patrol");
+    }
 
     /**
      * loadGLTFModel
@@ -104,7 +155,9 @@ export default (scene, modelConfiguration, model, modelGltf) => {
         if(mixer && time && modelReady){
             mixer.update(250);
         }
-
+        if(fsm) {
+            fsm.update();
+        }
         // this makes the ship look like its floating
         // const scale = (Math.sin(time)+4)/5;
         // const positionY = Math.sin(time)/2;
