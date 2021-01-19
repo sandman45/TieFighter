@@ -385,10 +385,10 @@ const config = {
         controls: false,
     },
     audio: {
-        music: false,
-        musicVolume: 5,
-        sfx: false,
-        sfxVolume: 5,
+        music: true,
+        musicVolume: 3,
+        sfx: true,
+        sfxVolume: 3,
     },
     floor: {
         size: { x: 1000, y: 1000, z: 1000 },
