@@ -18,9 +18,14 @@ export default (scene, config, collisionManager, audio) => {
 
     const lasers = [];
     function fire(sourceShipMesh, numberOfLasers, laserType) {
+
         const l = new Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, laserType);
         // trigger sound
-        audio.playSound("BLAST", l.laserSet[0]);
+        let blastType = "BLAST";
+        if(laserType === "REBELLION"){
+            blastType = "REBEL_BLAST"
+        }
+        audio.playSound(blastType, l.laserSet[0]);
         lasers.push(l);
     }
 

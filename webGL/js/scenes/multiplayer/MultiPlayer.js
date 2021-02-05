@@ -42,7 +42,7 @@ export default (canvas, screenDimensions, sceneSubjects) => {
     const collisionManager = CollisionManager([floor]);
     laser = LaserCannons(scene, sceneConstants.multiPlayer.weapons[0], collisionManager, audio);
 
-    const explosion = Explosion(scene, "EXPLOSION", audio);
+    const explosion = Explosion(scene, "EXPLOSION", audio, camera);
 
     sceneSubjects.push(explosion);
 
