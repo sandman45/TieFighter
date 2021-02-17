@@ -4,9 +4,11 @@ Creating a Tie Fighter game using [PierfrancescoSoffritti's Configurable Three J
 he has done an amazing job. 
 
 * early version
+
 ![Tie Fighter Game](tie-fighter-game.gif)
 
 * latest version
+
 ![Tie Fighter Game](tie-fighter-game-2.gif)
 
 ### Play it here http://tie-fighter.mattsanders.org
