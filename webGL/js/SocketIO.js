@@ -81,7 +81,8 @@ export default () => {
         // if player hits object call stopMoving;
         if(objectName.source === ObjectType.PLAYER){
             // console.log(`SocketIO: collision - Stop Moving Player: ${JSON.stringify(objectName)}`);
-            socket.emit(eventBusEvents.COLLISION, objectName); stopMoving();
+            socket.emit(eventBusEvents.COLLISION, objectName);
+            //stopMoving();
         } else {
             // console.log(`SocketIO: collision: ${JSON.stringify(objectName)}`);
         }

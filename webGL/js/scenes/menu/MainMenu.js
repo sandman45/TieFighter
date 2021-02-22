@@ -27,7 +27,7 @@ export default (canvas, screenDimensions, models) => {
     // audio.playSound("MUSIC_MENU", camera);
 
     Object.keys(models).forEach(model => {
-        sceneSubjects.push(ModelLoader(scene, models[model].config, Model[model], null, models[model].gltf));
+        sceneSubjects.push(ModelLoader(scene, models[model].config, Model[model], models[model].gltf));
     });
     let obj;
 
