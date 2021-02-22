@@ -9,6 +9,7 @@ import GeneralLights from "../../sceneSubjects/GeneralLights.js";
 import WeaponsCollisionManager from "../../controls/WeaponsCollisionManager.js";
 import ModelLoader, { Model } from "../../utils/ModelLoader.js";
 import FlyControls from "../../controls/FlyControls.js";
+
 import {parseConfiguration} from "../../utils/SceneConfigUtils.js";
 import globalConfiguration from "../../../sceneConfig.js";
 import GameAudio from "../../utils/Audio.js";
@@ -28,9 +29,9 @@ export default (canvas, screenDimensions, models, campaignConfiguration) => {
     const floor = Floor(scene, floorConfig);
     // static collision manager
     const collisionManager = CollisionManager([floor]);
-
+    const laser = LaserCannons(scene, campaignConfiguration.weapons[0], collisionManager, audio);
     // Ships
-    const ships = addShips(scene, models, campaignConfiguration);
+    const ships = addShips(scene, models, campaignConfiguration, laser);
     let playerShip = {};
     ships.forEach(ship => {
         if(ship.mesh.designation === campaignConfiguration.player.designation){
@@ -38,7 +39,7 @@ export default (canvas, screenDimensions, models, campaignConfiguration) => {
         }
     });
 
-    const laser = LaserCannons(scene, campaignConfiguration.weapons[0], collisionManager, audio);
+
     let controls;
     if(sceneGlobalConstants.controls.flightControls){
         controls = createFlightControls(playerShip.mesh, camera, renderer, collisionManager, laser, audio, campaignConfiguration.player);
@@ -71,10 +72,10 @@ export default (canvas, screenDimensions, models, campaignConfiguration) => {
         return flightControls;
     }
 
-    function addShips(scene, models){
+    function addShips(scene, models, campaignConfiguration, laser){
         const ships = [];
         Object.keys(models).forEach(model => {
-            ships.push(ModelLoader(scene, models[model].config, Model[model], models[model].gltf));
+            ships.push(ModelLoader(scene, models[model].config, Model[model], models[model].gltf, collisionManager, audio, laser));
         });
         return ships;
     }
@@ -102,7 +103,7 @@ export default (canvas, screenDimensions, models, campaignConfiguration) => {
 
     function buildLight(scene){
         const sphere = new THREE.SphereBufferGeometry(16,32,32);
-        const light = new THREE.PointLight( 0xffffff, 10, 700);
+        const light = new THREE.PointLight( 0xffffff, 10, 1200);
         light.add(new THREE.Mesh( sphere, new THREE.MeshBasicMaterial({color: 0xffffff})));
         light.position.set(400,400,500);
         scene.add(light);

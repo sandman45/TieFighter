@@ -1,6 +1,7 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/loaders/GLTFLoader.js';
 import FiniteStateMachine from "./FiniteStateMachine.js";
+import NpcControls from "../controls/NpcControls.js";
 
 export const Model = {
     TIE_FIGHTER: "models/tie-fighter/tie.glb",
@@ -16,13 +17,15 @@ export const Model = {
     Y_WING: "models/y-wing.glb"
 };
 
-export default (scene, modelConfiguration, model, modelGltf) => {
+export default (scene, modelConfiguration, model, modelGltf, collisionManager, audio, laser) => {
     let fsm;
     let loader;
     let mixer;
     let clip;
     let action;
+    let cm;
     let modelReady = false;
+    cm = collisionManager;
     const group = new THREE.Group();
     group.hull = modelConfiguration.hull;
     group.shields = modelConfiguration.shields;
@@ -38,54 +41,61 @@ export default (scene, modelConfiguration, model, modelGltf) => {
     } else {
         loadGLTFModel(Model[modelConfiguration.name]);
     }
-    if(!modelConfiguration.playerName){
-        initFiniteStateMachine();
+    if(!modelConfiguration.playerName && collisionManager && audio && laser){
+        initFiniteStateMachine(group);
     }
     scene.add(group);
 
-    function addHistory() {
-        const targetGO = globals.congaLine[targetNdx];
-        const newTargetPos = new THREE.Vector3();
-        newTargetPos.copy(targetGO.transform.position);
-        targetHistory.push(newTargetPos);
-    }
-
-    function initFiniteStateMachine() {
+    function initFiniteStateMachine(modelGroup) {
         fsm = new FiniteStateMachine({
             patrol: {
                 enter: () => {
-                    console.log(`enter finite state machine`);
                     console.log(`start patrol`);
                 },
                 update: () => {
-                    // console.log(`update patrol`);
+                    const collision = NpcControls(modelGroup, modelConfiguration,"patrol",-1, cm, audio, laser);
+                    if(collision){
+                        NpcControls(modelGroup, modelConfiguration, "turnAround", 1, cm, audio, laser);
+                        // console.log(`transition to patrol2`);
+                        // fsm.transition("patrol2");
+                        setTimeout(() => {
+                            NpcControls(modelGroup, modelConfiguration, "fire", null, cm, audio, laser);
+                        }, 1000);
+                    }
+                }
+            },
+            patrol2: {
+                enter: () => {
+                    console.log(`start patrol2`);
+                    // turn around 180 deg
+                    console.log(`rotate ship`);
+                    NpcControls(modelGroup, modelConfiguration, "turnAround", 1, cm, audio);
+                },
+                update: () => {
+                    const collision = NpcControls(modelGroup, modelConfiguration, "patrol", -1, cm, audio, laser);
+                    if(collision){
+                        console.log(`transition to patrol`);
+                        fsm.transition("patrol");
+                    }
+                }
+            },
+            acquireTarget: {
+                enter: () => {
+                    console.log(`start acquire target`);
+                },
+                update: () => {
+                    console.log(`update acquire target`);
                 }
             },
             returnToBase: {},
             goToLast: {
                 update: () => {
-                    addHistory();
-
-                    const targetPosition = targetHistory[0];
-                    const maxVelocity = .5;
-                    const turnSpeed = .5;
-                    const distance = aimTowardAndGetDistance(transform, targetPosition, turnSpeed);
-                    const velocity = distance;
-                    transform.translateOnAxis(kForward, Math.min(velocity, maxVelocity));
-                    if (distance <= maxVelocity) {
-                        fsm.transition("follow");
-                    }
 
                 }
             },
             follow: {
                 update: () => {
-                    addHistory();
-                    // remove the oldest history and just put ourselves there.
-                    const targetPos = targetHistory.shift();
-                    transform.position.copy(targetPos);
-                    const deltaTurnSpeed = maxTurnSpeed * globals.deltaTime;
-                    aimTowardAndGetDistance(transform, targetHistory[0], deltaTurnSpeed);
+
                 },
             }
         }, "patrol");

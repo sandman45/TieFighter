@@ -4,7 +4,6 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 import eventBus from "../eventBus/EventBus.js";
 import eventBusEvents from "../eventBus/events.js";
-// import * as THREE from '../../node_modules/three/build/three.module.js';
 
 function bind( scope, fn ) {
     return function () {
@@ -13,7 +12,6 @@ function bind( scope, fn ) {
 }
 
 function contextmenu( event ) {
-    // console.log(`contextmenu: ${event}`);
     event.preventDefault();
 }
 
