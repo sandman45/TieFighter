@@ -1,0 +1,43 @@
+.hud {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    z-index: 999;
+    bottom: 0;
+    position: absolute;
+    height: 200px;
+    width: 100%;
+}
+
+.hud-container {
+    display: flex;
+    flex-direction: row;
+    width: 80%;
+    justify-content: space-evenly;
+    background-color: darkgray;
+}
+
+.radar {
+    height: 150px;
+    width: 150px;
+    background-color: darkslategrey;
+    border: black 1px solid;
+    margin: auto;
+}
+
+.hull {
+    height: 150px;
+    width: 150px;
+    background-color: darkslategrey;
+    border: black 1px solid;
+    margin: auto;
+}
+
+.weapons {
+    height: 150px;
+    width: 150px;
+    background-color: darkslategrey;
+    border: black 1px solid;
+    margin: auto;
+}
+

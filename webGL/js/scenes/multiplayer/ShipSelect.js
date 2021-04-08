@@ -10,11 +10,11 @@ import ModelLoader, { Model } from "../../utils/ModelLoader.js";
 import EventBus from "../../eventBus/EventBus.js";
 import events from "../../eventBus/events.js";
 
-export default (canvas, screenDimensions, models) => {
+export default (canvas, models) => {
     const sceneConstants = parseConfiguration(sceneConfiguration);
     const scene = buildScene(sceneConstants);
-    const renderer = buildRender(screenDimensions);
-    const camera = buildCamera(screenDimensions);
+    const renderer = buildRender(canvas);
+    const camera = buildCamera(canvas);
     const audio = GameAudio(camera, sceneConfiguration.audio, () => {
         audio.playSound("MUSIC_SELECT", camera);
     });

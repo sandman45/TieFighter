@@ -9,14 +9,10 @@ import MultiPlayer from "./scenes/multiplayer/MultiPlayer.js";
 import ShipSelect from "./scenes/multiplayer/ShipSelect.js";
 import campaign from "./campaignMenu/campaign.js";
 
-export default (canvas, screen) => {
+export default (views, screen) => {
     const sceneConstants = parseConfiguration(sceneConfiguration);
     const clock = new THREE.Clock();
 
-    const screenDimensions = {
-        width: canvas.width,
-        height: canvas.height
-    };
     let mp;
     let ss;
     let scene;
@@ -27,6 +23,12 @@ export default (canvas, screen) => {
     let renderer = null;
     let camera = null;
     let sceneReady = false;
+
+    let screenDimensions = {
+        width: views[0].canvas.width,
+        height: views[0].canvas.height
+    };
+
     const mission = screen.search("mission");
     /**
      * LOADING SCREEN MENU
@@ -41,12 +43,12 @@ export default (canvas, screen) => {
     }
     if(screen === "menu") {
         Manager(sceneConstants.menu, (message, models) => {
-            const menu = MainMenu(canvas, screenDimensions, models);
+            const menu = MainMenu(views[0].canvas, models);
             sceneSubjects = sceneSubjects.concat(menu.sceneSubjects);
             controls = menu.controls;
             scene = menu.scene;
-            renderer = menu.renderer;
-            camera = menu.camera;
+            views[0].renderer = menu.renderer;
+            views[0].camera = menu.camera;
             sceneReady = true;
             menu.getWeaponsCollision = () => {
                 return null;
@@ -63,12 +65,12 @@ export default (canvas, screen) => {
         const loadingElem = document.getElementById('loading');
         loadingElem.style.visibility = 'visible';
         Manager(sceneConstants.shipSelect, (message, models) => {
-            ss = ShipSelect(canvas, screenDimensions, models);
+            ss = ShipSelect(views[0].canvas, models);
             sceneSubjects = sceneSubjects.concat(ss.sceneSubjects);
             weaponsCollision = ss.weaponsCollision;
             scene = ss.scene;
-            renderer = ss.renderer;
-            camera = ss.camera;
+            views[0].renderer = ss.renderer;
+            views[0].camera = ss.camera;
             sceneReady = true;
             controls = {
               onKeyDown: ss.onKeyDown,
@@ -80,12 +82,12 @@ export default (canvas, screen) => {
      * MULTIPLAYER STUFF
      */
     else if(screen === "multiplayer") {
-        mp = MultiPlayer(canvas, screenDimensions, sceneSubjects);
+        mp = MultiPlayer(views[0].canvas, sceneSubjects);
         weaponsCollision = mp.weaponsCollision;
         // mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
         scene = mp.scene;
-        renderer = mp.renderer;
-        camera = mp.camera;
+        views[0].renderer = mp.renderer;
+        views[0].camera = mp.camera;
         weaponsCollision = mp.getWeaponsCollision();
         sceneReady = true;
     }
@@ -115,15 +117,17 @@ export default (canvas, screen) => {
         // TODO: dynamically create from object/json based on mission selection
         const campaignConfig = campaign[screen];
         Manager(campaignConfig, (message, models) => {
-            const missionOne = MissionOne(canvas, screenDimensions, models, campaignConfig);
+            const missionOne = MissionOne(views[0].canvas, views[1].canvas, models, campaignConfig);
             sceneSubjects = missionOne.sceneSubjects;
             controls = missionOne.controls;
             weaponsCollision = missionOne.weaponsCollision;
 
             // mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
             scene = missionOne.scene;
-            renderer = missionOne.renderer;
-            camera = missionOne.camera;
+            views[0].renderer = missionOne.renderer;
+            views[0].camera = missionOne.camera;
+            views[1].camera = missionOne.targetCamera;
+            views[1].renderer = missionOne.targetRenderer;
             sceneReady = true;
         });
     }
@@ -145,24 +149,35 @@ export default (canvas, screen) => {
                     sceneSubjects[i].update(elapsedTime);
                 }
             }
-            renderer.render(scene, camera);
+            // multiple views/cameras ( for targeting computer )
+            for ( let ii = 0; ii < views.length; ++ ii ) {
+                const view = views[ ii ];
+                const camera = view.camera;
+                const renderer = view.renderer;
+                if(scene && camera && renderer){
+                    renderer.render(scene, camera);
+                }
+            }
         }
     }
 
     function onWindowResize() {
-        const { width, height } = canvas;
-        if(screenDimensions){
-            screenDimensions.width = width;
-            screenDimensions.height = height;
-        }
+        for ( let j = 0; j < views.length; ++ j ) {
+            const {width, height} = views[j].canvas;
+            if (screenDimensions) {
+                screenDimensions.width = width;
+                screenDimensions.height = height;
+            }
 
-        if(camera){
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-        }
+            if (views[j].camera) {
+                views[j].camera.aspect = width / height;
+                views[j].camera.updateProjectionMatrix();
+            }
 
-        if(renderer){
-            renderer.setSize(width, height);
+            console.log(`onWindowResize index:${j} = width: ${width}, height: ${height}`);
+            if(views[j].renderer){
+                views[j].renderer.setSize(width, height);
+            }
         }
     }
 

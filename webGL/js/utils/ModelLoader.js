@@ -53,13 +53,14 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                     console.log(`start patrol`);
                 },
                 update: () => {
-                    const collision = NpcControls(modelGroup, modelConfiguration,"patrol",-1, cm, audio, laser);
+                    // moves forward then turns around 180 deg and fires weapons.. then repeats
+                    const collision = NpcControls(scene, modelGroup, modelConfiguration,"patrol",-1, cm, audio, laser);
                     if(collision){
-                        NpcControls(modelGroup, modelConfiguration, "turnAround", 1, cm, audio, laser);
+                        NpcControls(scene, modelGroup, modelConfiguration, "turnAround", 1, cm, audio, laser);
                         // console.log(`transition to patrol2`);
                         // fsm.transition("patrol2");
                         setTimeout(() => {
-                            NpcControls(modelGroup, modelConfiguration, "fire", null, cm, audio, laser);
+                            NpcControls(scene, modelGroup, modelConfiguration, "fire", null, cm, audio, laser);
                         }, 1000);
                     }
                 }
@@ -69,10 +70,10 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                     console.log(`start patrol2`);
                     // turn around 180 deg
                     console.log(`rotate ship`);
-                    NpcControls(modelGroup, modelConfiguration, "turnAround", 1, cm, audio);
+                    NpcControls(scene, modelGroup, modelConfiguration, "turnAround", 1, cm, audio);
                 },
                 update: () => {
-                    const collision = NpcControls(modelGroup, modelConfiguration, "patrol", -1, cm, audio, laser);
+                    const collision = NpcControls(scene, modelGroup, modelConfiguration, "patrol", -1, cm, audio, laser);
                     if(collision){
                         console.log(`transition to patrol`);
                         fsm.transition("patrol");

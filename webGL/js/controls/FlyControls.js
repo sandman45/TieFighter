@@ -96,13 +96,27 @@ export default class FlyControls {
         this.rotationVector.z = ( - this.moveState.rollRight + this.moveState.rollLeft );
     };
 
+    throttleDown = () => {
+        if(parseFloat(this.throttle) > 0){
+            this.throttle = (parseFloat(this.throttle) - 0.1).toFixed(1);
+        }
+        console.log(`throttle: ${this.throttle}`);
+    };
+
+    throttleUp = () => {
+        if(parseFloat(this.throttle) < this.config.speed){
+            this.throttle = (parseFloat(this.throttle) + 0.1).toFixed(1);
+        }
+        console.log(`throttle: ${this.throttle}`);
+    };
+
     onKeyDown = function( keyCode ) {
         switch ( keyCode ) {
 
             case 16: /* shift */ this.movementSpeedMultiplier = .1; break;
 
-            case 87: /*W*/ this.moveState.forward = 1; break;
-            case 83: /*S*/ this.moveState.back = 1; break;
+            case 87: /*W*/ this.throttleUp(); break;
+            case 83: /*S*/ this.throttleDown(); break;
 
             case 65: /*A*/ this.moveState.left = 1; break;
             case 68: /*D*/ this.moveState.right = 1; break;
@@ -119,19 +133,13 @@ export default class FlyControls {
             case 81: /*Q*/ this.moveState.rollLeft = 1; break;
             case 69: /*E*/ this.moveState.rollRight = 1; break;
             case 187: /*+/=*/
-                if(parseFloat(this.throttle) < this.config.speed){
-                    this.throttle = (parseFloat(this.throttle) + 0.1).toFixed(1);
-                }
-                console.log(`throttle: ${this.throttle}`);
-                // console.log(`rollSpeed: ${this.rollSpeed}`);
+                this.throttleUp();
                 break;
             case 189: /*-*/
-                if(parseFloat(this.throttle) > 0){
-                    this.throttle = (parseFloat(this.throttle) - 0.1).toFixed(1);
-                }
-                console.log(`throttle: ${this.throttle}`);
+                this.throttleDown();
                 break;
             case 32: this.fireCannons(this.object); break;
+            case 116: this.acquireTarget(); break;
 
         }
 
@@ -144,8 +152,8 @@ export default class FlyControls {
 
             case 16: /* shift */ this.movementSpeedMultiplier = 1; break;
 
-            case 87: /*W*/ this.moveState.forward = 0; break;
-            case 83: /*S*/ this.moveState.back = 0; break;
+            case 87: /*W*/  break;
+            case 83: /*S*/  break;
 
             case 65: /*A*/ this.moveState.left = 0; break;
             case 68: /*D*/ this.moveState.right = 0; break;
@@ -193,7 +201,7 @@ export default class FlyControls {
 
             this.updateMovementVector();
         }
-
+        this.fireCannons(this.object);
     };
     mousemove = function( event ) {
         if ( ! this.dragToLook || this.mouseStatus > 0 ) {
@@ -235,6 +243,11 @@ export default class FlyControls {
 
         this.updateRotationVector();
 
+    };
+
+    acquireTarget = () => {
+        // search thru
+      console.log(`Acquire Target:`);
     };
 
     fireCannons = function(mesh) {

@@ -6,11 +6,19 @@
 		<link rel="stylesheet" href="./css/style.css">
 		<link rel="stylesheet" href="./css/loading.css">
 		<link rel="stylesheet" href="./css/menu.css">
+		<link rel="stylesheet" href="./css/hud.css">
 		<script src="/socket.io/socket.io.js"></script>
 	</head>
 
 	<body>
 		<canvas id="canvas"></canvas>
+		<div id="heads-up-display" class="hud">
+			<div class="hud-container">
+				<div id="weapons" class="weapons"></div>
+				<canvas id="radar" class="radar"></canvas>
+				<div id="hull" class="hull"></div>
+			</div>
+		</div>
 		<div id="loading">
 			<div>
 				<div >...loading...</div>
