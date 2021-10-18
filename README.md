@@ -31,7 +31,10 @@ cd WebGL
 npm install
 ```
 
-Or, if you are on Windows, just double click the `install.bat` file.
+create a `.env` file in the `/server/src/` directory
+```
+WEB_SERVER=3000
+```
 
 ### Launch the server
 
@@ -40,24 +43,19 @@ To start the server run this command, from the root folder of the project
 ```
 cd server
 cd src
-node main portNumber
+node main
 ```
 ### Running on Webstorm
 
 ```
 click run main.js node
 ```
+
 server will run port 3000 unless you change the port in the .env file
-the web server will run on port 8080 unless changed in the .env file
+
+the web server will run on port 3000 unless changed in the .env file
 
 The webpage will be available at `http://localhost:8080/`
-
---
-Or, if you are on Windows, just double click the `startServer.bat` file, the server will automatically start on port 8999.
-
-The webpage will be available at `http://localhost:8080/` 
-
-*note* not 100% if it works in windows.. i may have broke it ;) 
 
 ## Scene
 
