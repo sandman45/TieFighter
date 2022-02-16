@@ -42,6 +42,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
         loadGLTFModel(Model[modelConfiguration.name]);
     }
     if(!modelConfiguration.playerName && collisionManager && audio && laser){
+        console.log(`setup FSM for model: ${group.name}`);
         initFiniteStateMachine(group);
     }
     scene.add(group);
@@ -56,8 +57,6 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                     const collision = NpcControls(modelGroup, modelConfiguration,"patrol",-1, cm, audio, laser);
                     if(collision){
                         NpcControls(modelGroup, modelConfiguration, "turnAround", 1, cm, audio, laser);
-                        // console.log(`transition to patrol2`);
-                        // fsm.transition("patrol2");
                         setTimeout(() => {
                             NpcControls(modelGroup, modelConfiguration, "fire", null, cm, audio, laser);
                         }, 1000);

@@ -26,6 +26,7 @@ export default class FlyControls {
         this.throttle = 0;
         this.collisionManager = collisionManager;
         this.goal = new THREE.Object3D();
+
         object.add( this.goal );
         this.goal.position.set(0, 5, 20);
         this.setCameraPositionRelativeToMeshAndFollow(this.camera, object);
