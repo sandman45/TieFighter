@@ -24,7 +24,7 @@ export default (gameObjMesh, config, command, direction, collisionManager, audio
  * @param audio
  */
 function moveObject(mesh, config, collisionManager, audio) {
-    if(mesh.name === "Y_WING" || mesh.name === "SHUTTLE"){
+    if(config.fsm){
         // console.log(`moveObject: ${mesh.name}`);
         // console.log(`position x:${mesh.position.x}, y:${mesh.position.y}, z:${mesh.position.z}`)
 

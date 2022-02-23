@@ -8,6 +8,7 @@ import MissionOne from "./scenes/campaign/MissionOne.js";
 import MultiPlayer from "./scenes/multiplayer/MultiPlayer.js";
 import ShipSelect from "./scenes/multiplayer/ShipSelect.js";
 import campaign from "./campaignMenu/campaign.js";
+import CampaignDefault from "./scenes/campaign/CampaignDefault.js";
 
 export default (canvas, screen) => {
     const sceneConstants = parseConfiguration(sceneConfiguration);
@@ -93,21 +94,20 @@ export default (canvas, screen) => {
      * Campaign Screen!
      */
     else if(screen === "campaign") {
+        console.log(`screen: ${screen}`);
         // TODO: campaign screen with some cool animations ships flying by
         // TODO: relative to campaign story etc
-        // const campaignConfig = campaign.missionOne;
-        // Manager(campaignConfig, (message, models) => {
-        //     const missionOne = MissionOne(canvas, screenDimensions, models, campaignConfig);
-        //     sceneSubjects = missionOne.sceneSubjects;
-        //     controls = missionOne.controls;
-        //     weaponsCollision = missionOne.weaponsCollision;
-        //
-        //     // mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
-        //     scene = missionOne.scene;
-        //     renderer = missionOne.renderer;
-        //     camera = missionOne.camera;
-        //     sceneReady = true;
-        // });
+        const campaignConfig = campaign.default;
+        Manager(campaignConfig, (message, models) => {
+            const campaignDefaultScene = CampaignDefault(canvas, screenDimensions, models, campaignConfig);
+            sceneSubjects = campaignDefaultScene.sceneSubjects;
+            controls = campaignDefaultScene.controls;
+            weaponsCollision = campaignDefaultScene.weaponsCollision;
+            scene = campaignDefaultScene.scene;
+            renderer = campaignDefaultScene.renderer;
+            camera = campaignDefaultScene.camera;
+            sceneReady = true;
+        });
     } /**
      * Mission ONE!
      */
@@ -119,12 +119,11 @@ export default (canvas, screen) => {
             sceneSubjects = missionOne.sceneSubjects;
             controls = missionOne.controls;
             weaponsCollision = missionOne.weaponsCollision;
-
-            // mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
             scene = missionOne.scene;
             renderer = missionOne.renderer;
             camera = missionOne.camera;
             sceneReady = true;
+            // mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
         });
     }
 
@@ -142,7 +141,9 @@ export default (canvas, screen) => {
                     myWeaponsCollision.checkCollision(sceneSubjects);
                 }
                 for(let i = 0; i < sceneSubjects.length; i++) {
-                    sceneSubjects[i].update(elapsedTime);
+                    if(sceneSubjects[i]){
+                        sceneSubjects[i].update(elapsedTime);
+                    }
                 }
             }
             renderer.render(scene, camera);
