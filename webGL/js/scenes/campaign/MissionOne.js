@@ -14,12 +14,15 @@ import {parseConfiguration} from "../../utils/SceneConfigUtils.js";
 import globalConfiguration from "../../../sceneConfig.js";
 import GameAudio from "../../utils/Audio.js";
 import SkyBox from "../../sceneSubjects/SkyBox.js";
+import Hud from "../../HUD/hud.js";
 
-export default (canvas, screenDimensions, models, campaignConfiguration) => {
+export default (canvas, canvas2, models, campaignConfiguration) => {
+    console.log(`mission one width: ${canvas.width}, height: ${canvas.height}`);
     const sceneGlobalConstants = parseConfiguration(globalConfiguration);
     const scene = buildScene(sceneGlobalConstants);
-    const renderer = buildRender(screenDimensions);
-    const camera = buildCamera(screenDimensions);
+    const renderer = buildRender(canvas);
+    const targetRenderer = buildTargetRender(canvas2);
+    const camera = buildCamera(canvas);
     const audio = GameAudio(camera, sceneGlobalConstants.audio, () => {
         audio.playSound("MUSIC", camera);
     });
@@ -50,12 +53,17 @@ export default (canvas, screenDimensions, models, campaignConfiguration) => {
 
     const explosion = Explosion(scene, "EXPLOSION", audio, camera);
 
+    const targetCamera = buildTargetCamera(canvas);
+
+    const hud = new Hud(ships[2].mesh, targetCamera);
+
     const sc = [
         GeneralLights(scene),
         floor,
         laser,
         controls,
         explosion,
+        hud,
         ...ships,
         ...sceneSubjects
     ];
@@ -109,6 +117,38 @@ export default (canvas, screenDimensions, models, campaignConfiguration) => {
         scene.add(light);
     }
 
+
+
+    function buildTargetRender({ width, height }) {
+        const targRenderer = new THREE.WebGLRenderer({ canvas: canvas2, antialias: true, alpha: true });
+        const DPR = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
+        targRenderer.setPixelRatio(DPR);
+        targRenderer.setSize(width, height);
+
+        targRenderer.gammaInput = true;
+        targRenderer.gammaOutput = true;
+
+        targRenderer.shadowMap.enabled = true;
+        targRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        return targRenderer
+    }
+
+    // target Camera
+    function buildTargetCamera() {
+        const width = document.getElementById('radar').offsetWidth;
+        const height = document.getElementById('radar').offsetHeight;
+        const aspectRatio = width / height;
+        const fieldOfView = 60;
+        const nearPlane = 1;
+        const farPlane = 3000;
+        const camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
+
+        camera.position.y = 10;
+
+        return camera;
+    }
+
     function buildCamera({ width, height }) {
         const aspectRatio = width / height;
         const fieldOfView = 60;
@@ -124,7 +164,9 @@ export default (canvas, screenDimensions, models, campaignConfiguration) => {
     return {
         scene,
         camera,
+        targetCamera,
         renderer,
+        targetRenderer,
         controls,
         sceneSubjects: sc,
         weaponsCollision

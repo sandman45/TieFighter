@@ -8,17 +8,30 @@ import LocalStorage from "./localStorage/localStorage.js";
 
 initSocketIO(onKeyUp, onKeyDown);
 // initial state is menu
+const views = [];
+function View(canvas) {
+	return {
+		canvas
+	}
+}
 const canvas = document.getElementById('canvas');
-let sceneManager = SceneManager(canvas, "menu");
+const canvas2 = document.getElementById('radar');
+
+views.push(new View(canvas));
+views.push(new View(canvas2));
+
+let sceneManager = SceneManager(views, "menu");
 bindEventListeners();
 startRenderLoop();
 let showMenu = false;
 let campaignMenu = false;
+
 function bindEventListeners() {
 	handler.currentSelectionInView();
 	window.onresize = resizeCanvas;
 	window.onkeydown = onKeyDown;
 	window.onkeyup = onKeyUp;
+
 	const menuItems = document.getElementsByClassName("menu-item");
 	for(let i=0; i<menuItems.length; i++){
 		menuItems[i].onclick = onMenuItemClick;
@@ -44,13 +57,18 @@ function bindEventListeners() {
 }
 
 function resizeCanvas() {
-	canvas.style.width = '100%';
-	canvas.style.height= '100%';
+	for(let i = 0; i < views.length; ++i) {
+		if(i===0){
+			views[i].canvas.style.width = '100%';
+			views[i].canvas.style.height= '100%';
+		}
 
-	canvas.width  = canvas.offsetWidth;
-	canvas.height = canvas.offsetHeight;
+		views[i].canvas.width  = views[i].canvas.offsetWidth;
+		views[i].canvas.height = views[i].canvas.offsetHeight;
 
-    sceneManager.onWindowResize();
+
+		sceneManager.onWindowResize();
+	}
 }
 
 function onMenuItemClick(event) {
@@ -89,7 +107,7 @@ function onMenuItemClick(event) {
 		CampaignMenu.buildMenu();
 	}
 	// load scene
-	sceneManager = SceneManager(canvas, menuItem);
+	sceneManager = SceneManager(views, menuItem);
 	bindEventListeners();
 }
 
@@ -110,7 +128,7 @@ function onSubMenuItemClick(event) {
 		const loadingElem = document.getElementById('loading');
 		loadingElem.style.visibility = 'visible';
 		// load scene
-		sceneManager = SceneManager(canvas, subMenuItem);
+		sceneManager = SceneManager(views, subMenuItem);
 		bindEventListeners();
 	} else if(subMenuItem === "start") {
 		// clear canvas
@@ -136,7 +154,7 @@ function onSubMenuItemClick(event) {
         document.getElementById("start").disabled = true;
 
 		// load scene
-		sceneManager = SceneManager(canvas, "multiplayer");
+		sceneManager = SceneManager(views, "multiplayer");
 		bindEventListeners();
         handler.startGame();
 	} else if(subMenuItem === "connect") {
@@ -169,7 +187,7 @@ function onSubMenuItemClick(event) {
 		loadingElem.style.visibility = 'visible';
 
 		// load scene
-		sceneManager = SceneManager(canvas, "shipselect");
+		sceneManager = SceneManager(views, "shipselect");
 		bindEventListeners();
 	} else if(subMenuItem === "back") {
 		const canvas = document.getElementById('canvas');
@@ -197,7 +215,7 @@ function onSubMenuItemClick(event) {
 		const loadingElem = document.getElementById('loading');
 		loadingElem.style.visibility = 'visible';
 
-		sceneManager = SceneManager(canvas, "menu");
+		sceneManager = SceneManager(views, "menu");
 		bindEventListeners();
 	} else if (mission > -1) {
 		// hide all except menu
@@ -222,7 +240,7 @@ function onSubMenuItemClick(event) {
 		const loadingElem = document.getElementById('loading');
 		loadingElem.style.visibility = 'visible';
 
-		sceneManager = SceneManager(canvas, subMenuItem);
+		sceneManager = SceneManager(views, subMenuItem);
 		bindEventListeners();
 	}
 }

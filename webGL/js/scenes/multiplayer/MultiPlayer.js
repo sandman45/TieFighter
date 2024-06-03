@@ -17,11 +17,11 @@ import WeaponsCollisionManager from "../../controls/WeaponsCollisionManager.js";
 import FlyControls from "../../controls/FlyControls.js";
 import LocalStorage from "../../localStorage/localStorage.js"
 
-export default (canvas, screenDimensions, sceneSubjects) => {
+export default (canvas, sceneSubjects) => {
     const sceneConstants = parseConfiguration(sceneConfiguration);
     const scene = buildScene(sceneConstants);
-    const renderer = buildRender(screenDimensions);
-    const camera = buildCamera(screenDimensions);
+    const renderer = buildRender(canvas);
+    const camera = buildCamera(canvas);
     const audio = GameAudio(camera, sceneConfiguration.audio, () => {
         audio.playSound("MUSIC", camera);
     });

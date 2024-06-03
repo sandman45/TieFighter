@@ -8,11 +8,11 @@ import GameAudio from "../../utils/Audio.js";
 import SkyBox from "../../sceneSubjects/SkyBox.js";
 import ModelLoader, { Model } from "../../utils/ModelLoader.js";
 
-export default (canvas, screenDimensions, models) => {
+export default (canvas, models) => {
     const sceneConstants = parseConfiguration(sceneConfiguration);
     const scene = buildScene(sceneConstants);
-    const renderer = buildRender(screenDimensions);
-    const camera = buildCamera(screenDimensions);
+    const renderer = buildRender(canvas);
+    const camera = buildCamera(canvas);
     const audio = GameAudio(camera, sceneConfiguration.audio, () => {
         audio.playSound("MUSIC_MENU", camera);
     });
