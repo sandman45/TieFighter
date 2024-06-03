@@ -17,7 +17,9 @@ function contextmenu( event ) {
 
 export default class FlyControls {
 
-    constructor(object, camera, domElement, collisionManager, laser, audio, config) {
+    constructor(object, camera, domElement, collisionManager, laser, audio, config, ships, hud) {
+        this.ships = ships;
+        this.hud = hud;
         this.config = config;
         this.object = object;
         this.camera = camera;
@@ -111,6 +113,7 @@ export default class FlyControls {
     };
 
     onKeyDown = function( keyCode ) {
+        console.log(`onKeyDown: ${keyCode}`);
         switch ( keyCode ) {
 
             case 16: /* shift */ this.movementSpeedMultiplier = .1; break;
@@ -139,7 +142,7 @@ export default class FlyControls {
                 this.throttleDown();
                 break;
             case 32: this.fireCannons(this.object); break;
-            case 116: this.acquireTarget(); break;
+            case 84: this.acquireTarget(); break;
 
         }
 
@@ -246,8 +249,21 @@ export default class FlyControls {
     };
 
     acquireTarget = () => {
-        // search thru
-      console.log(`Acquire Target:`);
+        if(this.ships.length > -1){
+            const currentTargetIndex = this.ships.indexOf(this.hud.getCurrentTarget());
+            let nextTargetIndex = this.ships.indexOf(this.ships[currentTargetIndex-1]);
+            if( nextTargetIndex >= 0 ) {
+                this.hud.acquireNewTarget(this.ships[nextTargetIndex]);
+                console.log(`Acquire Target: ${nextTargetIndex}:  ${this.ships[nextTargetIndex].designation}, ${this.ships[nextTargetIndex].name}`);
+            } else {
+                nextTargetIndex = this.ships.length - 1;
+                if(nextTargetIndex > -1){
+                    let nextTarget = this.ships[nextTargetIndex];
+                    console.log(`Acquire Target: ${nextTargetIndex}:  ${nextTarget.designation}, ${nextTarget.name}`);
+                    this.hud.acquireNewTarget(nextTarget);
+                }
+            }
+        }
     };
 
     fireCannons = function(mesh) {

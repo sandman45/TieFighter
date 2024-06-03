@@ -39,6 +39,9 @@ function startGame() {
     //TODO: double check room, player selection and connection etc
     const room = LocalStorage.getItem("SOCKET_ROOM");
     EventBus.post(events.START_GAME, room);
+    //show HUD?
+    const hudElem = document.getElementById('heads-up-display');
+    hudElem.style.visibility = 'visible';
 }
 
 function pilotName() {

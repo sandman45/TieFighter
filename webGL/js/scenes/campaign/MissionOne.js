@@ -35,6 +35,11 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
     const laser = LaserCannons(scene, campaignConfiguration.weapons[0], collisionManager, audio);
     // Ships
     const ships = addShips(scene, models, campaignConfiguration, laser);
+    const hudShips =[];
+    ships.forEach((ship)=>{
+        hudShips.push(ship.mesh);
+    });
+
     let playerShip = {};
     ships.forEach(ship => {
         if(ship.mesh.designation === campaignConfiguration.player.designation){
@@ -42,6 +47,9 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
         }
     });
 
+    const targetCamera = buildTargetCamera(canvas);
+
+    const hud = new Hud(ships[2].mesh, targetCamera);
 
     let controls;
     if(sceneGlobalConstants.controls.flightControls){
@@ -53,9 +61,7 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
 
     const explosion = Explosion(scene, "EXPLOSION", audio, camera);
 
-    const targetCamera = buildTargetCamera(canvas);
 
-    const hud = new Hud(ships[2].mesh, targetCamera);
 
     const sc = [
         GeneralLights(scene),
@@ -71,7 +77,7 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
     const weaponsCollision = WeaponsCollisionManager([laser], null, scene, sceneGlobalConstants);
 
     function createFlightControls(mesh, camera, renderer, collisionManager, laser, audio, config) {
-        const flightControls = new FlyControls( mesh, camera, renderer.domElement, collisionManager, laser, audio, config );
+        const flightControls = new FlyControls( mesh, camera, renderer.domElement, collisionManager, laser, audio, config, hudShips, hud );
         flightControls.movementSpeed = config.speed;
         flightControls.domElement = renderer.domElement;
         flightControls.rollSpeed = config.rollSpeed;

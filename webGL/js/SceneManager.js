@@ -82,12 +82,14 @@ export default (views, screen) => {
      * MULTIPLAYER STUFF
      */
     else if(screen === "multiplayer") {
-        mp = MultiPlayer(views[0].canvas, sceneSubjects);
+        mp = MultiPlayer(views[0].canvas, views[1].canvas, sceneSubjects);
         weaponsCollision = mp.weaponsCollision;
         // mapConfigurationToGUI(sceneConstants, sceneConfiguration, controls, datGui, sceneConfiguration);
         scene = mp.scene;
         views[0].renderer = mp.renderer;
         views[0].camera = mp.camera;
+        views[1].camera = mp.targetCamera;
+        views[1].renderer = mp.targetRenderer;
         weaponsCollision = mp.getWeaponsCollision();
         sceneReady = true;
     }
@@ -129,6 +131,7 @@ export default (views, screen) => {
             views[1].camera = missionOne.targetCamera;
             views[1].renderer = missionOne.targetRenderer;
             sceneReady = true;
+
         });
     }
 

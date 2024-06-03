@@ -100,6 +100,9 @@ function onMenuItemClick(event) {
 		const menu = document.getElementById("menu");
 		menu.style.visibility = "hidden";
 
+		const hudElem = document.getElementById('heads-up-display');
+		hudElem.style.visibility = 'hidden';
+
 		// show campaign-menu
 		const subMenu = document.getElementById("campaign-menu");
 		subMenu.style.visibility = "visible";
@@ -172,6 +175,9 @@ function onSubMenuItemClick(event) {
 		const element2 = document.getElementById("menu");
 		element2.style.visibility = "hidden";
 
+		const hudElem = document.getElementById('heads-up-display');
+		hudElem.style.visibility = 'hidden';
+
 		const room = LocalStorage.getItem("SOCKET_ROOM");
 		EventBus.post(events.LEAVE_ROOM, room);
 
@@ -215,6 +221,9 @@ function onSubMenuItemClick(event) {
 		const loadingElem = document.getElementById('loading');
 		loadingElem.style.visibility = 'visible';
 
+		const hudElem = document.getElementById('heads-up-display');
+		hudElem.style.visibility = 'hidden';
+
 		sceneManager = SceneManager(views, "menu");
 		bindEventListeners();
 	} else if (mission > -1) {
@@ -239,6 +248,9 @@ function onSubMenuItemClick(event) {
 
 		const loadingElem = document.getElementById('loading');
 		loadingElem.style.visibility = 'visible';
+
+		const hudElem = document.getElementById('heads-up-display');
+		hudElem.style.visibility = 'visible';
 
 		sceneManager = SceneManager(views, subMenuItem);
 		bindEventListeners();

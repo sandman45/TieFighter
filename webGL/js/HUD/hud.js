@@ -2,12 +2,14 @@ import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threej
 
 export default class HUD {
     constructor(target, camera){
-        this.camera = camera;
-        this.target = target;
-        this.goal = new THREE.Object3D();
-        target.add( this.goal );
-        this.goal.position.set(0, 5, 20);
-        this.setCameraPositionRelativeToMeshAndFollow(this.camera, target);
+        if(target){
+            this.camera = camera;
+            this.target = target;
+            this.goal = new THREE.Object3D();
+            target.add( this.goal );
+            this.goal.position.set(0, 5, 20);
+            this.setCameraPositionRelativeToMeshAndFollow(this.camera, target);
+        }
     }
 
     acquireNewTarget = (target) => {
@@ -17,6 +19,10 @@ export default class HUD {
         this.goal.position.set(0, 5, 20);
         this.setCameraPositionRelativeToMeshAndFollow(this.camera, target);
     };
+
+    getCurrentTarget = () => {
+        return this.target;
+    }
 
     setCameraPositionRelativeToMeshAndFollow = (camera, mesh) => {
         const temp = new THREE.Vector3();
