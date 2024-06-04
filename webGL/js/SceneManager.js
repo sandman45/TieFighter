@@ -166,20 +166,24 @@ export default (views, screen) => {
 
     function onWindowResize() {
         for ( let j = 0; j < views.length; ++ j ) {
-            const {width, height} = views[j].canvas;
-            if (screenDimensions) {
-                screenDimensions.width = width;
-                screenDimensions.height = height;
-            }
+            if(j===0){
+                // second view is the targeting computer.. not resizing for now
+                const {width, height} = views[j].canvas;
 
-            if (views[j].camera) {
-                views[j].camera.aspect = width / height;
-                views[j].camera.updateProjectionMatrix();
-            }
+                if (screenDimensions) {
+                    screenDimensions.width = width;
+                    screenDimensions.height = height;
+                }
 
-            console.log(`onWindowResize index:${j} = width: ${width}, height: ${height}`);
-            if(views[j].renderer){
-                views[j].renderer.setSize(width, height);
+                if (views[j].camera) {
+                    views[j].camera.aspect = width / height;
+                    views[j].camera.updateProjectionMatrix();
+                }
+
+                console.log(`onWindowResize index:${j} = width: ${width}, height: ${height}`);
+                if(views[j].renderer){
+                    views[j].renderer.setSize(width, height);
+                }
             }
         }
     }

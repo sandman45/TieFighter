@@ -142,8 +142,8 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
 
     // target Camera
     function buildTargetCamera() {
-        const width = document.getElementById('radar').offsetWidth;
-        const height = document.getElementById('radar').offsetHeight;
+        const width = document.getElementById('targetComputer').offsetWidth;
+        const height = document.getElementById('targetComputer').offsetHeight;
         const aspectRatio = width / height;
         const fieldOfView = 60;
         const nearPlane = 1;

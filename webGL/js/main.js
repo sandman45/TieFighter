@@ -15,7 +15,7 @@ function View(canvas) {
 	}
 }
 const canvas = document.getElementById('canvas');
-const canvas2 = document.getElementById('radar');
+const canvas2 = document.getElementById('targetComputer');
 
 views.push(new View(canvas));
 views.push(new View(canvas2));

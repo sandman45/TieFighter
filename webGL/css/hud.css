@@ -18,9 +18,9 @@
     background-color: darkgray;
 }
 
-.radar {
+.targetComputer {
     height: 150px;
-    width: 150px;
+    width: 200px;
     background-color: darkslategrey;
     border: black 1px solid;
     margin: auto;
@@ -28,17 +28,30 @@
 
 .hull {
     height: 150px;
-    width: 150px;
+    width: 200px;
     background-color: darkslategrey;
     border: black 1px solid;
     margin: auto;
 }
 
-.weapons {
+.shields {
     height: 150px;
-    width: 150px;
+    width: 200px;
     background-color: darkslategrey;
     border: black 1px solid;
     margin: auto;
+
+    .shieldImage {
+        position: relative;
+        height: 100%;
+        left: 20px;
+    }
+    .ship-silhouette {
+        position: relative;
+        height: 35%;
+        bottom: 49px;
+        right: 80px;
+    }
 }
+
 
