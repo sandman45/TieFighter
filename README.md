@@ -57,6 +57,13 @@ the web server will run on port 3000 unless changed in the .env file
 
 The webpage will be available at `http://localhost:8080/`
 
+## Running on an EC2 instance ** for my EC2 its older and node 17.9.1 only works ** 
+I would have to re-create a new EC2 instance with newer distro
+- curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+- Install NVM
+- nvm install v17.9.1
+- 
+
 ## Scene
 
 The scene is built with Three.js (WebGL) and runs into your browser.
