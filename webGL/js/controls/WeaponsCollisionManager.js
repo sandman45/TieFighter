@@ -7,6 +7,8 @@ export default (weapons, userId, scene, sceneConstants) => {
             sceneObjects.forEach(obj => {
                 // checkCollision with weapons with scene objects
                 if(obj && obj.mesh){
+                    // skip destroyed ships
+                    if(obj.mesh.hull <= 0) return;
                     // console.log(`checking mesh collision: ${obj.mesh.name}`);
                     const collisionCheck = weapons[i].checkCollision(obj.mesh);
                     if(collisionCheck.collision){
@@ -39,6 +41,9 @@ export default (weapons, userId, scene, sceneConstants) => {
     function triggerEvent(sceneObjects, obj, event) {
         for(let i=0; i<sceneObjects.length; i++){
             if(event === eventType.EXPLOSION && sceneObjects[i].name === event){
+                // skip if already destroyed
+                if(obj.mesh.hull <= 0) return;
+
                 const isPlayer = obj.mesh.userId === userId;
 
                 applyDamage(obj.mesh, 25);
@@ -51,12 +56,29 @@ export default (weapons, userId, scene, sceneConstants) => {
                         hull: obj.mesh.hull,
                         maxHull: obj.mesh.maxHull,
                     });
+                } else {
+                    // notify HUD in case this ship is the current target
+                    eventBus.post(eventType.TARGET_DAMAGED, {
+                        shields: obj.mesh.shields,
+                        maxShields: obj.mesh.maxShields,
+                        hull: obj.mesh.hull,
+                        maxHull: obj.mesh.maxHull,
+                        userId: obj.mesh.userId,        // use userId instead of designation
+                        designation: obj.mesh.designation,
+                    });
                 }
 
                 sceneObjects[i].trigger(obj.mesh.position);
                 // console.log(`Update ${obj.mesh.name} Hull: ${obj.mesh.hull}`);
 
                 if(obj.mesh.hull <= 0){
+
+                    // post so MultiPlayer can clean up hudShips
+                    eventBus.post(eventType.SHIP_DESTROYED, {
+                        userId: obj.mesh.userId,
+                        designation: obj.mesh.designation,
+                    });
+
                     if(sceneConstants.multiPlayer.active){
                         console.log(`${obj.mesh.name}: ${obj.mesh.userId} has been destroyed!`);
                         if(obj.mesh.userId === userId){

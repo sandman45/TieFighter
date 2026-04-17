@@ -4,7 +4,7 @@ import events from "../eventBus/events.js";
 
 const SEGMENT_COUNT = 10;
 
-function updateBar(barId, current, max) {
+export function updateBar(barId, current, max) {
     const bar = document.getElementById(barId);
     if (!bar) return;
 
@@ -12,9 +12,8 @@ function updateBar(barId, current, max) {
     const activePct = max > 0 ? current / max : 0;
     const activeCount = Math.ceil(activePct * SEGMENT_COUNT);
 
-    // flash animation - remove and re-add class to retrigger
     bar.classList.remove('hit');
-    void bar.offsetWidth; // force reflow so animation restarts
+    void bar.offsetWidth;
     bar.classList.add('hit');
 
     segments.forEach((seg, i) => {
@@ -33,14 +32,33 @@ function updateBar(barId, current, max) {
 }
 
 export function initHUD(playerConfig) {
-    // seed bars with starting values from config on game start
     updateBar('shield-bar', playerConfig.shields, playerConfig.shields);
     updateBar('hull-bar', playerConfig.hull, playerConfig.hull);
 
-    // subscribe here so it only activates once the HUD is actually initialised
     EventBus.subscribe(events.PLAYER_DAMAGED, ({ shields, maxShields, hull, maxHull }) => {
         updateBar('shield-bar', shields, maxShields);
         updateBar('hull-bar', hull, maxHull);
+    });
+
+    // userId is now destructured from the event payload
+    EventBus.subscribe(events.TARGET_CHANGED, ({ shields, maxShields, hull, maxHull, name, designation, userId }) => {
+        const nameEl = document.getElementById('target-name');
+        if(nameEl) {
+            nameEl.textContent = designation || name || userId;
+            nameEl.dataset.targetUserId = userId || designation;
+        }
+        updateBar('target-shield-bar', shields, maxShields);
+        updateBar('target-hull-bar', hull, maxHull);
+    });
+
+    // userId and designation both destructured, currentTargetId read from the element
+    EventBus.subscribe(events.TARGET_DAMAGED, ({ shields, maxShields, hull, maxHull, userId, designation }) => {
+        const nameEl = document.getElementById('target-name');
+        const currentTargetId = nameEl && nameEl.dataset.targetUserId;
+        if(currentTargetId && (currentTargetId === userId || currentTargetId === designation)) {
+            updateBar('target-shield-bar', shields, maxShields);
+            updateBar('target-hull-bar', hull, maxHull);
+        }
     });
 }
 

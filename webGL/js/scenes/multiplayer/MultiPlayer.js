@@ -15,7 +15,7 @@ import PlayerControls from "../../controls/PlayerControls.js";
 import Explosion from "../../particles/Explosion.js";
 import WeaponsCollisionManager from "../../controls/WeaponsCollisionManager.js";
 import FlyControls from "../../controls/FlyControls.js";
-import Hud from "../../HUD/hud.js";
+import Hud, { initHUD, updateBar } from "../../HUD/hud.js";
 import LocalStorage from "../../localStorage/localStorage.js"
 
 export default (canvas, canvas2, sceneSubjects) => {
@@ -89,6 +89,7 @@ export default (canvas, canvas2, sceneSubjects) => {
         sceneSubjects.push(player);
         hudShips.push(player.mesh);
         hud = new Hud(hudShips[0], targetCamera);
+        initHUD(playerConfig); // add this
         sceneSubjects.push(hud);
         if(sceneConstants.controls.flightControls){
             controls = createFlightControls(player.mesh, camera, renderer, collisionManager, laser, audio, playerConfig);
@@ -100,6 +101,34 @@ export default (canvas, canvas2, sceneSubjects) => {
         
         sceneSubjects.push(controls);
         sceneSubjects.push(laser);
+
+        eventBus.subscribe(eventBusEvents.SHIP_DESTROYED, ({ userId: destroyedUserId }) => {
+            // remove from hudShips so T key no longer cycles to it
+            const idx = hudShips.findIndex(ship => ship.userId === destroyedUserId);
+            if(idx > -1) {
+                console.log(`removing destroyed ship ${destroyedUserId} from hudShips`);
+                hudShips.splice(idx, 1);
+            }
+
+            // if this was the local player, disable controls and laser
+            if(destroyedUserId === userId) {
+                controls = null;
+                laser = null;
+                // remove controls and laser from sceneSubjects so update() stops calling them
+                sceneSubjects = sceneSubjects.filter(sub => {
+                    return sub !== controls && sub !== laser;
+                });
+            }
+
+            // if this was the current target, clear the targeting computer
+            const nameEl = document.getElementById('target-name');
+            if(nameEl && nameEl.dataset.targetUserId === destroyedUserId) {
+                nameEl.textContent = 'NO TARGET';
+                nameEl.dataset.targetUserId = '';
+                updateBar('target-shield-bar', 0, 1);
+                updateBar('target-hull-bar', 0, 1);
+            }
+        });
     }
 
     eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, (data) => {
@@ -125,6 +154,7 @@ export default (canvas, canvas2, sceneSubjects) => {
         });
         if(add){
             const opponent = ModelLoader(scene, opponentConfig, Model[opponentConfig.name], null);
+            console.log(`opponent mesh - userId: ${opponent.mesh.userId}, hull: ${opponent.mesh.hull}, maxHull: ${opponent.mesh.maxHull}, shields: ${opponent.mesh.shields}, maxShields: ${opponent.mesh.maxShields}`);
             hudShips.push(opponent.mesh);
             sceneSubjects.push(opponent);
         }
@@ -137,7 +167,7 @@ export default (canvas, canvas2, sceneSubjects) => {
                 if(subject.fire){
                     //grab mesh from player in scene
                     scene.children.forEach(child => {
-                        if(child.userId === data.userId){
+                        if(child.userId === data.userId && child.hull > 0){
                             subject.fire(child, 2, child.faction);
                         }
                     });
@@ -182,9 +212,15 @@ export default (canvas, canvas2, sceneSubjects) => {
         });
     });
 
+
     eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL_END, (userId) => {
         // cleanup sceneObjects
         console.log(`${eventBusEvents.GAME_STATE_LOCAL_END} userId: ${userId}`);
+
+        // stop controls and laser immediately
+        controls = null;
+        laser = null;
+
         sceneSubjects.forEach((subject,i) => {
             if(subject.mesh) {
                 console.log(subject);

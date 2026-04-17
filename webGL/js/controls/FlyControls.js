@@ -252,21 +252,42 @@ export default class FlyControls {
         if(this.ships.length > -1){
             const currentTargetIndex = this.ships.indexOf(this.hud.getCurrentTarget());
             let nextTargetIndex = this.ships.indexOf(this.ships[currentTargetIndex-1]);
+            const target = this.ships[nextTargetIndex] || this.ships[this.ships.length - 1];
+            console.log(`target - userId: ${target.userId}, hull: ${target.hull}, maxHull: ${target.maxHull}, shields: ${target.shields}, maxShields: ${target.maxShields}`);
             if( nextTargetIndex >= 0 ) {
                 this.hud.acquireNewTarget(this.ships[nextTargetIndex]);
                 console.log(`Acquire Target: ${nextTargetIndex}:  ${this.ships[nextTargetIndex].designation}, ${this.ships[nextTargetIndex].name}`);
+                eventBus.post(eventBusEvents.TARGET_CHANGED, {
+                    shields: this.ships[nextTargetIndex].shields,
+                    maxShields: this.ships[nextTargetIndex].maxShields,
+                    hull: this.ships[nextTargetIndex].hull,
+                    maxHull: this.ships[nextTargetIndex].maxHull,
+                    name: this.ships[nextTargetIndex].name,
+                    designation: this.ships[nextTargetIndex].designation,
+                    userId: this.ships[nextTargetIndex].userId,  // add this
+                });
             } else {
                 nextTargetIndex = this.ships.length - 1;
                 if(nextTargetIndex > -1){
                     let nextTarget = this.ships[nextTargetIndex];
                     console.log(`Acquire Target: ${nextTargetIndex}:  ${nextTarget.designation}, ${nextTarget.name}`);
                     this.hud.acquireNewTarget(nextTarget);
+                    eventBus.post(eventBusEvents.TARGET_CHANGED, {
+                        shields: nextTarget.shields,
+                        maxShields: nextTarget.maxShields,
+                        hull: nextTarget.hull,
+                        maxHull: nextTarget.maxHull,
+                        name: nextTarget.name,
+                        designation: nextTarget.designation,
+                        userId: nextTarget.userId,  // add this
+                    });
                 }
             }
         }
     };
 
     fireCannons = function(mesh) {
+        if(mesh.hull <= 0) return;  // add this guard
         // move / translate them on the game world
         // console.log(`firing lasers`);
         this.laser.fire(mesh, 2, mesh.faction);
@@ -284,6 +305,7 @@ export default class FlyControls {
     };
 
     update = function( delta ) {
+        if(this.object.hull <= 0) return;
         const matrix = new THREE.Matrix4();
         matrix.extractRotation( this.object.matrix );
 
