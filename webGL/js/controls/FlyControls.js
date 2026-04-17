@@ -17,7 +17,9 @@ function contextmenu( event ) {
 
 export default class FlyControls {
 
-    constructor(object, camera, domElement, collisionManager, laser, audio, config) {
+    constructor(object, camera, domElement, collisionManager, laser, audio, config, ships, hud) {
+        this.ships = ships;
+        this.hud = hud;
         this.config = config;
         this.object = object;
         this.camera = camera;
@@ -96,13 +98,28 @@ export default class FlyControls {
         this.rotationVector.z = ( - this.moveState.rollRight + this.moveState.rollLeft );
     };
 
+    throttleDown = () => {
+        if(parseFloat(this.throttle) > 0){
+            this.throttle = (parseFloat(this.throttle) - 0.1).toFixed(1);
+        }
+        console.log(`throttle: ${this.throttle}`);
+    };
+
+    throttleUp = () => {
+        if(parseFloat(this.throttle) < this.config.speed){
+            this.throttle = (parseFloat(this.throttle) + 0.1).toFixed(1);
+        }
+        console.log(`throttle: ${this.throttle}`);
+    };
+
     onKeyDown = function( keyCode ) {
+        console.log(`onKeyDown: ${keyCode}`);
         switch ( keyCode ) {
 
             case 16: /* shift */ this.movementSpeedMultiplier = .1; break;
 
-            case 87: /*W*/ this.moveState.forward = 1; break;
-            case 83: /*S*/ this.moveState.back = 1; break;
+            case 87: /*W*/ this.throttleUp(); break;
+            case 83: /*S*/ this.throttleDown(); break;
 
             case 65: /*A*/ this.moveState.left = 1; break;
             case 68: /*D*/ this.moveState.right = 1; break;
@@ -119,19 +136,13 @@ export default class FlyControls {
             case 81: /*Q*/ this.moveState.rollLeft = 1; break;
             case 69: /*E*/ this.moveState.rollRight = 1; break;
             case 187: /*+/=*/
-                if(parseFloat(this.throttle) < this.config.speed){
-                    this.throttle = (parseFloat(this.throttle) + 0.1).toFixed(1);
-                }
-                console.log(`throttle: ${this.throttle}`);
-                // console.log(`rollSpeed: ${this.rollSpeed}`);
+                this.throttleUp();
                 break;
             case 189: /*-*/
-                if(parseFloat(this.throttle) > 0){
-                    this.throttle = (parseFloat(this.throttle) - 0.1).toFixed(1);
-                }
-                console.log(`throttle: ${this.throttle}`);
+                this.throttleDown();
                 break;
             case 32: this.fireCannons(this.object); break;
+            case 84: this.acquireTarget(); break;
 
         }
 
@@ -144,8 +155,8 @@ export default class FlyControls {
 
             case 16: /* shift */ this.movementSpeedMultiplier = 1; break;
 
-            case 87: /*W*/ this.moveState.forward = 0; break;
-            case 83: /*S*/ this.moveState.back = 0; break;
+            case 87: /*W*/  break;
+            case 83: /*S*/  break;
 
             case 65: /*A*/ this.moveState.left = 0; break;
             case 68: /*D*/ this.moveState.right = 0; break;
@@ -193,7 +204,7 @@ export default class FlyControls {
 
             this.updateMovementVector();
         }
-
+        this.fireCannons(this.object);
     };
     mousemove = function( event ) {
         if ( ! this.dragToLook || this.mouseStatus > 0 ) {
@@ -237,7 +248,46 @@ export default class FlyControls {
 
     };
 
+    acquireTarget = () => {
+        if(this.ships.length > -1){
+            const currentTargetIndex = this.ships.indexOf(this.hud.getCurrentTarget());
+            let nextTargetIndex = this.ships.indexOf(this.ships[currentTargetIndex-1]);
+            const target = this.ships[nextTargetIndex] || this.ships[this.ships.length - 1];
+            console.log(`target - userId: ${target.userId}, hull: ${target.hull}, maxHull: ${target.maxHull}, shields: ${target.shields}, maxShields: ${target.maxShields}`);
+            if( nextTargetIndex >= 0 ) {
+                this.hud.acquireNewTarget(this.ships[nextTargetIndex]);
+                console.log(`Acquire Target: ${nextTargetIndex}:  ${this.ships[nextTargetIndex].designation}, ${this.ships[nextTargetIndex].name}`);
+                eventBus.post(eventBusEvents.TARGET_CHANGED, {
+                    shields: this.ships[nextTargetIndex].shields,
+                    maxShields: this.ships[nextTargetIndex].maxShields,
+                    hull: this.ships[nextTargetIndex].hull,
+                    maxHull: this.ships[nextTargetIndex].maxHull,
+                    name: this.ships[nextTargetIndex].name,
+                    designation: this.ships[nextTargetIndex].designation,
+                    userId: this.ships[nextTargetIndex].userId,  // add this
+                });
+            } else {
+                nextTargetIndex = this.ships.length - 1;
+                if(nextTargetIndex > -1){
+                    let nextTarget = this.ships[nextTargetIndex];
+                    console.log(`Acquire Target: ${nextTargetIndex}:  ${nextTarget.designation}, ${nextTarget.name}`);
+                    this.hud.acquireNewTarget(nextTarget);
+                    eventBus.post(eventBusEvents.TARGET_CHANGED, {
+                        shields: nextTarget.shields,
+                        maxShields: nextTarget.maxShields,
+                        hull: nextTarget.hull,
+                        maxHull: nextTarget.maxHull,
+                        name: nextTarget.name,
+                        designation: nextTarget.designation,
+                        userId: nextTarget.userId,  // add this
+                    });
+                }
+            }
+        }
+    };
+
     fireCannons = function(mesh) {
+        if(mesh.hull <= 0) return;  // add this guard
         // move / translate them on the game world
         // console.log(`firing lasers`);
         this.laser.fire(mesh, 2, mesh.faction);
@@ -255,6 +305,7 @@ export default class FlyControls {
     };
 
     update = function( delta ) {
+        if(this.object.hull <= 0) return;
         const matrix = new THREE.Matrix4();
         matrix.extractRotation( this.object.matrix );
 

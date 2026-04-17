@@ -1,6 +1,6 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 
-export default (gameObjMesh, config, command, direction, collisionManager, audio, laser) => {
+export default (scene, gameObjMesh, config, command, direction, collisionManager, audio, laser) => {
     let collision = false;
     if(command === "patrol") {
         // if its patrol move the gameObj around a specific route
@@ -11,6 +11,9 @@ export default (gameObjMesh, config, command, direction, collisionManager, audio
         rotate(gameObjMesh, Math.PI, "y", 200, config);
     } else if(command === "fire") {
         fireWeapon(gameObjMesh, config, laser);
+    } else if(command === "acquireTarget") {
+        scene.
+        acquireTarget(gameObjMesh,)
     }
     return collision;
 }
@@ -97,4 +100,8 @@ function rotate(mesh, angle, axis = "y", duration = 300, config) {
             .onComplete( () => config.rotation.rotating = false)
             .start();
     }
+}
+
+function acquireTarget(mesh, targetObj) {
+
 }

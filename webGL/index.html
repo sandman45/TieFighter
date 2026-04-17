@@ -6,11 +6,81 @@
 		<link rel="stylesheet" href="./css/style.css">
 		<link rel="stylesheet" href="./css/loading.css">
 		<link rel="stylesheet" href="./css/menu.css">
+		<link rel="stylesheet" href="./css/hud.css">
 		<script src="/socket.io/socket.io.js"></script>
 	</head>
 
 	<body>
 		<canvas id="canvas"></canvas>
+		<div id="heads-up-display" class="hud">
+			<div class="hud-container">
+				<div id="shields" class="shields">
+					<div class="bar-container">
+						<div class="bar-label">SHIELDS</div>
+						<div class="segmented-bar" id="shield-bar">
+							<div class="segment" data-index="0"></div>
+							<div class="segment" data-index="1"></div>
+							<div class="segment" data-index="2"></div>
+							<div class="segment" data-index="3"></div>
+							<div class="segment" data-index="4"></div>
+							<div class="segment" data-index="5"></div>
+							<div class="segment" data-index="6"></div>
+							<div class="segment" data-index="7"></div>
+							<div class="segment" data-index="8"></div>
+							<div class="segment" data-index="9"></div>
+						</div>
+					</div>
+				</div>
+				<div class="target-computer-wrapper">
+					<canvas id="targetComputer" class="targetComputer"></canvas>
+					<div class="target-hud-overlay">
+						<div class="bar-label" id="target-name">NO TARGET</div>
+						<div class="segmented-bar" id="target-shield-bar">
+							<div class="segment" data-index="0"></div>
+							<div class="segment" data-index="1"></div>
+							<div class="segment" data-index="2"></div>
+							<div class="segment" data-index="3"></div>
+							<div class="segment" data-index="4"></div>
+							<div class="segment" data-index="5"></div>
+							<div class="segment" data-index="6"></div>
+							<div class="segment" data-index="7"></div>
+							<div class="segment" data-index="8"></div>
+							<div class="segment" data-index="9"></div>
+						</div>
+						<div class="bar-label">HULL</div>
+						<div class="segmented-bar" id="target-hull-bar">
+							<div class="segment" data-index="0"></div>
+							<div class="segment" data-index="1"></div>
+							<div class="segment" data-index="2"></div>
+							<div class="segment" data-index="3"></div>
+							<div class="segment" data-index="4"></div>
+							<div class="segment" data-index="5"></div>
+							<div class="segment" data-index="6"></div>
+							<div class="segment" data-index="7"></div>
+							<div class="segment" data-index="8"></div>
+							<div class="segment" data-index="9"></div>
+						</div>
+					</div>
+				</div>
+				<div id="hull" class="hull">
+					<div class="bar-container">
+						<div class="bar-label">HULL</div>
+						<div class="segmented-bar" id="hull-bar">
+							<div class="segment" data-index="0"></div>
+							<div class="segment" data-index="1"></div>
+							<div class="segment" data-index="2"></div>
+							<div class="segment" data-index="3"></div>
+							<div class="segment" data-index="4"></div>
+							<div class="segment" data-index="5"></div>
+							<div class="segment" data-index="6"></div>
+							<div class="segment" data-index="7"></div>
+							<div class="segment" data-index="8"></div>
+							<div class="segment" data-index="9"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 		<div id="loading">
 			<div>
 				<div >...loading...</div>

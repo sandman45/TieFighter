@@ -1,0 +1,191 @@
+.hud {
+    visibility: hidden;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    z-index: 999;
+    bottom: 0;
+    position: absolute;
+    height: 250px;
+    width: 100%;
+}
+
+.hud-container {
+    display: flex;
+    flex-direction: row;
+    width: 80%;
+    justify-content: space-evenly;
+    background-color: darkgray;
+}
+
+.targetComputer {
+    height: 188px;
+    width: 250px;
+    background-color: darkslategrey;
+    border: black 1px solid;
+    margin: auto;
+}
+
+.hull {
+    height: 188px;
+    width: 250px;
+    background-color: darkslategrey;
+    border: black 1px solid;
+    margin: auto;
+}
+
+.shields {
+    height: 188px;
+    width: 250px;
+    background-color: darkslategrey;
+    border: black 1px solid;
+    margin: auto;
+
+    .shieldImage {
+        position: relative;
+        height: 100%;
+        left: 20px;
+    }
+    .ship-silhouette {
+        position: relative;
+        height: 35%;
+        bottom: 49px;
+        right: 80px;
+    }
+}
+
+.bar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.bar-label {
+    font-family: "Courier New", monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #00ff99;
+    margin-bottom: 4px;
+    text-shadow: 0 0 6px #00ff99;
+}
+
+.segmented-bar {
+    display: flex;
+    flex-direction: row;
+    gap: 3px;
+    width: 100%;
+}
+
+.segment {
+    flex: 1;
+    height: 12px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(0, 255, 153, 0.3);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* shields active - blue/cyan */
+#shield-bar .segment.active {
+    background-color: #00cfff;
+    border-color: #00cfff;
+    box-shadow: 0 0 6px #00cfff, inset 0 0 4px rgba(255,255,255,0.3);
+}
+
+/* hull active - green, warning, critical */
+#hull-bar .segment.active {
+    background-color: #00ff99;
+    border-color: #00ff99;
+    box-shadow: 0 0 6px #00ff99, inset 0 0 4px rgba(255,255,255,0.2);
+}
+
+#hull-bar .segment.active.warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    box-shadow: 0 0 6px #ffc107, inset 0 0 4px rgba(255,255,255,0.2);
+}
+
+#hull-bar .segment.active.critical {
+    background-color: #ff3c3c;
+    border-color: #ff3c3c;
+    box-shadow: 0 0 8px #ff3c3c, inset 0 0 4px rgba(255,255,255,0.2);
+    animation: flicker 0.8s infinite alternate;
+}
+
+/* flash the whole bar when hit */
+.segmented-bar.hit .segment.active {
+    animation: flash-hit 0.3s ease-out;
+}
+
+@keyframes flash-hit {
+    0%   { filter: brightness(3); }
+    100% { filter: brightness(1); }
+}
+
+@keyframes flicker {
+    0%   { opacity: 1; }
+    100% { opacity: 0.4; }
+}
+
+.target-computer-wrapper {
+    position: relative;
+    height: 188px;
+    width: 250px;
+    margin: auto;
+}
+
+.targetComputer {
+    height: 188px;
+    width: 250px;
+    background-color: darkslategrey;
+    border: black 1px solid;
+}
+
+.target-hud-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 6px;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 80%, transparent);
+}
+
+#target-name {
+    font-family: "Courier New", monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: #ff9900;
+    text-shadow: 0 0 6px #ff9900;
+    margin-bottom: 2px;
+}
+
+/* target shield bar - orange tint to distinguish from player */
+#target-shield-bar .segment.active {
+    background-color: #00cfff;
+    border-color: #00cfff;
+    box-shadow: 0 0 6px #00cfff, inset 0 0 4px rgba(255,255,255,0.3);
+}
+
+#target-hull-bar .segment.active {
+    background-color: #ff9900;
+    border-color: #ff9900;
+    box-shadow: 0 0 6px #ff9900, inset 0 0 4px rgba(255,255,255,0.2);
+}
+
+#target-hull-bar .segment.active.warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    box-shadow: 0 0 6px #ffc107;
+}
+
+#target-hull-bar .segment.active.critical {
+    background-color: #ff3c3c;
+    border-color: #ff3c3c;
+    box-shadow: 0 0 8px #ff3c3c;
+    animation: flicker 0.8s infinite alternate;
+}

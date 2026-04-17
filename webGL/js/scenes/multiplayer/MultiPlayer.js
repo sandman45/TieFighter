@@ -15,13 +15,16 @@ import PlayerControls from "../../controls/PlayerControls.js";
 import Explosion from "../../particles/Explosion.js";
 import WeaponsCollisionManager from "../../controls/WeaponsCollisionManager.js";
 import FlyControls from "../../controls/FlyControls.js";
+import Hud, { initHUD, updateBar } from "../../HUD/hud.js";
 import LocalStorage from "../../localStorage/localStorage.js"
 
-export default (canvas, screenDimensions, sceneSubjects) => {
+export default (canvas, canvas2, sceneSubjects) => {
     const sceneConstants = parseConfiguration(sceneConfiguration);
     const scene = buildScene(sceneConstants);
-    const renderer = buildRender(screenDimensions);
-    const camera = buildCamera(screenDimensions);
+    const renderer = buildRender(canvas);
+    const targetRenderer = buildTargetRender(canvas2);
+    const camera = buildCamera(canvas);
+    let targetCamera;
     const audio = GameAudio(camera, sceneConfiguration.audio, () => {
         audio.playSound("MUSIC", camera);
     });
@@ -31,6 +34,8 @@ export default (canvas, screenDimensions, sceneSubjects) => {
     let laser = null;
     let weaponsCollision = null;
     let controls = null;
+    let hud = null;
+    let hudShips = [];
     buildLight(scene);
 
     const floorConfig = sceneConstants.floor;
@@ -78,6 +83,14 @@ export default (canvas, screenDimensions, sceneSubjects) => {
         playerConfig = selection;
         playerConfig.userId = socketId;
         player = ModelLoader(scene, playerConfig, Model[playerConfig.name], null);
+
+        targetCamera = buildTargetCamera(canvas);
+
+        sceneSubjects.push(player);
+        hudShips.push(player.mesh);
+        hud = new Hud(hudShips[0], targetCamera);
+        initHUD(playerConfig); // add this
+        sceneSubjects.push(hud);
         if(sceneConstants.controls.flightControls){
             controls = createFlightControls(player.mesh, camera, renderer, collisionManager, laser, audio, playerConfig);
         } else {
@@ -85,9 +98,37 @@ export default (canvas, screenDimensions, sceneSubjects) => {
         }
         controls.dragToLook = false;
         weaponsCollision = WeaponsCollisionManager([laser], userId, scene, sceneConstants);
-        sceneSubjects.push(player);
+        
         sceneSubjects.push(controls);
         sceneSubjects.push(laser);
+
+        eventBus.subscribe(eventBusEvents.SHIP_DESTROYED, ({ userId: destroyedUserId }) => {
+            // remove from hudShips so T key no longer cycles to it
+            const idx = hudShips.findIndex(ship => ship.userId === destroyedUserId);
+            if(idx > -1) {
+                console.log(`removing destroyed ship ${destroyedUserId} from hudShips`);
+                hudShips.splice(idx, 1);
+            }
+
+            // if this was the local player, disable controls and laser
+            if(destroyedUserId === userId) {
+                controls = null;
+                laser = null;
+                // remove controls and laser from sceneSubjects so update() stops calling them
+                sceneSubjects = sceneSubjects.filter(sub => {
+                    return sub !== controls && sub !== laser;
+                });
+            }
+
+            // if this was the current target, clear the targeting computer
+            const nameEl = document.getElementById('target-name');
+            if(nameEl && nameEl.dataset.targetUserId === destroyedUserId) {
+                nameEl.textContent = 'NO TARGET';
+                nameEl.dataset.targetUserId = '';
+                updateBar('target-shield-bar', 0, 1);
+                updateBar('target-hull-bar', 0, 1);
+            }
+        });
     }
 
     eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL_INIT_OPPONENT, (data) => {
@@ -113,6 +154,8 @@ export default (canvas, screenDimensions, sceneSubjects) => {
         });
         if(add){
             const opponent = ModelLoader(scene, opponentConfig, Model[opponentConfig.name], null);
+            console.log(`opponent mesh - userId: ${opponent.mesh.userId}, hull: ${opponent.mesh.hull}, maxHull: ${opponent.mesh.maxHull}, shields: ${opponent.mesh.shields}, maxShields: ${opponent.mesh.maxShields}`);
+            hudShips.push(opponent.mesh);
             sceneSubjects.push(opponent);
         }
     });
@@ -124,7 +167,7 @@ export default (canvas, screenDimensions, sceneSubjects) => {
                 if(subject.fire){
                     //grab mesh from player in scene
                     scene.children.forEach(child => {
-                        if(child.userId === data.userId){
+                        if(child.userId === data.userId && child.hull > 0){
                             subject.fire(child, 2, child.faction);
                         }
                     });
@@ -164,13 +207,20 @@ export default (canvas, screenDimensions, sceneSubjects) => {
                 console.log(`${child.name}: ${data.userId} userId has been removed from game!`);
                 scene.remove(child);
                 sceneSubjects.splice(sceneSubjects.indexOf(child), 1);
+                hudShips.splice(sceneSubjects.indexOf(child),1);
             }
         });
     });
 
+
     eventBus.subscribe(eventBusEvents.GAME_STATE_LOCAL_END, (userId) => {
         // cleanup sceneObjects
         console.log(`${eventBusEvents.GAME_STATE_LOCAL_END} userId: ${userId}`);
+
+        // stop controls and laser immediately
+        controls = null;
+        laser = null;
+
         sceneSubjects.forEach((subject,i) => {
             if(subject.mesh) {
                 console.log(subject);
@@ -213,12 +263,41 @@ export default (canvas, screenDimensions, sceneSubjects) => {
         return renderer
     }
 
+    function buildTargetRender({ width, height }) {
+        const targRenderer = new THREE.WebGLRenderer({ canvas: canvas2, antialias: true, alpha: true });
+        const DPR = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
+        targRenderer.setPixelRatio(DPR);
+        targRenderer.setSize(width, height);
+
+        targRenderer.gammaInput = true;
+        targRenderer.gammaOutput = true;
+
+        targRenderer.shadowMap.enabled = true;
+        targRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        return targRenderer
+    }
     function buildLight(scene){
         const sphere = new THREE.SphereBufferGeometry(16,32,32);
         const light = new THREE.PointLight( 0xffffff, 10, 700);
         light.add(new THREE.Mesh( sphere, new THREE.MeshBasicMaterial({color: 0xffffff})));
         light.position.set(400,400,500);
         scene.add(light);
+    }
+
+    // target Camera
+    function buildTargetCamera() {
+        const width = document.getElementById('targetComputer').offsetWidth;
+        const height = document.getElementById('targetComputer').offsetHeight;
+        const aspectRatio = width / height;
+        const fieldOfView = 60;
+        const nearPlane = 1;
+        const farPlane = 3000;
+        const camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
+
+        camera.position.y = 10;
+
+        return camera;
     }
 
     function buildCamera({ width, height }) {
@@ -234,7 +313,7 @@ export default (canvas, screenDimensions, sceneSubjects) => {
     }
 
     function createFlightControls(mesh, camera, renderer, collisionManager, laser, audio, config) {
-        const flightControls = new FlyControls( mesh, camera, renderer.domElement, collisionManager, laser, audio, config );
+        const flightControls = new FlyControls( mesh, camera, renderer.domElement, collisionManager, laser, audio, config, hudShips, hud );
         flightControls.movementSpeed = config.speed;
         flightControls.domElement = renderer.domElement;
         flightControls.rollSpeed = config.rollSpeed;
@@ -246,7 +325,9 @@ export default (canvas, screenDimensions, sceneSubjects) => {
     return {
         scene,
         camera,
+        targetCamera,
         renderer,
+        targetRenderer,
         getControls,
         getSceneSubjects,
         getWeaponsCollision
