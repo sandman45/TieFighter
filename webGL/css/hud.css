@@ -54,4 +54,77 @@
     }
 }
 
+.bar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.bar-label {
+    font-family: "Courier New", monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #00ff99;
+    margin-bottom: 4px;
+    text-shadow: 0 0 6px #00ff99;
+}
+
+.segmented-bar {
+    display: flex;
+    flex-direction: row;
+    gap: 3px;
+    width: 100%;
+}
+
+.segment {
+    flex: 1;
+    height: 12px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(0, 255, 153, 0.3);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* shields active - blue/cyan */
+#shield-bar .segment.active {
+    background-color: #00cfff;
+    border-color: #00cfff;
+    box-shadow: 0 0 6px #00cfff, inset 0 0 4px rgba(255,255,255,0.3);
+}
+
+/* hull active - green, warning, critical */
+#hull-bar .segment.active {
+    background-color: #00ff99;
+    border-color: #00ff99;
+    box-shadow: 0 0 6px #00ff99, inset 0 0 4px rgba(255,255,255,0.2);
+}
+
+#hull-bar .segment.active.warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    box-shadow: 0 0 6px #ffc107, inset 0 0 4px rgba(255,255,255,0.2);
+}
+
+#hull-bar .segment.active.critical {
+    background-color: #ff3c3c;
+    border-color: #ff3c3c;
+    box-shadow: 0 0 8px #ff3c3c, inset 0 0 4px rgba(255,255,255,0.2);
+    animation: flicker 0.8s infinite alternate;
+}
+
+/* flash the whole bar when hit */
+.segmented-bar.hit .segment.active {
+    animation: flash-hit 0.3s ease-out;
+}
+
+@keyframes flash-hit {
+    0%   { filter: brightness(3); }
+    100% { filter: brightness(1); }
+}
+
+@keyframes flicker {
+    0%   { opacity: 1; }
+    100% { opacity: 0.4; }
+}
 

@@ -29,6 +29,8 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
     const group = new THREE.Group();
     group.hull = modelConfiguration.hull;
     group.shields = modelConfiguration.shields;
+    group.maxHull = modelConfiguration.hull;
+    group.maxShields = modelConfiguration.shields;
     group.name = modelConfiguration.name;
     group.userId = modelConfiguration.userId ? modelConfiguration.userId : modelConfiguration.designation;
     group.designation = modelConfiguration.designation;

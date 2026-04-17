@@ -21,13 +21,41 @@ export default (weapons, userId, scene, sceneConstants) => {
         }
     }
 
+    function applyDamage(mesh, amount) {
+        if(mesh.shields > 0) {
+            const shieldDamage = Math.min(mesh.shields, amount);
+            mesh.shields -= shieldDamage;
+            const remainder = amount - shieldDamage;
+            if(remainder > 0) {
+                mesh.hull -= remainder;
+            }
+        } else {
+            mesh.hull -= amount;
+        }
+        mesh.hull = Math.max(0, mesh.hull);
+        mesh.shields = Math.max(0, mesh.shields);
+    }
+
     function triggerEvent(sceneObjects, obj, event) {
         for(let i=0; i<sceneObjects.length; i++){
             if(event === eventType.EXPLOSION && sceneObjects[i].name === event){
-                // new file that handles all this stuff?
-                obj.mesh.hull = obj.mesh.hull - 25;
-                // console.log(`Update ${obj.mesh.name} Hull: ${obj.mesh.hull}`);
+                const isPlayer = obj.mesh.userId === userId;
+
+                applyDamage(obj.mesh, 25);
+
+                // if this is the player's ship, broadcast for the HUD
+                if(isPlayer) {
+                    eventBus.post(eventType.PLAYER_DAMAGED, {
+                        shields: obj.mesh.shields,
+                        maxShields: obj.mesh.maxShields,
+                        hull: obj.mesh.hull,
+                        maxHull: obj.mesh.maxHull,
+                    });
+                }
+
                 sceneObjects[i].trigger(obj.mesh.position);
+                // console.log(`Update ${obj.mesh.name} Hull: ${obj.mesh.hull}`);
+
                 if(obj.mesh.hull <= 0){
                     if(sceneConstants.multiPlayer.active){
                         console.log(`${obj.mesh.name}: ${obj.mesh.userId} has been destroyed!`);

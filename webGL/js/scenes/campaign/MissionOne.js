@@ -14,7 +14,7 @@ import {parseConfiguration} from "../../utils/SceneConfigUtils.js";
 import globalConfiguration from "../../../sceneConfig.js";
 import GameAudio from "../../utils/Audio.js";
 import SkyBox from "../../sceneSubjects/SkyBox.js";
-import Hud from "../../HUD/hud.js";
+import HUD, { initHUD } from "../../HUD/hud.js";
 
 export default (canvas, canvas2, models, campaignConfiguration) => {
     console.log(`mission one width: ${canvas.width}, height: ${canvas.height}`);
@@ -48,8 +48,10 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
     });
 
     const targetCamera = buildTargetCamera(canvas);
+    const hud = new HUD(ships[2].mesh, targetCamera);
 
-    const hud = new Hud(ships[2].mesh, targetCamera);
+    // initHUD needs maxShields/maxHull so pass the full player config
+    initHUD(campaignConfiguration.player);
 
     let controls;
     if(sceneGlobalConstants.controls.flightControls){
@@ -74,7 +76,7 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
         ...sceneSubjects
     ];
 
-    const weaponsCollision = WeaponsCollisionManager([laser], null, scene, sceneGlobalConstants);
+    const weaponsCollision = WeaponsCollisionManager([laser], playerShip.mesh.userId, scene, sceneGlobalConstants);
 
     function createFlightControls(mesh, camera, renderer, collisionManager, laser, audio, config) {
         const flightControls = new FlyControls( mesh, camera, renderer.domElement, collisionManager, laser, audio, config, hudShips, hud );
