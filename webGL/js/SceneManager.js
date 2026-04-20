@@ -8,6 +8,9 @@ import MissionOne from "./scenes/campaign/MissionOne.js";
 import MultiPlayer from "./scenes/multiplayer/MultiPlayer.js";
 import ShipSelect from "./scenes/multiplayer/ShipSelect.js";
 import campaign from "./campaignMenu/campaign.js";
+import { TargetingReticle } from './HUD/targetingReticle.js';
+import eventBus from './eventBus/EventBus.js';
+import eventBusEvents from './eventBus/events.js';
 
 export default (views, screen) => {
     const sceneConstants = parseConfiguration(sceneConfiguration);
@@ -23,11 +26,25 @@ export default (views, screen) => {
     let renderer = null;
     let camera = null;
     let sceneReady = false;
+    let reticle = null;
+    let overlayCanvas = null;
 
     let screenDimensions = {
         width: views[0].canvas.width,
         height: views[0].canvas.height
     };
+
+    overlayCanvas = document.getElementById('reticle-overlay');
+    const DPR = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
+    overlayCanvas.width  = views[0].canvas.width * DPR;
+    overlayCanvas.height = views[0].canvas.height * DPR;
+
+    eventBus.subscribe(eventBusEvents.TARGET_CHANGED, ({ mesh }) => {
+        if (reticle) {
+            mesh ? reticle.setTarget(mesh) : reticle.clearTarget();
+        }
+    });
+
 
     const mission = screen.search("mission");
     /**
@@ -49,6 +66,7 @@ export default (views, screen) => {
             scene = menu.scene;
             views[0].renderer = menu.renderer;
             views[0].camera = menu.camera;
+
             sceneReady = true;
             menu.getWeaponsCollision = () => {
                 return null;
@@ -136,28 +154,39 @@ export default (views, screen) => {
     }
 
     function update() {
-        if(sceneReady){
+        if (sceneReady) {
             const elapsedTime = clock.getElapsedTime();
-            if(sceneSubjects.length > 0){
-                if(mp){
+            const dt = clock.getDelta();
+
+            // lazily create reticle once the camera is available
+            if (!reticle && views[0].camera) {
+                reticle = new TargetingReticle(overlayCanvas, views[0].camera);
+            }
+
+            if (sceneSubjects.length > 0) {
+                if (mp) {
                     myWeaponsCollision = mp.getWeaponsCollision();
                     sceneSubjects = mp.getSceneSubjects();
                 }
-                if(weaponsCollision){
+                if (weaponsCollision) {
                     weaponsCollision.checkCollision(sceneSubjects);
-                } else if(myWeaponsCollision) {
+                } else if (myWeaponsCollision) {
                     myWeaponsCollision.checkCollision(sceneSubjects);
                 }
-                for(let i = 0; i < sceneSubjects.length; i++) {
+                for (let i = 0; i < sceneSubjects.length; i++) {
                     sceneSubjects[i].update(elapsedTime);
                 }
             }
-            // multiple views/cameras ( for targeting computer )
-            for ( let ii = 0; ii < views.length; ++ ii ) {
-                const view = views[ ii ];
-                const camera = view.camera;
+
+            // update targeting reticle
+            if (reticle) reticle.update(dt);
+
+            // multiple views/cameras (for targeting computer)
+            for (let ii = 0; ii < views.length; ++ii) {
+                const view     = views[ii];
+                const camera   = view.camera;
                 const renderer = view.renderer;
-                if(scene && camera && renderer){
+                if (scene && camera && renderer) {
                     renderer.render(scene, camera);
                 }
             }
@@ -165,25 +194,29 @@ export default (views, screen) => {
     }
 
     function onWindowResize() {
-        for ( let j = 0; j < views.length; ++ j ) {
-            if(j===0){
-                // second view is the targeting computer.. not resizing for now
-                const {width, height} = views[j].canvas;
+        for (let j = 0; j < views.length; ++j) {
+            if (j === 0) {
+                const { width, height } = views[j].canvas;
 
                 if (screenDimensions) {
-                    screenDimensions.width = width;
+                    screenDimensions.width  = width;
                     screenDimensions.height = height;
                 }
-
                 if (views[j].camera) {
                     views[j].camera.aspect = width / height;
                     views[j].camera.updateProjectionMatrix();
                 }
-
-                console.log(`onWindowResize index:${j} = width: ${width}, height: ${height}`);
-                if(views[j].renderer){
+                if (views[j].renderer) {
                     views[j].renderer.setSize(width, height);
                 }
+
+                // keep overlay in sync
+                if (overlayCanvas) {
+                    overlayCanvas.width  = width;
+                    overlayCanvas.height = height;
+                }
+
+                // console.log(`onWindowResize index:${j} = width: ${width}, height: ${height}`);
             }
         }
     }

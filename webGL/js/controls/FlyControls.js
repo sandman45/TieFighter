@@ -258,6 +258,7 @@ export default class FlyControls {
                 this.hud.acquireNewTarget(this.ships[nextTargetIndex]);
                 console.log(`Acquire Target: ${nextTargetIndex}:  ${this.ships[nextTargetIndex].designation}, ${this.ships[nextTargetIndex].name}`);
                 eventBus.post(eventBusEvents.TARGET_CHANGED, {
+                    mesh: this.ships[nextTargetIndex],        // <-- ADD THIS
                     shields: this.ships[nextTargetIndex].shields,
                     maxShields: this.ships[nextTargetIndex].maxShields,
                     hull: this.ships[nextTargetIndex].hull,
@@ -273,6 +274,7 @@ export default class FlyControls {
                     console.log(`Acquire Target: ${nextTargetIndex}:  ${nextTarget.designation}, ${nextTarget.name}`);
                     this.hud.acquireNewTarget(nextTarget);
                     eventBus.post(eventBusEvents.TARGET_CHANGED, {
+                        mesh: nextTarget,                         // <-- ADD THIS
                         shields: nextTarget.shields,
                         maxShields: nextTarget.maxShields,
                         hull: nextTarget.hull,
