@@ -12,29 +12,35 @@
 
 	<body>
 		<canvas id="canvas"></canvas>
+		<canvas id="reticle-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:998;"></canvas>
 		<div id="heads-up-display" class="hud">
 			<div class="hud-container">
-				<div id="shields" class="shields">
-					<div class="bar-container">
-						<div class="bar-label">SHIELDS</div>
-						<div class="segmented-bar" id="shield-bar">
-							<div class="segment" data-index="0"></div>
-							<div class="segment" data-index="1"></div>
-							<div class="segment" data-index="2"></div>
-							<div class="segment" data-index="3"></div>
-							<div class="segment" data-index="4"></div>
-							<div class="segment" data-index="5"></div>
-							<div class="segment" data-index="6"></div>
-							<div class="segment" data-index="7"></div>
-							<div class="segment" data-index="8"></div>
-							<div class="segment" data-index="9"></div>
-						</div>
+
+				<!-- DEFLECTORS (Shields) -->
+				<div id="shields" class="shields panel">
+					<div class="panel-title">DEFLECTORS</div>
+					<div class="bar-label">SHIELDS</div>
+					<div class="segmented-bar" id="shield-bar">
+						<div class="segment" data-index="0"></div>
+						<div class="segment" data-index="1"></div>
+						<div class="segment" data-index="2"></div>
+						<div class="segment" data-index="3"></div>
+						<div class="segment" data-index="4"></div>
+						<div class="segment" data-index="5"></div>
+						<div class="segment" data-index="6"></div>
+						<div class="segment" data-index="7"></div>
+						<div class="segment" data-index="8"></div>
+						<div class="segment" data-index="9"></div>
 					</div>
 				</div>
-				<div class="target-computer-wrapper">
+
+				<!-- TARGET COMPUTER -->
+				<div class="target-computer-wrapper panel">
+					<div class="panel-title">TARGET COMPUTER</div>
 					<canvas id="targetComputer" class="targetComputer"></canvas>
 					<div class="target-hud-overlay">
 						<div class="bar-label" id="target-name">NO TARGET</div>
+						<div class="bar-label">SHIELDS</div>
 						<div class="segmented-bar" id="target-shield-bar">
 							<div class="segment" data-index="0"></div>
 							<div class="segment" data-index="1"></div>
@@ -62,21 +68,22 @@
 						</div>
 					</div>
 				</div>
-				<div id="hull" class="hull">
-					<div class="bar-container">
-						<div class="bar-label">HULL</div>
-						<div class="segmented-bar" id="hull-bar">
-							<div class="segment" data-index="0"></div>
-							<div class="segment" data-index="1"></div>
-							<div class="segment" data-index="2"></div>
-							<div class="segment" data-index="3"></div>
-							<div class="segment" data-index="4"></div>
-							<div class="segment" data-index="5"></div>
-							<div class="segment" data-index="6"></div>
-							<div class="segment" data-index="7"></div>
-							<div class="segment" data-index="8"></div>
-							<div class="segment" data-index="9"></div>
-						</div>
+
+				<!-- HULL INTEGRITY -->
+				<div id="hull" class="hull panel">
+					<div class="panel-title">HULL INTEGRITY</div>
+					<div class="bar-label">HULL</div>
+					<div class="segmented-bar" id="hull-bar">
+						<div class="segment" data-index="0"></div>
+						<div class="segment" data-index="1"></div>
+						<div class="segment" data-index="2"></div>
+						<div class="segment" data-index="3"></div>
+						<div class="segment" data-index="4"></div>
+						<div class="segment" data-index="5"></div>
+						<div class="segment" data-index="6"></div>
+						<div class="segment" data-index="7"></div>
+						<div class="segment" data-index="8"></div>
+						<div class="segment" data-index="9"></div>
 					</div>
 				</div>
 			</div>

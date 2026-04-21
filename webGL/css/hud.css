@@ -6,186 +6,198 @@
     z-index: 999;
     bottom: 0;
     position: absolute;
-    height: 250px;
+    height: 320px;
     width: 100%;
+    background: linear-gradient(to top, rgba(0,8,0,0.85) 0%, transparent 100%);
 }
 
 .hud-container {
     display: flex;
     flex-direction: row;
-    width: 80%;
-    justify-content: space-evenly;
-    background-color: darkgray;
+    width: 85%;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 12px;
+    gap: 10px;
 }
 
-.targetComputer {
-    height: 188px;
-    width: 250px;
-    background-color: darkslategrey;
-    border: black 1px solid;
-    margin: auto;
+/* ── Imperial panel base ── */
+.panel {
+    background: #050d05;
+    border: 1px solid #1a3a1a;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    padding: 10px 16px;
+    flex: 1;
+    font-family: 'Courier New', monospace;
+    position: relative;
 }
 
-.hull {
-    height: 188px;
-    width: 250px;
-    background-color: darkslategrey;
-    border: black 1px solid;
-    margin: auto;
+.panel-title {
+    font-family: 'Courier New', monospace;
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: #3a7a3a;
+    margin-bottom: 8px;
+    text-align: center;
+    border-bottom: 1px solid #1a3a1a;
+    padding-bottom: 5px;
+    text-shadow: 0 0 6px #1a5a1a;
 }
 
-.shields {
-    height: 188px;
-    width: 250px;
-    background-color: darkslategrey;
-    border: black 1px solid;
-    margin: auto;
-
-    .shieldImage {
-        position: relative;
-        height: 100%;
-        left: 20px;
-    }
-    .ship-silhouette {
-        position: relative;
-        height: 35%;
-        bottom: 49px;
-        right: 80px;
-    }
-}
-
-.bar-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 8px;
-    width: 100%;
-}
-
+/* ── Segmented bars ── */
 .bar-label {
-    font-family: "Courier New", monospace;
-    font-size: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 8px;
     letter-spacing: 2px;
-    color: #00ff99;
-    margin-bottom: 4px;
-    text-shadow: 0 0 6px #00ff99;
+    color: #3a7a3a;
+    margin-bottom: 3px;
+    text-align: center;
 }
 
 .segmented-bar {
     display: flex;
     flex-direction: row;
-    gap: 3px;
-    width: 100%;
+    gap: 2px;
+    margin-bottom: 6px;
 }
 
 .segment {
     flex: 1;
-    height: 12px;
-    background-color: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(0, 255, 153, 0.3);
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    height: 10px;
+    background-color: #0d1a0d;
+    border: 1px solid #1a3a1a;
+    transition: background-color 0.2s ease;
 }
 
-/* shields active - blue/cyan */
-#shield-bar .segment.active {
-    background-color: #00cfff;
-    border-color: #00cfff;
-    box-shadow: 0 0 6px #00cfff, inset 0 0 4px rgba(255,255,255,0.3);
+/* Shields – blue */
+#shield-bar .segment.active,
+#target-shield-bar .segment.active {
+    background-color: #00aaff;
+    border-color: #00aaff;
+    box-shadow: 0 0 4px #00aaff;
 }
 
-/* hull active - green, warning, critical */
+/* Hull – green → amber → red */
 #hull-bar .segment.active {
-    background-color: #00ff99;
-    border-color: #00ff99;
-    box-shadow: 0 0 6px #00ff99, inset 0 0 4px rgba(255,255,255,0.2);
+    background-color: #00cc44;
+    border-color: #00cc44;
+    box-shadow: 0 0 4px #00cc44;
 }
 
 #hull-bar .segment.active.warning {
-    background-color: #ffc107;
-    border-color: #ffc107;
-    box-shadow: 0 0 6px #ffc107, inset 0 0 4px rgba(255,255,255,0.2);
+    background-color: #aacc00;
+    border-color: #aacc00;
+    box-shadow: 0 0 4px #aacc00;
 }
 
 #hull-bar .segment.active.critical {
-    background-color: #ff3c3c;
-    border-color: #ff3c3c;
-    box-shadow: 0 0 8px #ff3c3c, inset 0 0 4px rgba(255,255,255,0.2);
-    animation: flicker 0.8s infinite alternate;
+    background-color: #cc2200;
+    border-color: #cc2200;
+    box-shadow: 0 0 6px #cc2200;
+    animation: flicker 0.7s infinite alternate;
 }
 
-/* flash the whole bar when hit */
+/* Target hull */
+#target-hull-bar .segment.active {
+    background-color: #cc6600;
+    border-color: #cc6600;
+    box-shadow: 0 0 4px #cc6600;
+}
+
+#target-hull-bar .segment.active.warning {
+    background-color: #aacc00;
+    border-color: #aacc00;
+}
+
+#target-hull-bar .segment.active.critical {
+    background-color: #cc2200;
+    border-color: #cc2200;
+    animation: flicker 0.7s infinite alternate;
+}
+
+#target-shield-bar .segment,
+#target-hull-bar .segment {
+    height: 18px;
+}
+
+#target-shield-bar,
+#target-hull-bar {
+    gap: 3px;
+}
 .segmented-bar.hit .segment.active {
-    animation: flash-hit 0.3s ease-out;
+    animation: flash-hit 0.25s ease-out;
 }
 
 @keyframes flash-hit {
-    0%   { filter: brightness(3); }
+    0%   { filter: brightness(4); }
     100% { filter: brightness(1); }
 }
 
 @keyframes flicker {
     0%   { opacity: 1; }
-    100% { opacity: 0.4; }
+    100% { opacity: 0.3; }
 }
 
+/* ── Shields panel ── */
+.shields {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 120px;
+}
+
+/* ── Target computer ── */
 .target-computer-wrapper {
     position: relative;
-    height: 188px;
-    width: 250px;
-    margin: auto;
+    flex: 1.8;
+    display: flex;
+    flex-direction: column;
 }
 
 .targetComputer {
-    height: 188px;
-    width: 250px;
-    background-color: darkslategrey;
-    border: black 1px solid;
+    width: 100%;
+    height: 150px;
+    background-color: #030d06;
+    border: 1px solid #1a3a1a;
+    margin-bottom: 6px;
+    display: block;
 }
 
 .target-hud-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding: 4px 6px;
-    background: linear-gradient(to top, rgba(0,0,0,0.7) 80%, transparent);
+    gap: 3px;
 }
 
 #target-name {
-    font-family: "Courier New", monospace;
-    font-size: 9px;
+    font-family: 'Courier New', monospace;
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: #cc6600;
+    text-shadow: 0 0 6px #cc6600;
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+/* ── Hull panel ── */
+.hull {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 120px;
+}
+
+/* ── Readout line ── */
+.panel-readout {
+    font-family: 'Courier New', monospace;
+    font-size: 8px;
     letter-spacing: 2px;
-    color: #ff9900;
-    text-shadow: 0 0 6px #ff9900;
-    margin-bottom: 2px;
+    color: #3a7a3a;
+    text-align: center;
+    margin-top: 4px;
 }
 
-/* target shield bar - orange tint to distinguish from player */
-#target-shield-bar .segment.active {
-    background-color: #00cfff;
-    border-color: #00cfff;
-    box-shadow: 0 0 6px #00cfff, inset 0 0 4px rgba(255,255,255,0.3);
-}
-
-#target-hull-bar .segment.active {
-    background-color: #ff9900;
-    border-color: #ff9900;
-    box-shadow: 0 0 6px #ff9900, inset 0 0 4px rgba(255,255,255,0.2);
-}
-
-#target-hull-bar .segment.active.warning {
-    background-color: #ffc107;
-    border-color: #ffc107;
-    box-shadow: 0 0 6px #ffc107;
-}
-
-#target-hull-bar .segment.active.critical {
-    background-color: #ff3c3c;
-    border-color: #ff3c3c;
-    box-shadow: 0 0 8px #ff3c3c;
-    animation: flicker 0.8s infinite alternate;
+.panel-readout span {
+    color: #00cc44;
 }
