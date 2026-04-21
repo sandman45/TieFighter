@@ -43,6 +43,7 @@ export class TargetingReticle {
         this._clearCanvas();
         if (!this.target || !this.camera) return;
 
+        this.camera.updateMatrixWorld();
         this._clock += dt;
 
         // --- project target world position to NDC then screen ---

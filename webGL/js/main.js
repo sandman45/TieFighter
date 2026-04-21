@@ -67,8 +67,14 @@ function resizeCanvas() {
 		views[i].canvas.width  = views[i].canvas.offsetWidth;
 		views[i].canvas.height = views[i].canvas.offsetHeight;
 
-
 		sceneManager.onWindowResize();
+	}
+
+	// sync overlay to exact game canvas pixel size
+	const overlay = document.getElementById('reticle-overlay');
+	if (overlay) {
+		overlay.width  = views[0].canvas.width;
+		overlay.height = views[0].canvas.height;
 	}
 }
 

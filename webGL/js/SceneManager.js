@@ -35,9 +35,8 @@ export default (views, screen) => {
     };
 
     overlayCanvas = document.getElementById('reticle-overlay');
-    const DPR = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
-    overlayCanvas.width  = views[0].canvas.width * DPR;
-    overlayCanvas.height = views[0].canvas.height * DPR;
+    overlayCanvas.width  = window.innerWidth;
+    overlayCanvas.height = window.innerHeight;
 
     eventBus.subscribe(eventBusEvents.TARGET_CHANGED, ({ mesh }) => {
         if (reticle) {
@@ -177,10 +176,7 @@ export default (views, screen) => {
                     sceneSubjects[i].update(elapsedTime);
                 }
             }
-
-            // update targeting reticle
             if (reticle) reticle.update(dt);
-
             // multiple views/cameras (for targeting computer)
             for (let ii = 0; ii < views.length; ++ii) {
                 const view     = views[ii];
@@ -191,6 +187,7 @@ export default (views, screen) => {
                 }
             }
         }
+
     }
 
     function onWindowResize() {
@@ -210,10 +207,9 @@ export default (views, screen) => {
                     views[j].renderer.setSize(width, height);
                 }
 
-                // keep overlay in sync
                 if (overlayCanvas) {
-                    overlayCanvas.width  = width;
-                    overlayCanvas.height = height;
+                    overlayCanvas.width  = window.innerWidth;
+                    overlayCanvas.height = window.innerHeight;
                 }
 
                 // console.log(`onWindowResize index:${j} = width: ${width}, height: ${height}`);
