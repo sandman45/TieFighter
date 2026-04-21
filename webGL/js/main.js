@@ -5,7 +5,6 @@ import CampaignMenu from "./campaignMenu/CampaignMenu.js";
 import EventBus from "./eventBus/EventBus.js";
 import events from "./eventBus/events.js";
 import LocalStorage from "./localStorage/localStorage.js";
-import { TargetingReticle } from './HUD/targetingReticle.js';
 
 initSocketIO(onKeyUp, onKeyDown);
 // initial state is menu
