@@ -149,6 +149,7 @@
 		</div>
 		<div id="menu">
 			<div class="menu">
+				<div class="menu-title">IMPERIAL COMBAT SIMULATOR</div>
 				<div class="menu-item" name="shipselect">MULTI-PLAYER</div>
 				<div class="menu-item" name="campaign">CAMPAIGN</div>
 			</div>
@@ -165,6 +166,10 @@
 				</button>
 				<button id="leaveServer" class="sub-menu-item" name="leaveserver" disabled="true">LEAVE SERVER</button>
 				<button id="start" class="sub-menu-item" name="start" disabled="true">START</button>
+				<div id="ship-select-arrows" style="display:none; position:absolute; top:50%; left:0; width:100%; transform:translateY(-50%); pointer-events:none;">
+					<button id="arrowLeft"  class="ship-arrow-btn">◄ PREV</button>
+					<button id="arrowRight" class="ship-arrow-btn">NEXT ►</button>
+				</div>
 			<div id="shipInfo">
 				<div id="shipInfoLeft" class="ship-info-left" >
 					<h5>TIE/LN FIGHTER</h5>
@@ -174,6 +179,7 @@
 				</div>
 				<div class="ship-info-right"></div>
 			</div>
+
 			<div id="btn-container" class="btn-container">
 				<button id="infoBtn" value="info" class="btn-item" >INFO</button>
 				<button id="selectBtn" value="select" class="btn-item" disabled="true">SELECT</button>

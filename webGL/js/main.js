@@ -54,6 +54,12 @@ function bindEventListeners() {
 		handler.btnClickFromMenu(event, sceneManager);
 	};
 
+	// ship select arrows
+	const arrowLeft  = document.getElementById('arrowLeft');
+	const arrowRight = document.getElementById('arrowRight');
+	if (arrowLeft)  arrowLeft.onclick  = () => sceneManager.onKeyDown(37, 1000);
+	if (arrowRight) arrowRight.onclick = () => sceneManager.onKeyDown(39, 1000);
+
 	resizeCanvas();
 }
 
@@ -102,6 +108,7 @@ function onMenuItemClick(event) {
 		// show subMenu
 		const subMenu = document.getElementById("sub-menu");
 		subMenu.style.visibility = "visible";
+		document.getElementById('ship-select-arrows').style.display = 'flex';
 	} else {
 		// hide main menu
 		const menu = document.getElementById("menu");
@@ -137,6 +144,9 @@ function onSubMenuItemClick(event) {
 
 		const loadingElem = document.getElementById('loading');
 		loadingElem.style.visibility = 'visible';
+
+		document.getElementById('ship-select-arrows').style.display = 'flex';
+
 		// load scene
 		sceneManager = SceneManager(views, subMenuItem);
 		bindEventListeners();
@@ -160,6 +170,8 @@ function onSubMenuItemClick(event) {
 
 		const element5 = document.getElementById("shipInfoLeft");
 		element5.style.visibility = "hidden";
+
+		document.getElementById('ship-select-arrows').style.display = 'none';
 
         document.getElementById("start").disabled = true;
 
@@ -199,6 +211,8 @@ function onSubMenuItemClick(event) {
 		const loadingElem = document.getElementById('loading');
 		loadingElem.style.visibility = 'visible';
 
+		document.getElementById('ship-select-arrows').style.display = 'flex';
+
 		// load scene
 		sceneManager = SceneManager(views, "shipselect");
 		bindEventListeners();
@@ -230,6 +244,8 @@ function onSubMenuItemClick(event) {
 
 		const hudElem = document.getElementById('heads-up-display');
 		hudElem.style.visibility = 'hidden';
+
+		document.getElementById('ship-select-arrows').style.display = 'none';
 
 		sceneManager = SceneManager(views, "menu");
 		bindEventListeners();

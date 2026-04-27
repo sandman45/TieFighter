@@ -1,153 +1,268 @@
-/* main menu  */
-#menu {
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
+
+:root {
+    --green:         #00cc44;
+    --green-dim:     #007722;
+    --amber:         #cc7700;
+    --red:           #cc2200;
+    --bg:            #020a03;
+    --panel-bg:      #040e05;
+    --border:        #0d2e10;
+    --border-bright: #1a5c20;
+    --text:          #00cc44;
+    --text-dim:      #3a7a3a;
+    --font-mono:     'Share Tech Mono', monospace;
+    --font-title:    'Orbitron', sans-serif;
+}
+
+/* ── SHARED MENU BASE ────────────────────────────────────────────────────────── */
+#menu,
+#campaign-menu,
+#sub-menu {
     z-index: 999;
     position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    font-size: xx-large;
-    font-family: sans-serif;
+    gap: 10px;
     visibility: hidden;
+    background: radial-gradient(ellipse at center, rgba(0,20,5,0.97) 0%, rgba(0,5,2,0.99) 100%);
+    /* scanlines */
+    background-image:
+            repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0,0,0,0.08) 2px,
+                    rgba(0,0,0,0.08) 4px
+            ),
+            radial-gradient(ellipse at center, rgba(0,20,5,0.97) 0%, rgba(0,5,2,0.99) 100%);
 }
 
-.menu-item {
-    padding: 12px;
-    background-color: grey;
-    color: white;
-    border: solid white;
-    cursor: pointer;
-}
-
-.menu-item:hover{
-    color: black;
-    border: solid black;
-}
-
-
-
-/* sub menu  */
-#sub-menu{
-    z-index: 999;
+/* ── EMPIRE HEADER ───────────────────────────────────────────────────────────── */
+#menu::before,
+#campaign-menu::before,
+#sub-menu::before {
+    content: 'GALACTIC EMPIRE · IMPERIAL NAVY';
+    font-family: var(--font-title);
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: var(--text-dim);
     position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
+    top: 20px;
+    left: 0; right: 0;
+    text-align: center;
+}
+
+#menu::after,
+#campaign-menu::after,
+#sub-menu::after {
+    content: '';
+    position: absolute;
+    top: 40px;
+    left: 10%; right: 10%;
+    height: 1px;
+    background: var(--border-bright);
+}
+
+/* ── MENU TITLE BLOCK ────────────────────────────────────────────────────────── */
+.menu {
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
-    font-size: xx-large;
-    font-family: sans-serif;
-    visibility: hidden;
+    gap: 10px;
 }
 
+.menu-title {
+    font-family: var(--font-title);
+    font-size: 22px;
+    letter-spacing: 6px;
+    color: var(--green);
+    text-shadow: 0 0 20px var(--green), 0 0 40px rgba(0,204,68,0.3);
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+/* ── SHARED BUTTON STYLE ─────────────────────────────────────────────────────── */
+.menu-item,
+.sub-menu-item,
+.btn-item {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 10px 32px;
+    width: 260px;
+    background: var(--panel-bg);
+    color: var(--text-dim);
+    border: 1px solid var(--border-bright);
+    cursor: pointer;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    transition: all 0.15s ease;
+    text-align: center;
+    position: relative;
+}
+
+.menu-item::before,
+.sub-menu-item::before,
+.btn-item::before {
+    content: '> ';
+    color: var(--border-bright);
+    transition: color 0.15s;
+}
+
+.menu-item:hover,
+.sub-menu-item:hover,
+.btn-item:hover {
+    background: #071408;
+    border-color: var(--green);
+    color: var(--green);
+    text-shadow: 0 0 8px var(--green);
+    box-shadow: 0 0 12px rgba(0,204,68,0.15);
+}
+
+.menu-item:hover::before,
+.sub-menu-item:hover::before,
+.btn-item:hover::before {
+    color: var(--green);
+}
+
+.menu-item:disabled,
+.sub-menu-item:disabled,
+.btn-item:disabled {
+    opacity: 0.25;
+    cursor: default;
+    pointer-events: none;
+}
+
+/* ── SUB MENU ITEMS ──────────────────────────────────────────────────────────── */
 .sub-menu-items {
     visibility: hidden;
 }
 
-.sub-menu-item {
-    padding: 12px;
-    width: 200px;
-    background-color: grey;
-    color: white;
-    border: solid white;
-    cursor: pointer;
-}
-
-.sub-menu-item:hover{
-    color: black;
-    border: solid black;
-}
-
-.sub-menu-item:disabled {
-    opacity: 0.4;
-    cursor: default;
-    pointer-events: none;
-}
-
-.spacer {
-    height: 4%;
-    width: 100%;
-}
-
-/* bottom button container */
+/* ── BOTTOM BUTTON CONTAINER (ship select) ───────────────────────────────────── */
 .btn-container {
     display: flex;
     flex-direction: row;
-    justify-content: space-evenly;
+    justify-content: center;
+    gap: 10px;
     visibility: hidden;
+    margin-top: 12px;
 }
 
 .btn-item {
-    flex: 1 auto;
-    padding: 12px;
-    background-color: grey;
-    color: white;
-    border: solid white;
-    cursor: pointer;
+    width: auto;
+    flex: unset;
+    padding: 8px 24px;
+    font-size: 9px;
 }
 
-.btn-item:hover{
-    color: black;
-    border: solid black;
-}
-
-.btn-item:disabled {
-    opacity: 0.4;
-    cursor: default;
-    pointer-events: none;
-}
-
-#shipInfo{
+/* ── SHIP INFO PANEL ─────────────────────────────────────────────────────────── */
+#shipInfo {
     padding-top: 20px;
     padding-bottom: 20px;
     visibility: hidden;
     display: flex;
     height: 40%;
     width: 80%;
+    gap: 12px;
 }
 
 .ship-info-left {
     flex: 1;
-    background-color: #888888;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-bright);
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    padding: 16px;
     visibility: hidden;
 }
 
+.ship-info-left h5 {
+    font-family: var(--font-title);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--green);
+    text-shadow: 0 0 8px var(--green);
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border-bright);
+    padding-bottom: 6px;
+}
+
 .ship-info-left p {
-    display: inline-block;
-    font-weight: lighter;
-    font-size: medium;
-    font-family: system-ui;
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.7;
+    color: var(--text-dim);
+    margin-bottom: 8px;
 }
 
 .ship-info-left img {
-    height: 200px;
+    height: 160px;
+    filter: drop-shadow(0 0 8px rgba(0,204,68,0.4));
+    display: block;
+    margin: 10px auto 0;
 }
 
 .ship-info-right {
     flex: 1;
     visibility: hidden;
+    border: 1px solid var(--border-bright);
+    background: var(--panel-bg);
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
 }
-/* Campaign Menu */
-#campaign-menu{
-    z-index: 999;
-    position: absolute;
-    left: 0;
-    top: 0;
+
+/* ── SPACER ──────────────────────────────────────────────────────────────────── */
+.spacer {
+    height: 4%;
     width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+}
+
+/* ── SHIP SELECT ARROWS ──────────────────────────────────────────────────────── */
+#ship-select-arrows {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    justify-content: space-between;
     align-items: center;
-    text-align: center;
-    font-size: xx-large;
-    font-family: sans-serif;
-    visibility: hidden;
+    padding: 0 24px;
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.ship-arrow-btn {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    padding: 20px 18px;
+    background: var(--panel-bg);
+    color: var(--green);
+    border: 1px solid var(--border-bright);
+    cursor: pointer;
+    pointer-events: all;
+    transition: all 0.15s ease;
+    line-height: 1;
+    letter-spacing: 2px;
+    text-shadow: 0 0 6px var(--green);
+    box-shadow: inset 0 0 8px rgba(0,204,68,0.05);
+}
+
+.ship-arrow-btn:hover {
+    background: #071408;
+    border-color: var(--green);
+    color: var(--green);
+    text-shadow: 0 0 14px var(--green);
+    box-shadow: 0 0 16px rgba(0,204,68,0.25), inset 0 0 8px rgba(0,204,68,0.1);
+}
+#sub-menu {
+    background: transparent;
+    background-image: none;
+}
+
+#sub-menu::before,
+#sub-menu::after {
+    display: none;
 }
