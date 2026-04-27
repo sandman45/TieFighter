@@ -134,6 +134,8 @@ export default (views, screen) => {
      */
     else if(mission > -1) {
         // TODO: dynamically create from object/json based on mission selection
+        // show loading screen while assets load
+        document.getElementById('loading').style.visibility = 'visible';
         const campaignConfig = campaign[screen];
         Manager(campaignConfig, (message, models) => {
             const missionOne = MissionOne(views[0].canvas, views[1].canvas, models, campaignConfig);
@@ -148,7 +150,7 @@ export default (views, screen) => {
             views[1].camera = missionOne.targetCamera;
             views[1].renderer = missionOne.targetRenderer;
             sceneReady = true;
-
+            document.getElementById('loading').style.visibility = 'hidden';
         });
     }
 
@@ -157,7 +159,6 @@ export default (views, screen) => {
             const elapsedTime = clock.getElapsedTime();
             const dt = clock.getDelta();
 
-            // lazily create reticle once the camera is available
             if (!reticle && views[0].camera) {
                 reticle = new TargetingReticle(overlayCanvas, views[0].camera);
             }

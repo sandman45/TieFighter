@@ -5,6 +5,7 @@ import CampaignMenu from "./campaignMenu/CampaignMenu.js";
 import EventBus from "./eventBus/EventBus.js";
 import events from "./eventBus/events.js";
 import LocalStorage from "./localStorage/localStorage.js";
+import { initBriefing } from './missionBriefing/missionBriefing.js';
 
 initSocketIO(onKeyUp, onKeyDown);
 // initial state is menu
@@ -234,33 +235,45 @@ function onSubMenuItemClick(event) {
 		bindEventListeners();
 	} else if (mission > -1) {
 		// hide all except menu
-		const element = document.getElementById("btn-container");
-		element.style.visibility = "hidden";
-
+		const element  = document.getElementById("btn-container");
 		const element2 = document.getElementById("menu");
-		element2.style.visibility = "hidden";
-
 		const element3 = document.getElementById("sub-menu");
-		element3.style.visibility = "hidden";
-
 		const element4 = document.getElementById("shipInfo");
-		element4.style.visibility = "hidden";
-
 		const element5 = document.getElementById("shipInfoLeft");
-		element5.style.visibility = "hidden";
-
 		const element6 = document.getElementById("campaign-menu");
-		element6.style.visibility = "hidden";
-
 		const loadingElem = document.getElementById('loading');
-		loadingElem.style.visibility = 'visible';
 
-		const hudElem = document.getElementById('heads-up-display');
-		hudElem.style.visibility = 'visible';
+		element.style.visibility  = "hidden";
+		element2.style.visibility = "hidden";
+		element3.style.visibility = "hidden";
+		element4.style.visibility = "hidden";
+		element5.style.visibility = "hidden";
+		element6.style.visibility = "hidden";
+		loadingElem.style.visibility = "hidden";
 
-		sceneManager = SceneManager(views, subMenuItem);
-		bindEventListeners();
+		showMissionBriefing(subMenuItem);
 	}
+}
+
+function showMissionBriefing(missionKey) {
+	const briefingEl = document.getElementById('mission-briefing');
+	// fully reset — previous visit may have hidden these
+	briefingEl.style.display    = 'block';
+	briefingEl.style.visibility = 'visible';
+	briefingEl.style.zIndex     = '2000';
+
+	initBriefing(() => {
+		// fully remove briefing
+		briefingEl.style.display    = 'none';
+		briefingEl.style.visibility = 'hidden';
+		briefingEl.style.zIndex     = '-1';
+
+		// show HUD
+		document.getElementById('heads-up-display').style.visibility = 'visible';
+
+		sceneManager = SceneManager(views, missionKey);
+		bindEventListeners();
+	});
 }
 
 function onKeyDown(event, duration) {

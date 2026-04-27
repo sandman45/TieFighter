@@ -7,12 +7,63 @@
 		<link rel="stylesheet" href="./css/loading.css">
 		<link rel="stylesheet" href="./css/menu.css">
 		<link rel="stylesheet" href="./css/hud.css">
+		<link rel="stylesheet" href="./css/missionBriefing.css">
 		<script src="/socket.io/socket.io.js"></script>
 	</head>
 
 	<body>
 		<canvas id="canvas"></canvas>
 		<canvas id="reticle-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:998;"></canvas>
+		<div id="mission-briefing" style="display:none; position:fixed; inset:0; z-index:2000;">
+			<div class="briefing-screen">
+				<div class="top-bar">
+					<div class="empire-logo">GALACTIC EMPIRE · IMPERIAL NAVY</div>
+					<div class="mission-title" id="briefing-mission-title">MISSION BRIEFING</div>
+					<div class="classification">TOP SECRET</div>
+				</div>
+				<div class="main-content">
+					<div class="map-panel">
+						<div class="panel-label" id="briefing-sector-label">TACTICAL STAR MAP</div>
+						<div class="map-container">
+							<canvas id="starMap"></canvas>
+						</div>
+					</div>
+					<div class="right-column">
+						<div class="officer-panel">
+							<div class="officer-portrait">
+								<img src="./images/impirials/thrawn.png" alt="Admiral Thrawn" style="width:100%; height:100%; object-fit:cover; object-position: top;">
+							</div>
+							<div class="officer-info">
+								<div class="officer-name" id="briefing-officer-name">ADM. THRAWN</div>
+								<div class="officer-rank" id="briefing-officer-rank">FLEET ADMIRAL · ISD CHIMAERA</div>
+								<div class="officer-speech" id="briefing-officer-speech">"Pilot, your skills will be tested today."<span class="cursor">_</span></div>
+							</div>
+						</div>
+						<div class="briefing-panel">
+							<div class="briefing-header" id="briefingHeader">SITUATION REPORT</div>
+							<div class="briefing-text" id="briefingText"></div>
+						</div>
+						<div class="questions-panel">
+							<div class="questions-label">BRIEFING TOPICS</div>
+							<button class="question-btn active" data-topic="situation">SITUATION</button>
+							<button class="question-btn" data-topic="objectives">PRIMARY OBJECTIVES</button>
+							<button class="question-btn" data-topic="secondary">SECONDARY OBJECTIVES</button>
+							<button class="question-btn" data-topic="craft">FLIGHT ASSIGNMENT</button>
+							<button class="question-btn" data-topic="threats">THREAT ASSESSMENT</button>
+						</div>
+					</div>
+				</div>
+				<div class="bottom-bar">
+					<button class="nav-btn" id="briefingBackBtn">◄ BACK</button>
+					<div class="status-text">
+						PILOT: <span id="pilotName">ALPHA ONE</span>
+						&nbsp;|&nbsp; CRAFT: <span>TIE/LN</span>
+						&nbsp;|&nbsp; STATUS: <span>READY</span>
+					</div>
+					<button class="nav-btn launch" id="launchBtn">LAUNCH ►</button>
+				</div>
+			</div>
+		</div>
 		<div id="heads-up-display" class="hud">
 			<div class="hud-container">
 
