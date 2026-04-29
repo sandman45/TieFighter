@@ -85,17 +85,31 @@ export default (modelConfig, callback) => {
     }
 
     function completed() {
-        // hide the loading bar
         const loadingElem = document.getElementById('loading');
-        loadingElem.style.visibility = 'hidden';
+        if(progressbarElem) progressbarElem.style.width = '100%';
+        const loadingText = document.querySelector('#loading > div > div:first-child');
+        if(loadingText) loadingText.textContent = '100%';
+
+        setTimeout(() => {
+            loadingElem.style.opacity = '0';
+            setTimeout(() => {
+                loadingElem.style.display = 'none';
+            }, 600); //600
+        }, 300); //300
+        console.log("Loading complete HIDE Loading bar");
         callback("completed loading models!", models);
     }
 
     function progress(url, itemsLoaded, itemsTotal) {
+        if(!progressbarElem) return;
+        const pct = Math.min((itemsLoaded / itemsTotal) * 100, 95);
+        progressbarElem.style.width = `${pct | 0}%`;
 
-        progressbarElem.style.width = `${itemsLoaded / itemsTotal * 100 | 0}%`;
-        // console.log(`Loading file: ${url} .\nLoaded ${itemsLoaded} of ${itemsTotal} files.`);
-
+        // update the loading text with a live count
+        const loadingText = document.querySelector('#loading > div > div:first-child');
+        if(loadingText) {
+            loadingText.textContent = `${pct | 0}%`;
+        }
     }
 }
 

@@ -151,8 +151,8 @@ const AudioType = {
 let listener;
 let gameCamera;
 let audioLoader;
-let sfxVolume = 1;
-let musicVolume = 1;
+let sfxVolume = 0.1;
+let musicVolume = 0.1;
 let audioConfig;
 let audioReady = false;
 
@@ -196,11 +196,11 @@ export default (camera, config, callback) => {
 
     function completed() {
         audioReady = true;
-        callback(`completed loading audio! ${AudioType}`);
+        callback(`Completed loading audio! ${AudioType}`);
     }
 
     function onProgress(url, itemsLoaded, itemsTotal) {
-        console.log(`${(itemsLoaded/itemsTotal)*100}% loaded`);
+        console.log(`${(itemsLoaded/itemsTotal)*100}% Audio loaded`);
     }
 
     function onError(err){

@@ -251,13 +251,11 @@ export function initLaunchBtn(onLaunch) {
     document.getElementById('launchBtn').addEventListener('click', () => {
         document.body.style.transition = 'opacity 0.5s ease';
         document.body.style.opacity = '0';
-        setTimeout(() => {
-            document.body.style.opacity = '1';  // <-- restore visibility
-            document.body.style.transition = '';
-            if (typeof onLaunch === 'function') {
-                onLaunch();
-            }
-        }, 500);
+        document.body.style.opacity = '1';  // <-- restore visibility
+        document.body.style.transition = '';
+        if (typeof onLaunch === 'function') {
+            onLaunch();
+        }
     });
 }
 
