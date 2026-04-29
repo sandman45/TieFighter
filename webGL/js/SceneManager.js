@@ -58,6 +58,7 @@ export default (views, screen) => {
         camera = null;
     }
     if(screen === "menu") {
+        showLoading();
         Manager(sceneConstants.menu, (message, models) => {
             const menu = MainMenu(views[0].canvas, models);
             sceneSubjects = sceneSubjects.concat(menu.sceneSubjects);
@@ -79,8 +80,7 @@ export default (views, screen) => {
      * SHIPSELECT STUFF
      */
     else if(screen === "shipselect") {
-        const loadingElem = document.getElementById('loading');
-        loadingElem.style.visibility = 'visible';
+        showLoading();
         Manager(sceneConstants.shipSelect, (message, models) => {
             ss = ShipSelect(views[0].canvas, models);
             sceneSubjects = sceneSubjects.concat(ss.sceneSubjects);
@@ -135,7 +135,7 @@ export default (views, screen) => {
     else if(mission > -1) {
         // TODO: dynamically create from object/json based on mission selection
         // show loading screen while assets load
-        document.getElementById('loading').style.visibility = 'visible';
+        showLoading();
         const campaignConfig = campaign[screen];
         Manager(campaignConfig, (message, models) => {
             const missionOne = MissionOne(views[0].canvas, views[1].canvas, models, campaignConfig);
@@ -150,8 +150,23 @@ export default (views, screen) => {
             views[1].camera = missionOne.targetCamera;
             views[1].renderer = missionOne.targetRenderer;
             sceneReady = true;
-            document.getElementById('loading').style.visibility = 'hidden';
         });
+    }
+
+    // helper at the top of SceneManager, before the if/else chain
+    function showLoading() {
+        console.log("Loading starting SHOW Loading bar");
+        const loadingElem = document.getElementById('loading');
+        loadingElem.style.display = 'flex';
+        loadingElem.style.visibility = "visible";
+        // force reflow so the transition fires correctly
+        void loadingElem.offsetWidth;
+        loadingElem.style.opacity = '1';
+        // reset bar
+        const bar = document.getElementById('progressbar');
+        if(bar) bar.style.width = '0%';
+        const loadingText = document.querySelector('#loading > div > div:first-child');
+        if(loadingText) loadingText.textContent = '...loading...';
     }
 
     function update() {
