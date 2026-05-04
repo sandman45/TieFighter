@@ -59,7 +59,7 @@ export default {
                 name: 'ISD',
                 position: { x: 20, y: 40, z: 10 },
                 rotation: { y: 0, x:0, z:0 },
-                speed: .2,
+                speed: .002,
                 scale: 20,
                 hull: 10000,
                 shields: 1000,
@@ -73,13 +73,14 @@ export default {
             {
                 designation: "TYDERIAN",
                 name: 'SHUTTLE',
-                position: { x: 20, y: 15, z: -20 },
+                position: { x: 20, y: 20, z: -20 },
                 rotation: { y: 3.15, x:0, z:0 },
-                speed: .4,
+                speed: .25,
                 scale: 3,
                 hull: 100,
                 shields: 100,
                 rollSpeed: .009,
+                turnRate: 0.006,
                 autoForward: false,
                 faction: "IMPERIAL",
                 weapons: {
@@ -91,16 +92,16 @@ export default {
             {
                 designation: "GOLD_LEADER",
                 name: 'Y_WING',
-                position: { x: -30, y: 1, z: -30 },
+                position: { x: -200, y: 1, z: -200 },
                 rotation: { y: 3.15, x:0, z:0, rotating: false },
-                speed: .5,
+                speed: .25,
                 scale: 5,
                 hull: 150,
                 shields: 125,
                 rollSpeed: .009,
                 autoForward: false,
                 faction: "REBELLION",
-                target:"ISD",
+                target: "ISD",
                 weapons: {
                     firing: false
                 }
@@ -108,16 +109,16 @@ export default {
             {
                 designation: "GOLD_TWO",
                 name: 'Y_WING',
-                position: { x: -35, y: 1, z: -35 },
+                position: { x: -210, y: 1, z: -185 },  // offset left of leader
                 rotation: { y: 3.15, x:0, z:0, rotating: false },
-                speed: .5,
+                speed: .25,
                 scale: 5,
                 hull: 150,
                 shields: 125,
                 rollSpeed: .009,
                 autoForward: false,
                 faction: "REBELLION",
-                target:"ISD",
+                target: "ISD",
                 weapons: {
                     firing: false
                 }
@@ -125,16 +126,16 @@ export default {
             {
                 designation: "GOLD_THREE",
                 name: 'Y_WING',
-                position: { x: -40, y: 1, z: -40 },
+                position: { x: -190, y: 1, z: -215 },  // offset right of leader
                 rotation: { y: 3.15, x:0, z:0, rotating: false },
-                speed: .5,
+                speed: .25,
                 scale: 5,
                 hull: 150,
                 shields: 125,
                 rollSpeed: .009,
                 autoForward: false,
                 faction: "REBELLION",
-                target:"ISD",
+                target: "ISD",
                 weapons: {
                     firing: false
                 }

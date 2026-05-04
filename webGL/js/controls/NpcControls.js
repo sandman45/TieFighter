@@ -1,52 +1,48 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 
-export default (scene, gameObjMesh, config, command, direction, collisionManager, audio, laser) => {
+export default (scene, gameObjMesh, config, command, direction, collisionManager, audio, laser, target) => {
     let collision = false;
+
     if(command === "patrol") {
-        // if its patrol move the gameObj around a specific route
         config.direction = direction;
         collision = moveObject(gameObjMesh, config, collisionManager, audio);
-
     } else if(command === "turnAround") {
         rotate(gameObjMesh, Math.PI, "y", 200, config);
     } else if(command === "fire") {
         fireWeapon(gameObjMesh, config, laser);
-    } else if(command === "acquireTarget") {
-        scene.
-        acquireTarget(gameObjMesh,)
+    } else if(command === "burstFire") {
+        burstFire(gameObjMesh, config, laser);
+    } else if(command === "moveToward") {
+        collision = moveToward(gameObjMesh, config, target, collisionManager);
+    } else if(command === "lookAtTarget") {
+        lookAtTarget(gameObjMesh, target, config);
+    } else if(command === "moveForward") {
+        collision = moveForward(gameObjMesh, config, collisionManager);
+    }  else if(command === "flightUpdate") {
+        collision = flightUpdate(gameObjMesh, config, target, collisionManager);
     }
+
     return collision;
 }
 
 /**
  * moveObject
- * moves game object forward
- * @param mesh
- * @param config
- * @param collisionManager
- * @param audio
+ * original patrol movement — moves forward along facing direction
  */
 function moveObject(mesh, config, collisionManager, audio) {
     if(mesh.name === "Y_WING" || mesh.name === "SHUTTLE"){
-        // console.log(`moveObject: ${mesh.name}`);
-        // console.log(`position x:${mesh.position.x}, y:${mesh.position.y}, z:${mesh.position.z}`)
-
         const matrix = new THREE.Matrix4();
-        matrix.extractRotation( mesh.matrix );
-        let directionVector;
-
-        directionVector = new THREE.Vector3( 0, 0, 1 );
+        matrix.extractRotation(mesh.matrix);
+        const directionVector = new THREE.Vector3(0, 0, 1);
         directionVector.applyMatrix4(matrix);
 
-            // audio.playSound(mesh, "FLYBY");
         const direction = -1;
-        const stepVector = directionVector.multiplyScalar( config.speed * direction );
+        const stepVector = directionVector.multiplyScalar(config.speed * direction);
         const tPosition = mesh.position.clone().add(stepVector);
         let collision = false;
         if(collisionManager){
             collision = collisionManager.checkCollision({ position: tPosition, name: mesh.name });
         }
-
         if(!collision){
             mesh.position.add(stepVector);
         }
@@ -55,10 +51,169 @@ function moveObject(mesh, config, collisionManager, audio) {
 }
 
 /**
+ * moveForward
+ * moves any mesh forward along its current facing direction
+ */
+function moveForward(mesh, config, collisionManager) {
+    const matrix = new THREE.Matrix4();
+    matrix.extractRotation(mesh.matrix);
+    const directionVector = new THREE.Vector3(0, 0, -1);
+    directionVector.applyMatrix4(matrix);
+
+    const stepVector = directionVector.multiplyScalar(config.speed);
+    const tPosition = mesh.position.clone().add(stepVector);
+    let collision = false;
+    if(collisionManager){
+        collision = collisionManager.checkCollision({ position: tPosition, name: mesh.name });
+    }
+    if(!collision){
+        mesh.position.add(stepVector);
+    }
+    return collision;
+}
+
+/**
+ * moveToward
+ * steers the mesh toward a world-space position or mesh
+ */
+function moveToward(mesh, config, target, collisionManager) {
+    if(!target) return false;
+
+    const targetPos = target.isVector3 ? target : target.position.clone();
+
+    // step toward target
+    const direction = new THREE.Vector3()
+        .subVectors(targetPos, mesh.position)
+        .normalize();
+
+    const stepVector = direction.multiplyScalar(config.speed);
+    const tPosition = mesh.position.clone().add(stepVector);
+
+    let collision = false;
+    if(collisionManager){
+        collision = collisionManager.checkCollision({ position: tPosition, name: mesh.name });
+    }
+    if(!collision){
+        mesh.position.add(stepVector);
+    }
+    return collision;
+}
+
+/**
+ * flightUpdate
+ * physically-based flight with momentum and visual banking.
+ * Call every frame — updates velocity, rotation and position in one step.
+ *
+ * Expects config.flight to be initialised (done automatically on first call).
+ */
+function flightUpdate(mesh, config, target, collisionManager) {
+    if(!target) return false;
+
+    // initialise flight state on first call
+    if(!config.flight) {
+        // start velocity along current mesh facing direction
+        const initMatrix = new THREE.Matrix4().extractRotation(mesh.matrix);
+        const initForward = new THREE.Vector3(0, 0, 1).applyMatrix4(initMatrix);
+        config.flight = {
+            velocity: initForward.multiplyScalar(config.speed),
+            currentBank: 0,
+        };
+    }
+
+    const f = config.flight;
+    const targetPos = target.isVector3 ? target : target.position.clone();
+
+    // desired direction toward target
+    const desired = new THREE.Vector3()
+        .subVectors(targetPos, mesh.position)
+        .normalize();
+
+    const TURN_RATE = config.turnRate || 0.006; // very gradual — wide sweeping arcs
+    const BANK_RATE = 0.05;
+    const MAX_BANK  = 0.4;
+    const SPEED     = config.speed;
+
+    // gently steer velocity toward desired direction
+    const newVelocity = f.velocity.clone().lerp(
+        desired.clone().multiplyScalar(SPEED),
+        TURN_RATE
+    );
+    newVelocity.setLength(SPEED);
+    f.velocity.copy(newVelocity);
+
+    // derive yaw from velocity — use (x, z) components
+    const flatVelocity = new THREE.Vector3(f.velocity.x, 0, f.velocity.z);
+    // derive yaw from velocity — add Math.PI to flip model to face forward
+    if(flatVelocity.length() > 0.001) {
+        mesh.rotation.y = Math.atan2(f.velocity.x, f.velocity.z) + Math.PI;
+    }
+
+    // gentle pitch from vertical velocity component
+    mesh.rotation.x = THREE.MathUtils.clamp(
+        -f.velocity.y / SPEED * 0.4,
+        -0.3,
+        0.3
+    );
+
+    // banking — cross product of old forward and new velocity direction
+    const oldForward = new THREE.Vector3(0, 0, 1)
+        .applyMatrix4(new THREE.Matrix4().extractRotation(mesh.matrix));
+    const cross = new THREE.Vector3().crossVectors(oldForward, f.velocity.clone().normalize());
+    const targetBank = cross.y * MAX_BANK * 3;
+    f.currentBank += (targetBank - f.currentBank) * BANK_RATE;
+    f.currentBank = THREE.MathUtils.clamp(f.currentBank, -MAX_BANK, MAX_BANK);
+    mesh.rotation.z = f.currentBank;
+
+    // move
+    const tPosition = mesh.position.clone().add(f.velocity);
+    let collision = false;
+    if(collisionManager) {
+        collision = collisionManager.checkCollision({ position: tPosition, name: mesh.name });
+    }
+    if(!collision) {
+        mesh.position.add(f.velocity);
+    }
+
+    return collision;
+}
+
+
+
+/**
+ * lookAtTarget
+ * smoothly rotates mesh to face a target position or mesh
+ */
+function lookAtTarget(mesh, target, config) {
+    if(!target) return;
+    if(config.rotation && config.rotation.rotating) return;
+
+    const targetPos = target.isVector3 ? target : target.position.clone();
+
+    // get the angle to the target on the Y axis
+    const direction = new THREE.Vector3()
+        .subVectors(targetPos, mesh.position)
+        .normalize();
+
+    const targetAngle = Math.atan2(direction.x, direction.z);
+    const currentAngle = mesh.rotation.y;
+    const diff = targetAngle - currentAngle;
+
+    // only tween if the difference is significant
+    if(Math.abs(diff) > 0.05) {
+        if(config.rotation) config.rotation.rotating = true;
+        new TWEEN.Tween(mesh.rotation)
+            .to({ y: targetAngle }, 800)
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .onComplete(() => {
+                if(config.rotation) config.rotation.rotating = false;
+            })
+            .start();
+    }
+}
+
+/**
  * fireWeapon
- * @param mesh
- * @param config
- * @param laser
+ * single shot fire
  */
 function fireWeapon(mesh, config, laser) {
     if(!config.weapons.firing){
@@ -69,13 +224,47 @@ function fireWeapon(mesh, config, laser) {
 }
 
 /**
+ * burstFire
+ * fires a burst of shots with a cooldown between bursts
+ */
+function burstFire(mesh, config, laser) {
+    if(!laser) return;
+
+    // initialise burst state on config if not present
+    if(config.weapons.burstCooldown === undefined) {
+        config.weapons.burstCooldown = 0;
+        config.weapons.burstCount = 0;
+        config.weapons.inBurst = false;
+    }
+
+    const now = Date.now();
+
+    if(!config.weapons.inBurst && now > config.weapons.burstCooldown) {
+        // start a new burst — fire 3 shots 300ms apart
+        config.weapons.inBurst = true;
+        config.weapons.burstCount = 0;
+
+        const burstInterval = setInterval(() => {
+            if(mesh.hull <= 0) {
+                clearInterval(burstInterval);
+                config.weapons.inBurst = false;
+                return;
+            }
+            laser.fire(mesh, 2, mesh.faction);
+            config.weapons.burstCount++;
+            if(config.weapons.burstCount >= 3) {
+                clearInterval(burstInterval);
+                config.weapons.inBurst = false;
+                // cooldown 2-4 seconds between bursts for variety
+                config.weapons.burstCooldown = now + 2000 + Math.random() * 2000;
+            }
+        }, 300);
+    }
+}
+
+/**
  * rotate
- * rotate game object
- * @param mesh
- * @param angle
- * @param axis
- * @param duration
- * @param config
+ * rotate game object by angle on axis
  */
 function rotate(mesh, angle, axis = "y", duration = 300, config) {
     duration -= 50;
@@ -92,16 +281,11 @@ function rotate(mesh, angle, axis = "y", duration = 300, config) {
             finalAngle = mesh.rotation.z + angle;
             tweenObj = { z: finalAngle };
         }
-
         config.rotation.rotating = true;
         new TWEEN.Tween(mesh.rotation)
             .to(tweenObj, duration)
             .easing(TWEEN.Easing.Quadratic.InOut)
-            .onComplete( () => config.rotation.rotating = false)
+            .onComplete(() => config.rotation.rotating = false)
             .start();
     }
-}
-
-function acquireTarget(mesh, targetObj) {
-
 }
