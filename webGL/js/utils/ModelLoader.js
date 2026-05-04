@@ -100,8 +100,8 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
         const FORM_RANGE     = 150;
         const ATTACK_RANGE   = 100;
         const THREAT_RANGE   = 50;
-        const EVADE_DURATION = 4000;
-        const EVADE_COOLDOWN = 5000;
+        const EVADE_DURATION = 10000;
+        const EVADE_COOLDOWN = 10000;
 
         let attackWaypoint = null;
         let evadeTarget = null;

@@ -92,7 +92,7 @@ export default {
             {
                 designation: "GOLD_LEADER",
                 name: 'Y_WING',
-                position: { x: -200, y: 1, z: -200 },
+                position: { x: -600, y: 1, z: -600 },
                 rotation: { y: 3.15, x:0, z:0, rotating: false },
                 speed: .25,
                 scale: 5,
@@ -109,7 +109,7 @@ export default {
             {
                 designation: "GOLD_TWO",
                 name: 'Y_WING',
-                position: { x: -210, y: 1, z: -185 },  // offset left of leader
+                position: { x: -510, y: 1, z: -585 },  // offset left of leader
                 rotation: { y: 3.15, x:0, z:0, rotating: false },
                 speed: .25,
                 scale: 5,
@@ -126,7 +126,7 @@ export default {
             {
                 designation: "GOLD_THREE",
                 name: 'Y_WING',
-                position: { x: -190, y: 1, z: -215 },  // offset right of leader
+                position: { x: -590, y: 1, z: -515 },  // offset right of leader
                 rotation: { y: 3.15, x:0, z:0, rotating: false },
                 speed: .25,
                 scale: 5,
