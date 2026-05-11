@@ -16,7 +16,7 @@ export default {
             shields: 0,
             position: { x: 10, y: 1, z: 10 },
             rotation: { y: 3.15, x:0, z:0 },
-            speed: .7,
+            speed: .6,
             scale: .25,
             rollSpeed: .009,
             autoForward: false,
@@ -45,7 +45,7 @@ export default {
                 shields: 0,
                 position: { x: 10, y: 1, z: 10 },
                 rotation: { y: 3.15, x:0, z:0 },
-                speed: .7,
+                speed: .6,
                 scale: .25,
                 rollSpeed: .009,
                 autoForward: false,
@@ -75,7 +75,7 @@ export default {
                 name: 'SHUTTLE',
                 position: { x: 20, y: 20, z: -20 },
                 rotation: { y: 3.15, x:0, z:0 },
-                speed: .25,
+                speed: .20,
                 scale: 3,
                 hull: 100,
                 shields: 100,
@@ -92,7 +92,7 @@ export default {
             {
                 designation: "GOLD_LEADER",
                 name: 'Y_WING',
-                position: { x: -600, y: 1, z: -600 },
+                position: { x: -1000, y: 1, z: -1000 },
                 rotation: { y: 3.15, x:0, z:0, rotating: false },
                 speed: .25,
                 scale: 5,
@@ -109,7 +109,7 @@ export default {
             {
                 designation: "GOLD_TWO",
                 name: 'Y_WING',
-                position: { x: -510, y: 1, z: -585 },  // offset left of leader
+                position: { x: -810, y: 1, z: -885 },  // offset left of leader
                 rotation: { y: 3.15, x:0, z:0, rotating: false },
                 speed: .25,
                 scale: 5,
@@ -126,7 +126,7 @@ export default {
             {
                 designation: "GOLD_THREE",
                 name: 'Y_WING',
-                position: { x: -590, y: 1, z: -515 },  // offset right of leader
+                position: { x: -890, y: 1, z: -815 },  // offset right of leader
                 rotation: { y: 3.15, x:0, z:0, rotating: false },
                 speed: .25,
                 scale: 5,
