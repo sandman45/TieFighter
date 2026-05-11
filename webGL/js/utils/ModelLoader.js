@@ -25,6 +25,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
     let action;
     let cm;
     let modelReady = false;
+    let lastTime = 0;
     cm = collisionManager;
     const group = new THREE.Group();
     group.hull = modelConfiguration.hull;
@@ -288,7 +289,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
             return meshA.position.distanceTo(targetPos);
         }
 
-        const PATROL_DISTANCE  = 450;
+        const PATROL_DISTANCE  = 1000;
         const ARRIVE_THRESHOLD = 20;
         const DOCK_WAIT        = 20000; // 20 seconds
 
@@ -333,8 +334,10 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                 enter: () => {
                     console.log(`${modelGroup.designation} SHUTTLE entering DEPART`);
                     initWaypoints();
-                    // only seed if starting fresh — preserve momentum on subsequent departures
-                    seedVelocityToward(waypointA);
+                    // only seed on very first load when there is no flight state at all
+                    if(!modelConfiguration.flight) {
+                        seedVelocityToward(waypointA);
+                    }
                 },
                 update: () => {
                     initWaypoints();
@@ -346,7 +349,6 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                     );
 
                     if(collision) {
-                        // boundary hit only — reset and re-seed
                         modelConfiguration.flight = null;
                         seedVelocityToward(waypointA);
                     }
@@ -422,6 +424,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
             rise: {
                 enter: () => {
                     console.log(`${modelGroup.designation} SHUTTLE entering RISE`);
+                    wingsUp(); // raise wings as shuttle rises to dock
                     if(!modelConfiguration.flight) {
                         modelConfiguration.flight = { velocity: new THREE.Vector3(0,0,0), currentBank: 0 };
                     }
@@ -482,6 +485,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
 
             // ── LOWER ────────────────────────────────────────────────
             // descend back on Z axis to patrol Z before departing
+            // ── LOWER ────────────────────────────────────────────────
             lower: {
                 enter: () => {
                     console.log(`${modelGroup.designation} SHUTTLE entering LOWER`);
@@ -494,11 +498,10 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                     const isd = getISD();
                     if(!isd) return;
 
-                    // lower target — back to patrol Z
                     const lowerTarget = new THREE.Vector3(
                         isd.position.x,
-                        getPatrolY(isd),  // lower back down on Y
-                        (getPatrolZ(isd)-30)   // Z stays at patrol level
+                        getPatrolY(isd),
+                        getPatrolZ(isd) - 30
                     );
 
                     const dist = modelGroup.position.distanceTo(lowerTarget);
@@ -511,8 +514,46 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                         modelGroup.position.add(step);
                     }
 
-                    // once back at patrol Z seed velocity toward waypointA and depart
                     if(dist < 2) {
+                        modelConfiguration.flight = { velocity: new THREE.Vector3(0,0,0), currentBank: 0 };
+                        fsm.transition("turnToDepart");
+                    }
+                }
+            },
+
+            // ── TURN TO DEPART ───────────────────────────────────────
+            // rotate in place to face waypointA before departing
+            turnToDepart: {
+                enter: () => {
+                    console.log(`${modelGroup.designation} SHUTTLE entering TURN_TO_DEPART`);
+                    wingsDown(); // lower wings before departing
+                },
+                update: () => {
+                    if(!waypointA) return;
+
+                    // calculate angle to waypointA
+                    const toWaypoint = new THREE.Vector3()
+                        .subVectors(waypointA, modelGroup.position)
+                        .normalize();
+                    const targetYaw = Math.atan2(toWaypoint.x, toWaypoint.z);
+
+                    // find shortest angle difference
+                    let yawDiff = targetYaw - modelGroup.rotation.y;
+                    while(yawDiff >  Math.PI) yawDiff -= Math.PI * 2;
+                    while(yawDiff < -Math.PI) yawDiff += Math.PI * 2;
+
+                    // rotate slowly in place
+                    modelGroup.rotation.y += yawDiff * 0.02;
+
+                    // once close enough to facing waypointA — start flying
+                    if(Math.abs(yawDiff) < 0.05) {
+                        // seed velocity in exact direction we are now facing
+                        const facingMatrix = new THREE.Matrix4().extractRotation(modelGroup.matrix);
+                        const facingDir = new THREE.Vector3(0, 0, -1).applyMatrix4(facingMatrix);
+                        modelConfiguration.flight = {
+                            velocity: facingDir.multiplyScalar(modelConfiguration.speed * 0.3),
+                            currentBank: 0
+                        };
                         fsm.transition("depart");
                     }
                 }
@@ -579,18 +620,56 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
         // action.play();
     }
 
-    function update(time) {
+    function wingsDown() {
+        console.log(`wingsDown called`);
+        if(!mixer || !action || !clip) return;
+        action.stop();
+        action.reset();
+        action.timeScale = 1;      // play at normal speed
+        action.loop = THREE.LoopOnce;
+        action.clampWhenFinished = true;
+        action.play();
 
+        // pause at halfway through the clip
+        const halfTime = (clip.duration / 2) * 1000;
+        setTimeout(() => {
+            if(action) {
+                action.paused = true;
+                console.log(`wingsDown paused at halfway: ${action.time}`);
+            }
+        }, halfTime);
+    }
+
+    function wingsUp() {
+        console.log(`wingsUp called`);
+        if(!mixer || !action || !clip) return;
+        action.stop();
+        action.reset();
+        action.timeScale = 1;              // play forward
+        action.loop = THREE.LoopOnce;
+        action.clampWhenFinished = true;
+        action.time = clip.duration / 2;  // start from halfway — wings down position
+        action.play();
+
+        // pause at end of clip — wings fully up
+        const halfTime = (clip.duration / 2) * 1000;
+        setTimeout(() => {
+            if(action) {
+                action.paused = true;
+                console.log(`wingsUp paused at: ${action.time}`);
+            }
+        }, halfTime);
+    }
+
+    function update(time) {
         if(mixer && time && modelReady){
-            mixer.update(250);
+            const delta = time - lastTime;
+            mixer.update(delta);
         }
+        lastTime = time;
         if(fsm) {
             fsm.update();
         }
-        // this makes the ship look like its floating
-        // const scale = (Math.sin(time)+4)/5;
-        // const positionY = Math.sin(time)/2;
-        // group.position.y = playerPosition.y + positionY;
     }
 
     function playAnimations() {
@@ -608,6 +687,8 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
     return {
         mesh: group,
         update,
-        playAnimations
+        playAnimations,
+        wingsDown,
+        wingsUp
     }
 }

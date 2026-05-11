@@ -42,8 +42,13 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
 
     let playerShip = {};
     ships.forEach(ship => {
+        console.log(`ship: ${ship.mesh.name}`);
         if(ship.mesh.designation === campaignConfiguration.player.designation){
             playerShip = ship;
+        }
+        if(ship.mesh.name === 'SHUTTLE') {
+            console.log(`calling wingsDown on shuttle`);
+            ship.wingsDown();
         }
     });
 

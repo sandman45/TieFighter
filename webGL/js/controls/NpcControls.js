@@ -138,7 +138,10 @@ function flightUpdate(mesh, config, target, collisionManager) {
         desired.clone().multiplyScalar(SPEED),
         TURN_RATE
     );
-    newVelocity.setLength(SPEED);
+    // with this:
+    const currentLen = newVelocity.length();
+    const targetLen = THREE.MathUtils.lerp(currentLen, SPEED, 0.02); // gradual acceleration
+    newVelocity.setLength(Math.min(targetLen, SPEED));
     f.velocity.copy(newVelocity);
 
     // derive yaw from velocity — use (x, z) components

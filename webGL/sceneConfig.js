@@ -391,11 +391,11 @@ const config = {
         sfxVolume: 5,
     },
     floor: {
-        size: { x: 1000, y: 1000, z: 1000 },
+        size: { x: 3000, y: 3000, z: 3000 },
         transparent: false
     },
     skyBox: {
-        size: { x: 2000, y: 2000, z: 2000},
+        size: { x: 3000, y: 3000, z: 3000},
     },
     weapons: [
         {
