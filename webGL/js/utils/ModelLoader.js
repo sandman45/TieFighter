@@ -10,6 +10,7 @@ export const Model = {
     TIE_ADVANCED: "models/tie-advanced/tie-advanced.glb",
     TIE_DEFENDER: "models/tie-defender/tie-defender.glb",
     SHUTTLE: "models/shuttle/shuttle.glb",
+    TRANSPORT: "models/transport/star_wars_gr-75_medium_transport.glb",
     ISD: "models/destroyer/isd.glb",
     A_WING: "models/a-wing.glb",
     B_WING: "models/b-wing.glb",
@@ -46,7 +47,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
     }
     // change the guard to only exclude ISD
     if(!modelConfiguration.playerName && collisionManager && audio && laser
-        && modelConfiguration.name !== 'ISD') {
+        && modelConfiguration.name !== 'ISD' && modelConfiguration.name !== 'TRANSPORT') {
         if(modelConfiguration.name === 'SHUTTLE') {
             initShuttleFSM(group);
         } else {
@@ -299,7 +300,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
 
         // positions relative to ISD
         function getPatrolY(isd) { return isd.position.y - 20; }  // patrol height
-        function getDockY(isd)   { return isd.position.y + 20;  }  // risen Y toward ISD underside
+        function getDockY(isd)   { return isd.position.y + 30;  }  // risen Y toward ISD underside
         function getPatrolZ(isd) { return isd.position.z - 20; }  // patrol Z — unchanged
 
         function initWaypoints() {
@@ -310,7 +311,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
             // waypointA — far out on positive X
             waypointA = new THREE.Vector3(isd.position.x + PATROL_DISTANCE, y, z);
             // waypointB — directly under ISD at patrol Z
-            waypointB = new THREE.Vector3(isd.position.x, y, z);
+            waypointB = new THREE.Vector3(isd.position.x - 15, y, z-80);
         }
 
         function seedVelocityToward(target) {
@@ -333,6 +334,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
             depart: {
                 enter: () => {
                     console.log(`${modelGroup.designation} SHUTTLE entering DEPART`);
+                    console.log(`${modelGroup.designation} x: ${modelGroup.position.x}, y:${modelGroup.position.y}, z: ${modelGroup.position.z}`);
                     initWaypoints();
                     // only seed on very first load when there is no flight state at all
                     if(!modelConfiguration.flight) {
@@ -438,7 +440,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                     const riseTarget = new THREE.Vector3(
                         isd.position.x,
                         getDockY(isd),   // rise on Y toward ISD underside
-                        (getPatrolZ(isd) - 30)  // Z stays at patrol level
+                        (getPatrolZ(isd) - 80)  // Z stays at patrol level
                     );
 
                     const dist = modelGroup.position.distanceTo(riseTarget);
@@ -493,6 +495,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                         modelConfiguration.flight = { velocity: new THREE.Vector3(0,0,0), currentBank: 0 };
                     }
                     modelConfiguration.flight.velocity.set(0, 0, 0);
+                    wingsDown(); // lower wings before departing
                 },
                 update: () => {
                     const isd = getISD();
@@ -501,7 +504,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                     const lowerTarget = new THREE.Vector3(
                         isd.position.x,
                         getPatrolY(isd),
-                        getPatrolZ(isd) - 30
+                        getPatrolZ(isd) - 80
                     );
 
                     const dist = modelGroup.position.distanceTo(lowerTarget);
@@ -526,7 +529,6 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
             turnToDepart: {
                 enter: () => {
                     console.log(`${modelGroup.designation} SHUTTLE entering TURN_TO_DEPART`);
-                    wingsDown(); // lower wings before departing
                 },
                 update: () => {
                     if(!waypointA) return;

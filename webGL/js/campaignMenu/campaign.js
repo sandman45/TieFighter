@@ -14,7 +14,7 @@ export default {
             name: 'TIE_FIGHTER',
             hull: 100,
             shields: 0,
-            position: { x: 10, y: 1, z: 10 },
+            position: { x: 20, y: 40, z: 40 },
             rotation: { y: 3.15, x:0, z:0 },
             speed: .6,
             scale: .25,
@@ -43,7 +43,7 @@ export default {
                 name: 'TIE_FIGHTER',
                 hull: 100,
                 shields: 0,
-                position: { x: 10, y: 1, z: 10 },
+                position: { x: 20, y: 40, z: 40 },
                 rotation: { y: 3.15, x:0, z:0 },
                 speed: .6,
                 scale: .25,
@@ -60,7 +60,7 @@ export default {
                 position: { x: 20, y: 40, z: 10 },
                 rotation: { y: 0, x:0, z:0 },
                 speed: .002,
-                scale: 20,
+                scale: 40,
                 hull: 10000,
                 shields: 1000,
                 rollSpeed: .009,
@@ -75,8 +75,25 @@ export default {
                 name: 'SHUTTLE',
                 position: { x: 20, y: 20, z: -20 },
                 rotation: { y: 3.15, x:0, z:0 },
-                speed: .20,
+                speed: .40,
                 scale: 3,
+                hull: 100,
+                shields: 100,
+                rollSpeed: .009,
+                turnRate: 0.006,
+                autoForward: false,
+                faction: "IMPERIAL",
+                weapons: {
+                    firing: false
+                }
+            },
+            {
+                designation: "TRANSPORT_A",
+                name: 'TRANSPORT',
+                position: { x: 1000, y: 50, z: 10 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .10,
+                scale: 1,
                 hull: 100,
                 shields: 100,
                 rollSpeed: .009,
@@ -126,7 +143,7 @@ export default {
             {
                 designation: "GOLD_THREE",
                 name: 'Y_WING',
-                position: { x: -890, y: 1, z: -815 },  // offset right of leader
+                position: { x: -820, y: 1, z: -875 },  // offset right of leader
                 rotation: { y: 3.15, x:0, z:0, rotating: false },
                 speed: .25,
                 scale: 5,
