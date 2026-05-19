@@ -19,6 +19,9 @@ export default (modelConfig, callback) => {
         TIE_DEFENDER: {
             url: "models/tie-defender/tie-defender.glb",
         },
+        GUN_BOAT: {
+            url: "models/gun-boat/star_wars_alpha-class_xg-1_star_wing.glb",
+        },
         SHUTTLE: {
             url: "models/shuttle/shuttle.glb",
         },
@@ -31,11 +34,29 @@ export default (modelConfig, callback) => {
         B_WING: {
             url: "models/b-wing.glb",
         },
+        Y_WING: {
+            url: "models/y-wing.glb",
+        },
         X_WING: {
             url: "models/x-wing.glb",
         },
-        Y_WING: {
-            url: "models/y-wing.glb",
+        TRANSPORT: {
+            url: "models/transport/star_wars_gr-75_medium_transport.glb",
+        },
+        FREIGHTER: {
+            url: "models/freighter/star_wars_bff-1_bulk_freighter.glb",
+        },
+        LITE_FREIGHTER: {
+            url: "models/lite-freighter/star_wars_yt-2400_light_freighter.glb",
+        },
+        FRIGATE: {
+            url: "models/frigate/star_wars_nebulon_b_frigate.glb",
+        },
+        CORVETTE: {
+            url: "models/corvette/star_wars_cr-90.glb",
+        },
+        PLATFORM: {
+            url: "models/platform-space-station/star_wars_xq6_platform.glb",
         }
     };
 
