@@ -19,6 +19,7 @@ import Hud, { initHUD, updateBar } from "../../HUD/hud.js";
 import LocalStorage from "../../localStorage/localStorage.js"
 
 export default (canvas, canvas2, sceneSubjects) => {
+    let skyBox = null;
     const sceneConstants = parseConfiguration(sceneConfiguration);
     const scene = buildScene(sceneConstants);
     const renderer = buildRender(canvas);
@@ -36,6 +37,7 @@ export default (canvas, canvas2, sceneSubjects) => {
     let controls = null;
     let hud = null;
     let hudShips = [];
+
     buildLight(scene);
 
     const floorConfig = sceneConstants.floor;
@@ -244,7 +246,7 @@ export default (canvas, canvas2, sceneSubjects) => {
 
     function buildScene(sceneConstants) {
         const scene = new THREE.Scene();
-        SkyBox(scene, sceneConstants);
+        skyBox = SkyBox(scene, sceneConstants);
         return scene;
     }
 

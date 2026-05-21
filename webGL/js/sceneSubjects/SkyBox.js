@@ -1,31 +1,39 @@
-// import * as THREE from '../../node_modules/three/build/three.module.js'
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
+
 export default (scene, config) => {
     const loader = new THREE.TextureLoader();
-    // loader.crossOrigin = "";
-    const cubeGeometry = new THREE.BoxGeometry(config.skyBox.size.x, config.skyBox.size.y, config.skyBox.size.z);
+    const cubeGeometry = new THREE.BoxGeometry(
+        config.skyBox.size.x,
+        config.skyBox.size.y,
+        config.skyBox.size.z
+    );
     const cubeMaterials = [];
     const front_texture = new loader.load("/images/skybox/space/space_ft.png");
-    const back_texture = new loader.load("/images/skybox/space/space_bk.png");
-    const up_texture = new loader.load("/images/skybox/space/space_up.png");
-    const down_texture = new loader.load("/images/skybox/space/space_dn.png");
+    const back_texture  = new loader.load("/images/skybox/space/space_bk.png");
+    const up_texture    = new loader.load("/images/skybox/space/space_up.png");
+    const down_texture  = new loader.load("/images/skybox/space/space_dn.png");
     const right_texture = new loader.load("/images/skybox/space/space_rt.png");
-    const left_texture = new loader.load("/images/skybox/space/space_lf.png");
+    const left_texture  = new loader.load("/images/skybox/space/space_lf.png");
 
-    const front = new THREE.MeshBasicMaterial( { map: front_texture, side: THREE.DoubleSide });
-    const back = new THREE.MeshBasicMaterial( { map: back_texture, side: THREE.DoubleSide });
-    const up = new THREE.MeshBasicMaterial( { map: up_texture, side: THREE.DoubleSide });
-    const down = new THREE.MeshBasicMaterial( { map: down_texture, side: THREE.DoubleSide });
-    const right = new THREE.MeshBasicMaterial( { map: right_texture, side: THREE.DoubleSide });
-    const left = new THREE.MeshBasicMaterial( { map: left_texture, side: THREE.DoubleSide });
-
-    cubeMaterials.push(front);
-    cubeMaterials.push(back);
-    cubeMaterials.push(up);
-    cubeMaterials.push(down);
-    cubeMaterials.push(right);
-    cubeMaterials.push(left);
+    // BackSide only — no z-fighting, no seams from inside
+    cubeMaterials.push(new THREE.MeshBasicMaterial({ map: front_texture, side: THREE.BackSide }));
+    cubeMaterials.push(new THREE.MeshBasicMaterial({ map: back_texture,  side: THREE.BackSide }));
+    cubeMaterials.push(new THREE.MeshBasicMaterial({ map: up_texture,    side: THREE.BackSide }));
+    cubeMaterials.push(new THREE.MeshBasicMaterial({ map: down_texture,  side: THREE.BackSide }));
+    cubeMaterials.push(new THREE.MeshBasicMaterial({ map: right_texture, side: THREE.BackSide }));
+    cubeMaterials.push(new THREE.MeshBasicMaterial({ map: left_texture,  side: THREE.BackSide }));
 
     const cube = new THREE.Mesh(cubeGeometry, cubeMaterials);
+    // render skybox behind everything else
+    cube.renderOrder = -1;
     scene.add(cube);
+
+    // return update so SceneManager can pass camera position each frame
+    function update(camera) {
+        if(camera) {
+            cube.position.copy(camera.position);
+        }
+    }
+
+    return { update };
 }

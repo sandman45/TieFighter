@@ -1,73 +1,10 @@
 // ── MISSION DATA ──────────────────────────────────────────────────────────────
-// Swap this object out per mission to drive the whole briefing screen.
-export const MISSION = {
-    id: 'mission1',
-    title: 'PATROL SIGMA-7',
-    sector: 'SECTOR 7-G',
-    mapWaypoints: [
-        { id: 'nav1',  x: 0.15, y: 0.35, label: 'NAV 1',        type: 'nav',      primary: true },
-        { id: 'nav2',  x: 0.38, y: 0.55, label: 'NAV 2',        type: 'nav',      primary: true },
-        { id: 'nav3',  x: 0.62, y: 0.40, label: 'NAV 3',        type: 'nav',      primary: true },
-        { id: 'obj1',  x: 0.50, y: 0.25, label: 'CONVOY',       type: 'target',   primary: true },
-        { id: 'obj2',  x: 0.75, y: 0.60, label: 'STATION',      type: 'friendly'               },
-        { id: 'start', x: 0.08, y: 0.70, label: 'LAUNCH POINT', type: 'player'                 },
-        { id: 'reb1',  x: 0.45, y: 0.72, label: 'REBEL PATROL', type: 'enemy'                  },
-        { id: 'reb2',  x: 0.68, y: 0.22, label: 'REBEL ESCORT', type: 'enemy'                  },
-    ],
-    flightPath: ['start', 'nav1', 'nav2', 'obj1', 'nav3', 'obj2'],
-    topics: {
-        situation: {
-            header: 'SITUATION REPORT',
-            text: `
-        <p>Imperial convoy <span class="highlight">SIGMA-7</span> has been ambushed in sector 7-G by Rebel Alliance forces. The convoy, carrying critical hyperdrive components for the <span class="highlight">ISD RELENTLESS</span>, has requested immediate fighter escort.</p>
-        <p>Rebel X-Wing and Y-Wing squadrons have been detected in the area. Intelligence suggests a coordinated strike intended to capture or destroy the cargo.</p>
-        <p>You will launch immediately and intercept all hostile craft before they can disable the convoy transports.</p>
-      `
-        },
-        objectives: {
-            header: 'PRIMARY OBJECTIVES',
-            text: `
-        <div class="objective-item"><span class="obj-marker">►</span><span>Destroy all Rebel <span class="highlight">X-WING</span> fighters in sector</span></div>
-        <div class="objective-item"><span class="obj-marker">►</span><span>Protect convoy transports <span class="highlight">SIGMA 1</span> through <span class="highlight">SIGMA 4</span></span></div>
-        <div class="objective-item"><span class="obj-marker">►</span><span>Ensure safe passage to rendezvous point <span class="highlight">NAV 3</span></span></div>
-        <p style="margin-top:10px; color: var(--text-dim); font-size:9px;">Failure to protect the convoy will result in mission failure. All transport losses will be logged in your service record.</p>
-      `
-        },
-        secondary: {
-            header: 'SECONDARY OBJECTIVES',
-            text: `
-        <div class="objective-item"><span class="obj-marker">◆</span><span>Capture Rebel <span class="highlight">Y-WING</span> leader — disable, do not destroy</span></div>
-        <div class="objective-item"><span class="obj-marker">◆</span><span>Inspect cargo container <span class="highlight">CRG ALPHA</span> for contraband</span></div>
-        <p style="margin-top:10px; color: var(--text-dim); font-size:9px;">Secondary objectives are optional but completion will be noted in your Imperial service record.</p>
-      `
-        },
-        craft: {
-            header: 'FLIGHT ASSIGNMENT',
-            text: `
-        <p>ASSIGNED CRAFT: <span class="highlight">TIE/LN FIGHTER</span></p>
-        <p>DESIGNATION: <span class="highlight">ALPHA ONE</span></p>
-        <p>WING: <span class="highlight">ALPHA SQUADRON</span> · 4 CRAFT</p>
-        <p style="margin-top:8px;">LOADOUT:</p>
-        <div class="objective-item"><span class="obj-marker">·</span><span>LASER CANNONS — STANDARD</span></div>
-        <div class="objective-item"><span class="obj-marker">·</span><span>NO WARHEAD CAPACITY</span></div>
-        <div class="objective-item"><span class="obj-marker">·</span><span>NO SHIELDS — SPEED IS YOUR DEFENSE</span></div>
-        <p style="margin-top:8px; color: var(--text-dim); font-size:9px;">The TIE/ln has no shields or hyperdrive. Do not stray from the operational area.</p>
-      `
-        },
-        threats: {
-            header: 'THREAT ASSESSMENT',
-            text: `
-        <p>CONFIRMED HOSTILES:</p>
-        <div class="objective-item"><span class="obj-marker" style="color:#cc2200">▲</span><span><span class="highlight">RED SQUADRON</span> — 4× T-65 X-WING · HIGH THREAT</span></div>
-        <div class="objective-item"><span class="obj-marker" style="color:#cc2200">▲</span><span><span class="highlight">GOLD SQUADRON</span> — 2× BTL Y-WING · MEDIUM THREAT</span></div>
-        <p style="margin-top:8px; color: var(--text-dim); font-size:9px;">X-Wings are faster and better shielded than your craft. Use superior maneuverability. Attack Y-Wings from the rear to avoid ion cannons.</p>
-      `
-        }
-    }
-};
+// MISSION is now set dynamically from campaign config — see initBriefing
+let MISSION = null;
 
 // ── BRIEFING TEXT ─────────────────────────────────────────────────────────────
 export function showTopic(topicKey) {
+    if(!MISSION) return;
     const topic = MISSION.topics[topicKey];
     if (!topic) return;
 
@@ -89,7 +26,6 @@ export function showTopic(topicKey) {
 // ── STAR MAP ──────────────────────────────────────────────────────────────────
 const mapCanvas = document.getElementById('starMap');
 const ctx = mapCanvas.getContext('2d');
-
 let animFrame = 0;
 
 const COLORS = {
@@ -128,6 +64,7 @@ function wp(waypoint) {
 }
 
 function drawFlightPath() {
+    if(!MISSION) return;
     const path  = MISSION.flightPath;
     const wpMap = {};
     MISSION.mapWaypoints.forEach(w => { wpMap[w.id] = w; });
@@ -153,6 +90,7 @@ function drawFlightPath() {
 }
 
 function drawWaypoints() {
+    if(!MISSION) return;
     MISSION.mapWaypoints.forEach(waypoint => {
         const { x, y } = wp(waypoint);
         const color = COLORS[waypoint.type] || '#ffffff';
@@ -243,26 +181,28 @@ function renderMap() {
     drawFlightPath();
     drawWaypoints();
     animFrame++;
-    mapAnimationId = requestAnimationFrame(renderMap);  // <-- store the ID
+    mapAnimationId = requestAnimationFrame(renderMap);
 }
 
 // ── LAUNCH ────────────────────────────────────────────────────────────────────
-export function initLaunchBtn(onLaunch) {
-    document.getElementById('launchBtn').addEventListener('click', () => {
-        document.body.style.transition = 'opacity 0.5s ease';
-        document.body.style.opacity = '0';
-        document.body.style.opacity = '1';  // <-- restore visibility
-        document.body.style.transition = '';
-        if (typeof onLaunch === 'function') {
-            onLaunch();
-        }
-    });
-}
-
 let mapAnimationId = null;
-let briefingInitialised = false;
 
-export function initBriefing(onLaunch) {
+export function initBriefing(campaignConfig, onLaunch) {
+    // set mission data from campaign config
+    MISSION = campaignConfig.briefing;
+    MISSION.flightPath  = campaignConfig.briefing.flightPath;
+    MISSION.mapWaypoints = campaignConfig.briefing.mapWaypoints;
+
+    // populate header fields from campaign config
+    document.getElementById('briefing-mission-title').textContent = campaignConfig.title;
+    document.getElementById('briefing-sector-label').textContent  = campaignConfig.briefing.sector;
+    document.getElementById('briefing-officer-name').textContent  = campaignConfig.briefing.officer.name;
+    document.getElementById('briefing-officer-rank').textContent  = campaignConfig.briefing.officer.rank;
+    document.getElementById('briefing-officer-speech').innerHTML  =
+        `"${campaignConfig.briefing.officer.speech}"<span class="cursor">_</span>`;
+
+    const officerImg = document.querySelector('.officer-portrait img');
+    if(officerImg) officerImg.src = campaignConfig.briefing.officer.image;
 
     // cancel any previous map animation loop
     if (mapAnimationId !== null) {
@@ -276,7 +216,6 @@ export function initBriefing(onLaunch) {
     launchBtn.replaceWith(launchBtn.cloneNode(true));
     backBtn.replaceWith(backBtn.cloneNode(true));
 
-    // re-query after clone
     document.querySelectorAll('.question-btn').forEach(btn => {
         btn.replaceWith(btn.cloneNode(true));
     });
@@ -291,7 +230,6 @@ export function initBriefing(onLaunch) {
     resizeMap();
     renderMap();
 
-    // back button
     document.getElementById('briefingBackBtn').addEventListener('click', () => {
         cancelAnimationFrame(mapAnimationId);
         mapAnimationId = null;
@@ -300,5 +238,9 @@ export function initBriefing(onLaunch) {
         document.getElementById('campaign-menu').style.visibility    = 'visible';
     });
 
-    initLaunchBtn(onLaunch);
+    document.getElementById('launchBtn').addEventListener('click', () => {
+        cancelAnimationFrame(mapAnimationId);
+        mapAnimationId = null;
+        if (typeof onLaunch === 'function') onLaunch();
+    });
 }
