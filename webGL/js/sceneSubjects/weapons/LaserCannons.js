@@ -94,7 +94,6 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
         moveLaser(time);
     }
 
-    // inner checkCollision — uses Box3 against actual mesh geometry
     function checkCollision(pos, name, id) {
         if(!pos || exemptions(sourceMesh.name)) return { collision: false };
 
@@ -108,7 +107,7 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
             });
 
             if(!targetMesh) {
-                // fallback spread check if mesh not found in scene
+                // fallback spread check
                 const spread = 2;
                 if(
                     (laser.laser.position.x >= (pos.x - spread) && laser.laser.position.x <= (pos.x + spread)) &&
@@ -121,15 +120,38 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
                 return;
             }
 
-            // compute world-space bounding box from actual geometry
+            // first do a fast Box3 pre-check to avoid expensive raycasting
+            // when laser is nowhere near the target
             const box = new THREE.Box3().setFromObject(targetMesh);
+            const preCheckPadding = getPadding(name);
+            box.expandByScalar(preCheckPadding);
 
-            // expand box slightly per ship type for gameplay feel
-            const padding = getPadding(name);
-            box.expandByScalar(padding);
+            if(!box.containsPoint(laser.laser.position)) {
+                // laser not even close — skip raycasting entirely
+                return;
+            }
 
-            if(box.containsPoint(laser.laser.position)) {
-                console.log(`laser HIT ${name}: ${id}`);
+            // laser is inside the bounding box — do precise raycast check
+            // cast a ray from slightly behind the laser toward its travel direction
+            const matrix = new THREE.Matrix4().extractRotation(sourceMesh.matrix);
+            const laserDir = new THREE.Vector3(0, 0, 1).applyMatrix4(matrix).normalize();
+
+            // cast from a small distance behind the laser position
+            const rayOrigin = laser.laser.position.clone().addScaledVector(laserDir, 2);
+            const rayDir    = laserDir.clone().negate();
+
+            const raycaster = new THREE.Raycaster(rayOrigin, rayDir, 0, 4);
+
+            // collect all meshes in the target group for raycasting
+            const meshesToCheck = [];
+            targetMesh.traverse(child => {
+                if(child.isMesh) meshesToCheck.push(child);
+            });
+
+            const intersects = raycaster.intersectObjects(meshesToCheck, false);
+
+            if(intersects.length > 0) {
+                console.log(`precise laser HIT ${name}: ${id} at distance ${intersects[0].distance}`);
                 cleanup(laser.laser, i);
                 collisionRes = { collision: true, name: 'Laser-hit' };
             }
@@ -139,20 +161,22 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
     }
 
     function getPadding(name) {
+        // pre-check box padding — just needs to be big enough
+        // to not miss fast-moving lasers, raycast handles precision
         const paddings = {
-            ISD:             0,
-            SHUTTLE:         1,
-            Y_WING:          1,
-            X_WING:          1,
-            A_WING:          1,
-            B_WING:          1,
-            TIE_FIGHTER:     2,
-            TIE_INTERCEPTOR: 2,
-            TIE_ADVANCED:    2,
-            TIE_DEFENDER:    2,
-            TIE_BOMBER:      2,
+            ISD:             15,  // large ship — wider pre-check zone
+            SHUTTLE:         5,
+            Y_WING:          5,
+            X_WING:          5,
+            A_WING:          4,
+            B_WING:          5,
+            TIE_FIGHTER:     3,
+            TIE_INTERCEPTOR: 3,
+            TIE_ADVANCED:    3,
+            TIE_DEFENDER:    3,
+            TIE_BOMBER:      3,
         };
-        return paddings[name] !== undefined ? paddings[name] : 1;
+        return paddings[name] !== undefined ? paddings[name] : 4;
     }
 
     function calculateDirectionVector(sourceShipMesh) {
