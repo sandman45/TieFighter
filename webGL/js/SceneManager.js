@@ -174,6 +174,16 @@ export default (views, screen) => {
             const elapsedTime = clock.getElapsedTime();
             const dt = clock.getDelta();
 
+            // update skybox to follow camera
+            if(views[0].camera) {
+                scene && scene.children.forEach(child => {
+                    // skybox cube has no name — identify by geometry type
+                    if(child.geometry && child.geometry.type === 'BoxGeometry' && child.renderOrder === -1) {
+                        child.position.copy(views[0].camera.position);
+                    }
+                });
+            }
+
             if (!reticle && views[0].camera) {
                 reticle = new TargetingReticle(overlayCanvas, views[0].camera);
             }

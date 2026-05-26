@@ -17,6 +17,7 @@ import SkyBox from "../../sceneSubjects/SkyBox.js";
 import HUD, { initHUD } from "../../HUD/hud.js";
 
 export default (canvas, canvas2, models, campaignConfiguration) => {
+    let skyBox = null;
     console.log(`mission one width: ${canvas.width}, height: ${canvas.height}`);
     const sceneGlobalConstants = parseConfiguration(globalConfiguration);
     const scene = buildScene(sceneGlobalConstants);
@@ -26,6 +27,7 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
     const audio = GameAudio(camera, sceneGlobalConstants.audio, () => {
         audio.playSound("MUSIC", camera);
     });
+
     buildLight(scene);
 
     const floorConfig = sceneGlobalConstants.floor;
@@ -103,7 +105,7 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
 
     function buildScene(sceneGlobalConstants) {
         const scene = new THREE.Scene();
-        SkyBox(scene, sceneGlobalConstants);
+        skyBox = SkyBox(scene, sceneGlobalConstants);
         return scene;
     }
 
@@ -182,6 +184,7 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
         targetRenderer,
         controls,
         sceneSubjects: sc,
-        weaponsCollision
+        weaponsCollision,
+        updateSkyBox: (cam) => { if(skyBox) skyBox.update(cam); }
     };
 }

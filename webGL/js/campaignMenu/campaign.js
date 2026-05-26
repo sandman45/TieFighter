@@ -8,6 +8,77 @@ export default {
         aftermath: "The captured freighter carried 10 individuals, some of them were Mugaari sympathisers. Imperial Intelligence hoped to learn more about the Rebel activity in the sector through the prisoners. Admiral Flanken and Major Thorbo were the ones who interrogated the prisoners for the desired base of operations and plans using an Interrogation droid to extract every detail they could get. To Stele it reminded him of being a Bordali prisoner, but figured that it served the Rebels right.\n" +
             "\n" +
             "Another thing was that Alliance forces in the area upon hearing the unsuccessful smuggle attempt believed that if they could not smuggle their forces out of this sector, they may have to force their way out. This would lead to the First Battle of Javin.",
+        briefing: {
+            officer: {
+                name: "ADM. THRAWN",
+                rank: "FLEET ADMIRAL · ISD CHIMAERA",
+                image: "./images/impirials/thrawn.png",
+                speech: '"Pilot, the Rebels grow desperate. Do not let them escape."'
+            },
+            sector: "JAVIN SECTOR · OUTPOST D-34",
+            mapWaypoints: [
+                { id: 'start',     x: 0.55, y: 0.32, label: 'LAUNCH POINT',    type: 'player'                 },
+                { id: 'isd',       x: 0.55, y: 0.30, label: 'ISD VICTORIOUS',  type: 'friendly'               },
+                { id: 'nav1',      x: 0.60, y: 0.38, label: 'NAV 1',           type: 'nav',     primary: true  },
+                { id: 'shuttle',   x: 0.65, y: 0.45, label: 'TYDERIAN',        type: 'friendly'               },
+                { id: 'nav2',      x: 0.72, y: 0.48, label: 'NAV 2',           type: 'nav',     primary: true  },
+                { id: 'transport', x: 0.80, y: 0.50, label: 'TRANSPORT ALPHA', type: 'friendly'               },
+                { id: 'nav3',      x: 0.72, y: 0.40, label: 'NAV 3',           type: 'nav',     primary: true  },
+                { id: 'reb1',      x: 0.20, y: 0.65, label: 'GOLD LEADER',     type: 'enemy'                  },
+                { id: 'reb2',      x: 0.15, y: 0.72, label: 'GOLD TWO',        type: 'enemy'                  },
+                { id: 'reb3',      x: 0.18, y: 0.60, label: 'GOLD THREE',      type: 'enemy'                  },
+            ],
+            flightPath: ['start', 'nav1', 'shuttle', 'nav2', 'transport', 'nav3', 'isd'],
+            topics: {
+                situation: {
+                    header: 'SITUATION REPORT',
+                    text: `
+                    <p>Following the Rebel defeat on <span class="highlight">HOTH</span>, freighter traffic has increased in the <span class="highlight">JAVIN SECTOR</span>. Imperial Intelligence suspects Rebel forces are attempting to pass through <span class="highlight">OUTPOST D-34</span>.</p>
+                    <p>Three Y-Wing bombers designated <span class="highlight">GOLD SQUADRON</span> have been detected on an attack vector toward the <span class="highlight">ISD VICTORIOUS</span>. You will intercept and destroy them before they reach the Star Destroyer.</p>
+                    <p>Simultaneously, <span class="highlight">SHUTTLE TYDERIAN</span> is conducting docking operations with <span class="highlight">TRANSPORT ALPHA</span> to transfer critical cargo. The shuttle must not be interrupted.</p>
+                `
+                },
+                objectives: {
+                    header: 'PRIMARY OBJECTIVES',
+                    text: `
+                    <div class="objective-item"><span class="obj-marker">►</span><span>Destroy all <span class="highlight">GOLD SQUADRON</span> Y-Wing bombers</span></div>
+                    <div class="objective-item"><span class="obj-marker">►</span><span>Protect <span class="highlight">ISD VICTORIOUS</span> from bomber attack runs</span></div>
+                    <div class="objective-item"><span class="obj-marker">►</span><span>Protect <span class="highlight">SHUTTLE TYDERIAN</span> during docking operations</span></div>
+                    <p style="margin-top:10px; color: var(--text-dim); font-size:9px;">Loss of the ISD Victorious will result in mission failure.</p>
+                `
+                },
+                secondary: {
+                    header: 'SECONDARY OBJECTIVES',
+                    text: `
+                    <div class="objective-item"><span class="obj-marker">◆</span><span>Escort <span class="highlight">SHUTTLE TYDERIAN</span> during docking operations with <span class="highlight">TRANSPORT ALPHA</span></span></div>
+                    <div class="objective-item"><span class="obj-marker">◆</span><span>Inspect incoming freighter traffic for <span class="highlight">REBEL CONTRABAND</span></span></div>
+                    <div class="objective-item"><span class="obj-marker">◆</span><span>Capture <span class="highlight">GOLD LEADER</span> — disable, do not destroy</span></div>
+                    <p style="margin-top:10px; color: var(--text-dim); font-size:9px;">Secondary objectives are optional but will be noted in your Imperial service record.</p>
+                `
+                },
+                craft: {
+                    header: 'FLIGHT ASSIGNMENT',
+                    text: `
+                    <p>ASSIGNED CRAFT: <span class="highlight">TIE/LN FIGHTER</span></p>
+                    <p>DESIGNATION: <span class="highlight">ALPHA ONE</span></p>
+                    <p>WING: <span class="highlight">ALPHA SQUADRON</span></p>
+                    <p style="margin-top:8px;">LOADOUT:</p>
+                    <div class="objective-item"><span class="obj-marker">·</span><span>LASER CANNONS — STANDARD</span></div>
+                    <div class="objective-item"><span class="obj-marker">·</span><span>NO WARHEAD CAPACITY</span></div>
+                    <div class="objective-item"><span class="obj-marker">·</span><span>NO SHIELDS — SPEED IS YOUR DEFENSE</span></div>
+                    <p style="margin-top:8px; color: var(--text-dim); font-size:9px;">The TIE/ln has no shields or hyperdrive. Do not stray from the operational area.</p>
+                `
+                },
+                threats: {
+                    header: 'THREAT ASSESSMENT',
+                    text: `
+                    <p>CONFIRMED HOSTILES:</p>
+                    <div class="objective-item"><span class="obj-marker" style="color:#cc2200">▲</span><span><span class="highlight">GOLD SQUADRON</span> — 3× BTL Y-WING · MEDIUM THREAT</span></div>
+                    <p style="margin-top:8px; color: var(--text-dim); font-size:9px;">Y-Wings are heavily armoured with shields. Attack from the rear. They will attempt attack runs on the ISD — do not let them reach weapons range.</p>
+                `
+                }
+            }
+        },
         player: {
             designation: "ALPHA_ONE",
             playerName: "PLAYER1",
@@ -75,7 +146,7 @@ export default {
                 name: 'SHUTTLE',
                 position: { x: 20, y: 20, z: -20 },
                 rotation: { y: 3.15, x:0, z:0 },
-                speed: .40,
+                speed: .20,
                 scale: 3,
                 hull: 100,
                 shields: 100,

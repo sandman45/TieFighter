@@ -9,6 +9,7 @@ import SkyBox from "../../sceneSubjects/SkyBox.js";
 import ModelLoader, { Model } from "../../utils/ModelLoader.js";
 
 export default (canvas, models) => {
+    let skyBox = null;
     const sceneConstants = parseConfiguration(sceneConfiguration);
     const scene = buildScene(sceneConstants);
     const renderer = buildRender(canvas);
@@ -16,6 +17,7 @@ export default (canvas, models) => {
     const audio = GameAudio(camera, sceneConfiguration.audio, () => {
         audio.playSound("MUSIC_MENU", camera);
     });
+
     buildLight(scene);
 
     const floorConfig = sceneConstants.floor;
@@ -42,7 +44,7 @@ export default (canvas, models) => {
 
     function buildScene(sceneConstants) {
         const scene = new THREE.Scene();
-        SkyBox(scene, sceneConstants);
+        skyBox = SkyBox(scene, sceneConstants);
         return scene;
     }
 

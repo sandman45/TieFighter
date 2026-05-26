@@ -76,31 +76,66 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
 
         function distanceTo(meshA, meshB) {
             if(!meshA || !meshB) return Infinity;
+            // for the ISD use its visual center not group origin
+            if(meshB.name === 'ISD') {
+                const center = getISDCenter(meshB);
+                return meshA.position.distanceTo(center);
+            }
             return meshA.position.distanceTo(meshB.position);
+        }
+
+        function getISDCenter(isd) {
+            const box = new THREE.Box3().setFromObject(isd);
+            const center = new THREE.Vector3();
+            box.getCenter(center);
+            return center;
+        }
+
+        function getISDSize(isd) {
+            const box = new THREE.Box3().setFromObject(isd);
+            const size = new THREE.Vector3();
+            box.getSize(size);
+            return size;
         }
 
         function getAttackWaypoint(isd) {
             if(!isd) return null;
+            const center = getISDCenter(isd);
+            const size   = getISDSize(isd);
+
+            // orbit radius based on actual ship size — stay outside the hull
+            const safeRadiusX = (size.x / 2) + 60;
+            const safeRadiusZ = (size.z / 2) + 60;
+            const safeRadiusY = (size.y / 2) + 30;
+
+            // pick a random angle around the ship
+            const angle = Math.random() * Math.PI * 2;
+
             return new THREE.Vector3(
-                isd.position.x + (Math.random() - 0.5) * 100,
-                isd.position.y + (Math.random() - 0.5) * 20,
-                isd.position.z + (Math.random() - 0.5) * 100
+                center.x + Math.cos(angle) * safeRadiusX * (0.8 + Math.random() * 0.4),
+                center.y + (Math.random() - 0.5) * safeRadiusY,
+                center.z + Math.sin(angle) * safeRadiusZ * (0.8 + Math.random() * 0.4)
             );
         }
 
-        // also add a form waypoint slightly offset per ship so they
-        // don't all pile on the same path
         function getFormWaypoint(isd) {
             if(!isd) return null;
+            const center = getISDCenter(isd);
+            const size   = getISDSize(isd);
+
+            // form up at a safe distance from the ship
+            const angle = Math.random() * Math.PI * 2;
+            const radius = (Math.max(size.x, size.z) / 2) + 100;
+
             return new THREE.Vector3(
-                isd.position.x + (Math.random() - 0.5) * 40,
-                isd.position.y,
-                isd.position.z + (Math.random() - 0.5) * 40
+                center.x + Math.cos(angle) * radius,
+                center.y + (Math.random() - 0.5) * 40,
+                center.z + Math.sin(angle) * radius
             );
         }
 
-        const FORM_RANGE     = 150;
-        const ATTACK_RANGE   = 100;
+        const FORM_RANGE     = 250;
+        const ATTACK_RANGE   = 180;
         const THREAT_RANGE   = 50;
         const EVADE_DURATION = 10000;
         const EVADE_COOLDOWN = 10000;

@@ -6,6 +6,7 @@ import EventBus from "./eventBus/EventBus.js";
 import events from "./eventBus/events.js";
 import LocalStorage from "./localStorage/localStorage.js";
 import { initBriefing } from './missionBriefing/missionBriefing.js';
+import campaign from "./campaignMenu/campaign.js"; // add this import
 
 initSocketIO(onKeyUp, onKeyDown);
 // initial state is menu
@@ -273,18 +274,18 @@ function onSubMenuItemClick(event) {
 
 function showMissionBriefing(missionKey) {
 	const briefingEl = document.getElementById('mission-briefing');
-	// fully reset — previous visit may have hidden these
 	briefingEl.style.display    = 'block';
 	briefingEl.style.visibility = 'visible';
 	briefingEl.style.zIndex     = '2000';
 
-	initBriefing(() => {
-		// fully remove briefing
+	// pass campaign config for this mission to initBriefing
+	const campaignConfig = campaign[missionKey];
+
+	initBriefing(campaignConfig, () => {
 		briefingEl.style.display    = 'none';
 		briefingEl.style.visibility = 'hidden';
 		briefingEl.style.zIndex     = '-1';
 
-		// show HUD
 		document.getElementById('heads-up-display').style.visibility = 'visible';
 
 		sceneManager = SceneManager(views, missionKey);
