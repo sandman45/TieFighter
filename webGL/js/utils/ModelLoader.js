@@ -27,6 +27,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
     let cm;
     let modelReady = false;
     let lastTime = 0;
+    let skyBox = null;
     cm = collisionManager;
     const group = new THREE.Group();
     group.hull = modelConfiguration.hull;
@@ -41,11 +42,10 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
 
     if(modelGltf) {
         configureGLTFObject(modelGltf);
-
     } else {
         loadGLTFModel(Model[modelConfiguration.name]);
     }
-    // change the guard to only exclude ISD
+
     if(!modelConfiguration.playerName && collisionManager && audio && laser
         && modelConfiguration.name !== 'ISD' && modelConfiguration.name !== 'TRANSPORT') {
         if(modelConfiguration.name === 'SHUTTLE') {
@@ -76,7 +76,6 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
 
         function distanceTo(meshA, meshB) {
             if(!meshA || !meshB) return Infinity;
-            // for the ISD use its visual center not group origin
             if(meshB.name === 'ISD') {
                 const center = getISDCenter(meshB);
                 return meshA.position.distanceTo(center);
@@ -103,12 +102,10 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
             const center = getISDCenter(isd);
             const size   = getISDSize(isd);
 
-            // orbit radius based on actual ship size — stay outside the hull
             const safeRadiusX = (size.x / 2) + 60;
             const safeRadiusZ = (size.z / 2) + 60;
             const safeRadiusY = (size.y / 2) + 30;
 
-            // pick a random angle around the ship
             const angle = Math.random() * Math.PI * 2;
 
             return new THREE.Vector3(
@@ -123,7 +120,6 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
             const center = getISDCenter(isd);
             const size   = getISDSize(isd);
 
-            // form up at a safe distance from the ship
             const angle = Math.random() * Math.PI * 2;
             const radius = (Math.max(size.x, size.z) / 2) + 100;
 
@@ -132,6 +128,59 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                 center.y + (Math.random() - 0.5) * 40,
                 center.z + Math.sin(angle) * radius
             );
+        }
+
+        // ── ship-to-ship collision ────────────────────────────────
+        function checkShipCollision(modelGroup) {
+            const myBox = new THREE.Box3().setFromObject(modelGroup);
+            myBox.expandByScalar(-2);
+
+            let collision = false;
+            let collisionNormal = null;
+
+            scene.children.forEach(child => {
+                if(child === modelGroup) return;
+                if(!child.userId && !child.designation) return;
+                if(child.hull <= 0) return;
+                if(child.name === 'EXPLOSION') return;
+
+                const otherBox = new THREE.Box3().setFromObject(child);
+                otherBox.expandByScalar(-2);
+
+                if(myBox.intersectsBox(otherBox)) {
+                    const myCenter    = new THREE.Vector3();
+                    const otherCenter = new THREE.Vector3();
+                    myBox.getCenter(myCenter);
+                    otherBox.getCenter(otherCenter);
+
+                    collisionNormal = new THREE.Vector3()
+                        .subVectors(myCenter, otherCenter)
+                        .normalize();
+
+                    collision = true;
+                }
+            });
+
+            return { collision, collisionNormal };
+        }
+
+        function handleShipCollision(newWaypoint) {
+            const shipCollision = checkShipCollision(modelGroup);
+            if(!shipCollision.collision || !shipCollision.collisionNormal) return false;
+
+            modelGroup.position.addScaledVector(shipCollision.collisionNormal, modelConfiguration.speed * 2);
+
+            if(modelConfiguration.flight && modelConfiguration.flight.velocity) {
+                const v = modelConfiguration.flight.velocity;
+                const dot = v.dot(shipCollision.collisionNormal);
+                v.addScaledVector(shipCollision.collisionNormal, -2 * dot);
+                v.x += (Math.random() - 0.5) * 0.1;
+                v.z += (Math.random() - 0.5) * 0.1;
+                v.setLength(modelConfiguration.speed);
+            }
+
+            if(newWaypoint) attackWaypoint = newWaypoint;
+            return true;
         }
 
         const FORM_RANGE     = 250;
@@ -147,29 +196,27 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
 
         fsm = new FiniteStateMachine({
 
-            // fly toward ISD in formation
             form: {
                 enter: () => {
                     console.log(`${modelGroup.designation} entering FORM`);
-                    // reset flight state so momentum starts fresh
                     modelConfiguration.flight = null;
                 },
                 update: () => {
                     const isd = getISD();
                     if(!isd) return;
 
-                    const formTarget = getFormWaypoint(isd);
+                    if(handleShipCollision(null)) return;
+
                     const collision = NpcControls(scene, modelGroup, modelConfiguration, "flightUpdate", -1, cm, audio, laser, isd);
 
                     if(collision) {
-                        // nudge back toward ISD on boundary hit
                         modelGroup.position.add(
                             new THREE.Vector3()
                                 .subVectors(isd.position, modelGroup.position)
                                 .normalize()
                                 .multiplyScalar(modelConfiguration.speed * 2)
                         );
-                        modelConfiguration.flight = null; // reset momentum
+                        modelConfiguration.flight = null;
                     }
 
                     if(distanceTo(modelGroup, isd) < FORM_RANGE) {
@@ -190,6 +237,8 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                     const player = getPlayer();
                     if(!isd) return;
 
+                    if(handleShipCollision(getAttackWaypoint(isd))) return;
+
                     if(player && distanceTo(modelGroup, player) < THREAT_RANGE && Date.now() > evadeCooldownUntil) {
                         fsm.transition("evade");
                         return;
@@ -206,15 +255,13 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                                 .normalize()
                                 .multiplyScalar(modelConfiguration.speed * 2)
                         );
-                        modelConfiguration.flight = null; // reset momentum on wall hit
+                        modelConfiguration.flight = null;
                     }
 
-                    // fire when close to ISD
                     if(distanceTo(modelGroup, isd) < ATTACK_RANGE) {
                         NpcControls(scene, modelGroup, modelConfiguration, "burstFire", -1, cm, audio, laser);
                     }
 
-                    // pick new overshoot waypoint when close to current one
                     if(attackWaypoint && modelGroup.position.distanceTo(attackWaypoint) < 20) {
                         attackWaypoint = getAttackWaypoint(isd);
                     }
@@ -226,12 +273,11 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                     console.log(`${modelGroup.designation} entering EVADE`);
                     evadeTimer = Date.now() + EVADE_DURATION;
                     const player = getPlayer();
-                    // fly directly away from player with some vertical variation
                     if(player) {
                         const away = new THREE.Vector3()
                             .subVectors(modelGroup.position, player.position)
                             .normalize();
-                        away.y += (Math.random() - 0.5) * 0.5; // add vertical variation
+                        away.y += (Math.random() - 0.5) * 0.5;
                         away.normalize();
                         evadeTarget = modelGroup.position.clone().add(away.multiplyScalar(100));
                     } else {
@@ -243,9 +289,11 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                             )
                         );
                     }
-                    modelConfiguration.flight = null; // reset momentum for sharp evasion
+                    modelConfiguration.flight = null;
                 },
                 update: () => {
+                    if(handleShipCollision(null)) return;
+
                     const collision = NpcControls(scene, modelGroup, modelConfiguration, "flightUpdate", -1, cm, audio, laser, evadeTarget);
 
                     if(collision) {
@@ -263,11 +311,13 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                 enter: () => {
                     console.log(`${modelGroup.designation} entering RETURN_TO_ATTACK`);
                     evadeCooldownUntil = Date.now() + EVADE_COOLDOWN;
-                    modelConfiguration.flight = null; // reset momentum
+                    modelConfiguration.flight = null;
                 },
                 update: () => {
                     const isd = getISD();
                     if(!isd) return;
+
+                    if(handleShipCollision(null)) return;
 
                     const collision = NpcControls(scene, modelGroup, modelConfiguration, "flightUpdate", -1, cm, audio, laser, isd);
 
@@ -287,7 +337,6 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                 }
             },
 
-            // keep old states so nothing breaks
             patrol: {
                 enter: () => {},
                 update: () => {
@@ -327,31 +376,27 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
 
         const PATROL_DISTANCE  = 1000;
         const ARRIVE_THRESHOLD = 20;
-        const DOCK_WAIT        = 20000; // 20 seconds
+        const DOCK_WAIT        = 20000;
 
-        let waypointA       = null;
-        let waypointB       = null;
-        let dockTimer       = 0;
+        let waypointA = null;
+        let waypointB = null;
+        let dockTimer = 0;
 
-        // positions relative to ISD
-        function getPatrolY(isd) { return isd.position.y - 20; }  // patrol height
-        function getDockY(isd)   { return isd.position.y + 30;  }  // risen Y toward ISD underside
-        function getPatrolZ(isd) { return isd.position.z - 20; }  // patrol Z — unchanged
+        function getPatrolY(isd) { return isd.position.y - 20; }
+        function getDockY(isd)   { return isd.position.y + 30; }
+        function getPatrolZ(isd) { return isd.position.z - 20; }
 
         function initWaypoints() {
             const isd = getISD();
             if(!isd || waypointA) return;
             const y = getPatrolY(isd);
             const z = getPatrolZ(isd);
-            // waypointA — far out on positive X
             waypointA = new THREE.Vector3(isd.position.x + PATROL_DISTANCE, y, z);
-            // waypointB — directly under ISD at patrol Z
-            waypointB = new THREE.Vector3(isd.position.x - 15, y, z-80);
+            waypointB = new THREE.Vector3(isd.position.x - 15, y, z - 80);
         }
 
         function seedVelocityToward(target) {
             if(!target) { modelConfiguration.flight = null; return; }
-            // only seed if no flight state exists yet — otherwise let momentum carry
             if(!modelConfiguration.flight) {
                 const targetPos = target.isVector3 ? target : target.position;
                 const toTarget = new THREE.Vector3()
@@ -364,14 +409,10 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
 
         fsm = new FiniteStateMachine({
 
-            // ── DEPART ───────────────────────────────────────────────
-            // fly out to waypointA
             depart: {
                 enter: () => {
                     console.log(`${modelGroup.designation} SHUTTLE entering DEPART`);
-                    console.log(`${modelGroup.designation} x: ${modelGroup.position.x}, y:${modelGroup.position.y}, z: ${modelGroup.position.z}`);
                     initWaypoints();
-                    // only seed on very first load when there is no flight state at all
                     if(!modelConfiguration.flight) {
                         seedVelocityToward(waypointA);
                     }
@@ -400,7 +441,6 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                 enter: () => {
                     console.log(`${modelGroup.designation} SHUTTLE entering RETURN`);
                     initWaypoints();
-                    // only seed if no flight state — let momentum carry into the turn
                     seedVelocityToward(waypointB);
                 },
                 update: () => {
@@ -422,8 +462,6 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                 }
             },
 
-            // ── SLOW DOWN ────────────────────────────────────────────
-            // bleed off speed to a stop under the ISD
             slowDown: {
                 enter: () => {
                     console.log(`${modelGroup.designation} SHUTTLE entering SLOW_DOWN`);
@@ -441,7 +479,6 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                     if(newSpeed > 0.01) {
                         f.velocity.setLength(newSpeed);
 
-                        // smooth yaw while slowing
                         const targetYaw = Math.atan2(f.velocity.x, f.velocity.z) + Math.PI;
                         let yawDiff = targetYaw - modelGroup.rotation.y;
                         while(yawDiff >  Math.PI) yawDiff -= Math.PI * 2;
@@ -456,12 +493,10 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                 }
             },
 
-            // ── RISE ─────────────────────────────────────────────────
-            // rise on Z axis toward ISD underside and slowly rotate
             rise: {
                 enter: () => {
                     console.log(`${modelGroup.designation} SHUTTLE entering RISE`);
-                    wingsUp(); // raise wings as shuttle rises to dock
+                    wingsUp();
                     if(!modelConfiguration.flight) {
                         modelConfiguration.flight = { velocity: new THREE.Vector3(0,0,0), currentBank: 0 };
                     }
@@ -471,11 +506,10 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                     const isd = getISD();
                     if(!isd) return;
 
-                    // rise target — same X and Y, Z moves toward ISD
                     const riseTarget = new THREE.Vector3(
                         isd.position.x,
-                        getDockY(isd),   // rise on Y toward ISD underside
-                        (getPatrolZ(isd) - 80)  // Z stays at patrol level
+                        getDockY(isd),
+                        getPatrolZ(isd) - 80
                     );
 
                     const dist = modelGroup.position.distanceTo(riseTarget);
@@ -488,7 +522,6 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                         modelGroup.position.add(step);
                     }
 
-                    // slowly rotate to docking orientation
                     let yawDiff = 0 - modelGroup.rotation.y;
                     while(yawDiff >  Math.PI) yawDiff -= Math.PI * 2;
                     while(yawDiff < -Math.PI) yawDiff += Math.PI * 2;
@@ -502,8 +535,6 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                 }
             },
 
-            // ── DOCKED ───────────────────────────────────────────────
-            // sit still for 20 seconds
             docked: {
                 enter: () => {
                     console.log(`${modelGroup.designation} SHUTTLE entering DOCKED`);
@@ -513,16 +544,12 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                     }
                 },
                 update: () => {
-                    // hold position — no movement
                     if(Date.now() > dockTimer) {
                         fsm.transition("lower");
                     }
                 }
             },
 
-            // ── LOWER ────────────────────────────────────────────────
-            // descend back on Z axis to patrol Z before departing
-            // ── LOWER ────────────────────────────────────────────────
             lower: {
                 enter: () => {
                     console.log(`${modelGroup.designation} SHUTTLE entering LOWER`);
@@ -530,7 +557,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                         modelConfiguration.flight = { velocity: new THREE.Vector3(0,0,0), currentBank: 0 };
                     }
                     modelConfiguration.flight.velocity.set(0, 0, 0);
-                    wingsDown(); // lower wings before departing
+                    wingsDown();
                 },
                 update: () => {
                     const isd = getISD();
@@ -552,15 +579,30 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                         modelGroup.position.add(step);
                     }
 
+                    // rotate toward waypointA while lowering
+                    if(waypointA) {
+                        const toWaypoint = new THREE.Vector3()
+                            .subVectors(waypointA, modelGroup.position)
+                            .normalize();
+                        const targetYaw = Math.atan2(toWaypoint.x, toWaypoint.z);
+                        let yawDiff = targetYaw - modelGroup.rotation.y;
+                        while(yawDiff >  Math.PI) yawDiff -= Math.PI * 2;
+                        while(yawDiff < -Math.PI) yawDiff += Math.PI * 2;
+                        modelGroup.rotation.y += yawDiff * 0.012;
+                    }
+
                     if(dist < 2) {
-                        modelConfiguration.flight = { velocity: new THREE.Vector3(0,0,0), currentBank: 0 };
+                        const facingMatrix = new THREE.Matrix4().extractRotation(modelGroup.matrix);
+                        const facingDir = new THREE.Vector3(0, 0, -1).applyMatrix4(facingMatrix);
+                        modelConfiguration.flight = {
+                            velocity: facingDir.multiplyScalar(modelConfiguration.speed * 0.3),
+                            currentBank: 0
+                        };
                         fsm.transition("turnToDepart");
                     }
                 }
             },
 
-            // ── TURN TO DEPART ───────────────────────────────────────
-            // rotate in place to face waypointA before departing
             turnToDepart: {
                 enter: () => {
                     console.log(`${modelGroup.designation} SHUTTLE entering TURN_TO_DEPART`);
@@ -568,23 +610,18 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
                 update: () => {
                     if(!waypointA) return;
 
-                    // calculate angle to waypointA
                     const toWaypoint = new THREE.Vector3()
                         .subVectors(waypointA, modelGroup.position)
                         .normalize();
                     const targetYaw = Math.atan2(toWaypoint.x, toWaypoint.z);
 
-                    // find shortest angle difference
                     let yawDiff = targetYaw - modelGroup.rotation.y;
                     while(yawDiff >  Math.PI) yawDiff -= Math.PI * 2;
                     while(yawDiff < -Math.PI) yawDiff += Math.PI * 2;
 
-                    // rotate slowly in place
                     modelGroup.rotation.y += yawDiff * 0.02;
 
-                    // once close enough to facing waypointA — start flying
                     if(Math.abs(yawDiff) < 0.05) {
-                        // seed velocity in exact direction we are now facing
                         const facingMatrix = new THREE.Matrix4().extractRotation(modelGroup.matrix);
                         const facingDir = new THREE.Vector3(0, 0, -1).applyMatrix4(facingMatrix);
                         modelConfiguration.flight = {
@@ -598,12 +635,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
 
         }, "depart");
     }
-    /**
-     * loadGLTFModel
-     * @description this will load the GLTF model
-     * from file and sets it up
-     * @param modelGltf
-     */
+
     function loadGLTFModel(modelGltf) {
         loader = new GLTFLoader();
         loader.load(modelGltf, function(gltf, err) {
@@ -617,20 +649,13 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
             root.scale.z = modelConfiguration.scale;
             root.name = modelConfiguration.name;
             if(gltf.animations.length > 0){
-               animations(gltf);
+                animations(gltf);
             }
             modelReady = true;
             group.add(root);
         });
     }
 
-    /**
-     * configureGLTFObject
-     * @description this takes a gltf model already loaded
-     * by the manager and configures it before adding it to the group which
-     * has already been added to the scene
-     * @param modelGltf
-     */
     function configureGLTFObject(modelGltf) {
         const root = modelGltf.scene;
         root.rotation.y = modelConfiguration.rotation.y;
@@ -648,13 +673,10 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
 
     function animations(gltf) {
         mixer = new THREE.AnimationMixer(gltf.scene);
-        // clips = modelGltf.animations;
         clip = THREE.AnimationClip.findByName(gltf.animations, 'Take 01');
         action = mixer.clipAction(clip);
-        // action.loop = THREE.LoopRepeat;
         action.clampWhenFinished = true;
         action.timeScale = 1/15;
-        // action.play();
     }
 
     function wingsDown() {
@@ -662,12 +684,11 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
         if(!mixer || !action || !clip) return;
         action.stop();
         action.reset();
-        action.timeScale = 1;      // play at normal speed
+        action.timeScale = 1;
         action.loop = THREE.LoopOnce;
         action.clampWhenFinished = true;
         action.play();
 
-        // pause at halfway through the clip
         const halfTime = (clip.duration / 2) * 1000;
         setTimeout(() => {
             if(action) {
@@ -682,13 +703,12 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
         if(!mixer || !action || !clip) return;
         action.stop();
         action.reset();
-        action.timeScale = 1;              // play forward
+        action.timeScale = 1;
         action.loop = THREE.LoopOnce;
         action.clampWhenFinished = true;
-        action.time = clip.duration / 2;  // start from halfway — wings down position
+        action.time = clip.duration / 2;
         action.play();
 
-        // pause at end of clip — wings fully up
         const halfTime = (clip.duration / 2) * 1000;
         setTimeout(() => {
             if(action) {

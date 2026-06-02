@@ -5,17 +5,12 @@ export default (weapons, userId, scene, sceneConstants) => {
     function checkCollision(sceneObjects) {
         for(let i=0; i<weapons.length; i++) {
             sceneObjects.forEach(obj => {
-                // checkCollision with weapons with scene objects
                 if(obj && obj.mesh){
-                    // skip destroyed ships
-                    if(obj.mesh.hull <= 0) return;
-                    // console.log(`checking mesh collision: ${obj.mesh.name}`);
                     const collisionCheck = weapons[i].checkCollision(obj.mesh);
                     if(collisionCheck.collision){
-                        // console.log(`lasers collided with ${obj.mesh.name}`);
-                        // console.log(`trigger: explosion at ${JSON.stringify(obj.mesh.position)}`);
-                        // trigger explosion
-                        triggerEvent(sceneObjects, obj, eventType.EXPLOSION);
+                        // use actual hit point if available, fall back to mesh position
+                        const hitPosition = collisionCheck.hitPoint || obj.mesh.position;
+                        triggerEvent(sceneObjects, obj, eventType.EXPLOSION, hitPosition);
                         return true;
                     }
                 }
@@ -38,17 +33,13 @@ export default (weapons, userId, scene, sceneConstants) => {
         mesh.shields = Math.max(0, mesh.shields);
     }
 
-    function triggerEvent(sceneObjects, obj, event) {
+    function triggerEvent(sceneObjects, obj, event, hitPosition) {
         for(let i=0; i<sceneObjects.length; i++){
             if(event === eventType.EXPLOSION && sceneObjects[i].name === event){
-                // skip if already destroyed
-                if(obj.mesh.hull <= 0) return;
-
                 const isPlayer = obj.mesh.userId === userId;
 
                 applyDamage(obj.mesh, 25);
 
-                // if this is the player's ship, broadcast for the HUD
                 if(isPlayer) {
                     eventBus.post(eventType.PLAYER_DAMAGED, {
                         shields: obj.mesh.shields,
@@ -57,18 +48,18 @@ export default (weapons, userId, scene, sceneConstants) => {
                         maxHull: obj.mesh.maxHull,
                     });
                 } else {
-                    // notify HUD in case this ship is the current target
                     eventBus.post(eventType.TARGET_DAMAGED, {
                         shields: obj.mesh.shields,
                         maxShields: obj.mesh.maxShields,
                         hull: obj.mesh.hull,
                         maxHull: obj.mesh.maxHull,
-                        userId: obj.mesh.userId,        // use userId instead of designation
+                        userId: obj.mesh.userId,
                         designation: obj.mesh.designation,
                     });
                 }
 
-                sceneObjects[i].trigger(obj.mesh.position);
+                // trigger explosion at actual hit point
+                sceneObjects[i].trigger(hitPosition);
                 // console.log(`Update ${obj.mesh.name} Hull: ${obj.mesh.hull}`);
 
                 if(obj.mesh.hull <= 0){
