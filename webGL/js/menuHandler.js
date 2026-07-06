@@ -2,6 +2,42 @@ import EventBus from "./eventBus/EventBus.js";
 import events from "./eventBus/events.js";
 import LocalStorage from "./localStorage/localStorage.js";
 
+let shipInfoData = null;
+const shipInfoReady = fetch(new URL('./data/shipInfo.json', import.meta.url))
+    .then(res => res.json())
+    .then(data => { shipInfoData = data; })
+    .catch(err => console.error('Failed to load ship info data', err));
+
+function renderShipInfo(modelName) {
+    if(!shipInfoData){
+        shipInfoReady.then(() => renderShipInfo(modelName));
+        return;
+    }
+
+    const info = shipInfoData[modelName];
+    if(!info) return;
+
+    const title = document.getElementById("shipInfoTitle");
+    const paragraphs = document.getElementById("shipInfoParagraphs");
+    const image = document.getElementById("shipInfoImage");
+
+    if(title) title.textContent = info.title;
+
+    if(paragraphs){
+        paragraphs.innerHTML = "";
+        info.paragraphs.forEach(text => {
+            const p = document.createElement("p");
+            p.textContent = text;
+            paragraphs.appendChild(p);
+        });
+    }
+
+    if(image){
+        image.src = info.image;
+        image.alt = info.title;
+    }
+}
+
 function btnClickFromMenu(event, sceneManager) {
     const subMenuItem = event.currentTarget.getAttribute("value");
     console.log(`sub menu item: ${subMenuItem}`);
@@ -54,6 +90,7 @@ function currentSelectionInView() {
     EventBus.subscribe(events.SHIP_SELECTION_CHANGE, d => {
         console.log(`${events.SHIP_SELECTION_CHANGE} to ${d}`);
         LocalStorage.setItem("SELECTED_SHIP", d);
+        renderShipInfo(d);
     });
 }
 
