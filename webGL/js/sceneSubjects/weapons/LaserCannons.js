@@ -115,9 +115,12 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
                     (laser.laser.position.z >= (pos.z - spread) && laser.laser.position.z <= (pos.z + spread))
                 ) {
                     cleanup(laser.laser, i);
-                    collisionRes = { collision: true, name: 'Laser-hit' };
+                    collisionRes = {
+                        collision: true,
+                        name: 'Laser-hit',
+                        hitPoint: laser.laser.position.clone() // laser position as fallback
+                    };
                 }
-                return;
             }
 
             // first do a fast Box3 pre-check to avoid expensive raycasting
@@ -153,7 +156,12 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
             if(intersects.length > 0) {
                 console.log(`precise laser HIT ${name}: ${id} at distance ${intersects[0].distance}`);
                 cleanup(laser.laser, i);
-                collisionRes = { collision: true, name: 'Laser-hit' };
+                // return the actual world-space hit point
+                collisionRes = {
+                    collision: true,
+                    name: 'Laser-hit',
+                    hitPoint: intersects[0].point.clone()
+                };
             }
         });
 

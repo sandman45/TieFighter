@@ -76,9 +76,30 @@ export default class HUD {
 
     acquireNewTarget = (target) => {
         this.target = target;
+
+        // compute bounding box to get visual center and size
+        const box = new THREE.Box3().setFromObject(target);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+
+        // position goal relative to the visual center
+        // distance scales with the largest dimension of the ship
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const distance = maxDim * 0.8;
+
         this.goal = new THREE.Object3D();
-        target.add( this.goal );
-        this.goal.position.set(0, 5, 20);
+        target.add(this.goal);
+
+        // offset goal from the visual center in local space
+        const localCenter = center.clone().sub(target.position);
+        this.goal.position.set(
+            localCenter.x,
+            localCenter.y + size.y * 0.1,
+            localCenter.z + distance
+        );
+
         this.setCameraPositionRelativeToMeshAndFollow(this.camera, target);
     };
 
@@ -90,7 +111,14 @@ export default class HUD {
         const temp = new THREE.Vector3();
         temp.setFromMatrixPosition(this.goal.matrixWorld);
         camera.position.lerp(temp, .2);
-        camera.lookAt( mesh.position );
+
+        // use Box3 center for large models like the ISD
+        // so the camera looks at the visual center not the group pivot
+        const box = new THREE.Box3().setFromObject(mesh);
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+
+        camera.lookAt(center);
     };
 
     update = () => {

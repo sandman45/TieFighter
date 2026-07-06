@@ -57,6 +57,16 @@ the web server will run on port 3000 unless changed in the .env file
 
 The webpage will be available at `http://localhost:8080/`
 
+### Testing
+
+Run the integration test suite from the root folder of the project
+
+```
+npm test
+```
+
+This spawns the real server on a scratch port and checks it over HTTP/Socket.IO the same way a browser would (index page, client JS, CSS, a ship model, and the Socket.IO handshake). It uses Node's built-in test runner, so no extra install is needed.
+
 ## Running on an EC2 instance ** for my EC2 its older and node 17.9.1 only works ** 
 I would have to re-create a new EC2 instance with newer distro
 - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash

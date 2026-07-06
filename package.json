@@ -4,7 +4,7 @@
   "description": "Creating a Tie Fighter game using [PierfrancescoSoffritti's Configurable Three JS App template](https://github.com/PierfrancescoSoffritti/configurable-threejs-app). Check it out  he has done an amazing job.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cd server && npm test",
     "build": "cd server && npm i && cd .. && cd webGL && npm i",
     "start": "node server/src/main.js"
   },
