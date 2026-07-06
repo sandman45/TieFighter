@@ -1,0 +1,74 @@
+{
+    "TIE_FIGHTER": {
+        "title": "TIE/LN FIGHTER",
+        "image": "public/TIE_Fighter.png",
+        "paragraphs": [
+            "The TIE/ln space superiority starfighter, also known as the TIE/LN starfighter and commonly called the TIE fighter, was the signature starfighter of the Galactic Empire and de facto symbol of Imperial space superiority.",
+            "Its official production name was the Twin Ion Engine \"line edition\" space superiority starfighter. Instantly recognizable from the roar of its engines as well as its unique design, the TIE/ln exuded Imperial power and prestige across the galaxy, seeing use throughout the Empire's political existence."
+        ]
+    },
+    "TIE_INTERCEPTOR": {
+        "title": "TIE/IN INTERCEPTOR",
+        "image": "images/tie-fighter-silhouette.png",
+        "paragraphs": [
+            "The TIE/in interceptor was developed from the standard TIE/ln fighter, trading cargo space for four wing-mounted laser cannons and sharper maneuverability.",
+            "Feared for its speed and firepower, the interceptor became the Empire's answer to the increasingly capable starfighters fielded by the Rebel Alliance."
+        ]
+    },
+    "TIE_ADVANCED": {
+        "title": "TIE ADVANCED x1",
+        "image": "images/advance-tie-front.png",
+        "paragraphs": [
+            "The TIE Advanced x1 was an experimental starfighter equipped with a hyperdrive, deflector shields, and bent solar-panel wings, a significant leap over standard TIE designs.",
+            "Most famously flown by Darth Vader himself, the Advanced x1 combined the raw speed of the TIE line with a level of survivability rarely seen among Imperial fighters."
+        ]
+    },
+    "TIE_DEFENDER": {
+        "title": "TIE/D DEFENDER",
+        "image": "images/tie-fighter-silhouette.png",
+        "paragraphs": [
+            "The TIE/D Defender was among the most advanced starfighters ever fielded by the Empire, boasting three wings, deflector shields, a hyperdrive, and heavy weaponry.",
+            "Its unmatched combination of speed, firepower, and durability made it a symbol of Sienar Fleet Systems' engineering ambition late in the Galactic Civil War."
+        ]
+    },
+    "TIE_BOMBER": {
+        "title": "TIE/SA BOMBER",
+        "image": "images/tie-fighter-silhouette.png",
+        "paragraphs": [
+            "The TIE/sa bomber traded speed and agility for a twin-pod hull capable of carrying heavy ordnance, making it the Empire's primary strike craft against capital ships and ground targets.",
+            "Slow and lightly armed for dogfighting, bombers typically flew escorted by fighters or interceptors to and from their targets."
+        ]
+    },
+    "A_WING": {
+        "title": "RZ-1 A-WING",
+        "image": "images/silhouette-ships.gif",
+        "paragraphs": [
+            "The RZ-1 A-wing interceptor was the fastest starfighter in the Rebel Alliance's arsenal, prized for hit-and-run strikes and running down fleeing targets.",
+            "Its minimal armor and cramped cockpit demanded a skilled pilot, but in the right hands the A-wing was nearly impossible to catch."
+        ]
+    },
+    "X_WING": {
+        "title": "T-65 X-WING",
+        "image": "images/xwing-front.png",
+        "paragraphs": [
+            "The T-65B X-wing starfighter was the backbone of the Rebel Alliance's starfighter corps, balancing speed, shields, and hyperdrive range with four powerful laser cannons.",
+            "Versatile enough for dogfighting, escort duty, and precision strikes, the X-wing became the iconic symbol of Rebel resistance against the Empire."
+        ]
+    },
+    "B_WING": {
+        "title": "A/SF-01 B-WING",
+        "image": "images/silhouette-ships.gif",
+        "paragraphs": [
+            "The A/SF-01 B-wing was a heavy assault starfighter built around a rotating cockpit and gyroscopically stabilized wings, carrying more firepower than any other Rebel fighter.",
+            "Difficult to fly but devastating in combat, the B-wing excelled at punching through capital ship shields and heavy escort formations."
+        ]
+    },
+    "Y_WING": {
+        "title": "BTL-A4 Y-WING",
+        "image": "images/silhouette-ships.gif",
+        "paragraphs": [
+            "The BTL-A4 Y-wing was a rugged, older-model starfighter/bomber that served the Rebellion reliably thanks to its heavy payload and easy maintenance.",
+            "Though slower and less agile than newer designs, its durability and versatility kept it in frontline service throughout the Galactic Civil War."
+        ]
+    }
+}

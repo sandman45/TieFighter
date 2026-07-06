@@ -21,6 +21,9 @@ export default (canvas, models) => {
     buildLight(scene);
     let moving = false;
     let shipInfo = false;
+    // canonical ship-row x position, independent of the +2 "peek" offset onSelect() applies
+    let currentShipX = 0;
+    const INFO_PEEK_OFFSET_X = 2;
     const floorConfig = sceneConstants.floor;
     const floor = Floor(scene, floorConfig);
     const sceneSubjects = [
@@ -120,7 +123,8 @@ export default (canvas, models) => {
         let visibility;
         element = document.getElementById("shipInfoLeft");
         if(!shipInfo){
-            finalXPos = camera.position.x + 2;
+            // base off currentShipX (not camera.position.x) so the peek offset never compounds
+            finalXPos = currentShipX + INFO_PEEK_OFFSET_X;
             finalYPos = camera.position.y - 1;
             finalZPos = camera.position.z + 5;
             shipInfo = true;
@@ -128,7 +132,7 @@ export default (canvas, models) => {
             // show info box
             visibility = "visible";
         } else {
-            finalXPos = camera.position.x - 2;
+            finalXPos = currentShipX;
             finalYPos = camera.position.y + 1;
             finalZPos = camera.position.z - 5;
             shipInfo = false;
@@ -147,28 +151,30 @@ export default (canvas, models) => {
     }
 
     function onKeyDown(keycode, duration){
-        let tweenObj;
-        let finalPos;
+        let finalShipX;
         if(moving){
             return;
         }
-        moving = true;
-        if(keycode === 37 && camera.position.x < 40){
+        if(keycode === 37 && currentShipX < 40){
             //move camera left
-            finalPos = camera.position.x + 10;
-            tweenObj = { x: finalPos };
-        } else if(keycode === 39 && camera.position.x > -40){
+            finalShipX = currentShipX + 10;
+        } else if(keycode === 39 && currentShipX > -40){
             //move camera right
-            finalPos = camera.position.x - 10;
-            tweenObj = { x: finalPos };
+            finalShipX = currentShipX - 10;
+        } else {
+            return;
         }
+        moving = true;
+        // preserve the info-panel peek offset (if open) so the framing doesn't jump
+        const finalCameraX = finalShipX + (shipInfo ? INFO_PEEK_OFFSET_X : 0);
         new TWEEN.Tween(camera.position)
-            .to(tweenObj, duration)
+            .to({ x: finalCameraX }, duration)
             .easing(TWEEN.Easing.Quadratic.InOut)
             .onComplete( () => {
                 moving = false;
+                currentShipX = finalShipX;
                 // send out event for selection
-                const modelName = getModelInView(models, finalPos);
+                const modelName = getModelInView(models, finalShipX);
                 if(modelName){
                     EventBus.post(events.SHIP_SELECTION_CHANGE, modelName);
                 }
