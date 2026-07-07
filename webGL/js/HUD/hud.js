@@ -60,7 +60,7 @@ export function initHUD(playerConfig) {
     });
 
     // userId is now destructured from the event payload
-    EventBus.subscribe(events.TARGET_CHANGED, ({ shields, maxShields, hull, maxHull, name, designation, userId }) => {
+    EventBus.subscribe(events.TARGET_CHANGED, ({ shields, maxShields, hull, maxHull, name, designation, userId, speed }) => {
         const nameEl = document.getElementById('target-name');
         if(nameEl) {
             nameEl.textContent = designation || name || userId;
@@ -68,6 +68,9 @@ export function initHUD(playerConfig) {
         }
         updateBar('target-shield-bar', shields, maxShields);
         updateBar('target-hull-bar', hull, maxHull);
+
+        const speedEl = document.getElementById('target-speed-readout');
+        if(speedEl) speedEl.textContent = speed !== undefined ? speed.toFixed(1) : '--';
     });
 
     // userId and designation both destructured, currentTargetId read from the element

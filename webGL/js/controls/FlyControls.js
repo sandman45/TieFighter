@@ -26,6 +26,7 @@ export default class FlyControls {
         this.laser = laser;
         this.audio = audio;
         this.throttle = 0;
+        this.updateThrottleReadout();
         this.collisionManager = collisionManager;
         this.dockingManager = null;
         this.goal = new THREE.Object3D();
@@ -99,22 +100,31 @@ export default class FlyControls {
         this.rotationVector.z = ( - this.moveState.rollRight + this.moveState.rollLeft );
     };
 
+    updateThrottleReadout = () => {
+        const throttleEl = document.getElementById('throttle-readout');
+        const speedEl = document.getElementById('speed-readout');
+        if(throttleEl) {
+            const pct = this.config.speed > 0 ? (parseFloat(this.throttle) / this.config.speed) * 100 : 0;
+            throttleEl.textContent = `${Math.round(pct)}%`;
+        }
+        if(speedEl) speedEl.textContent = parseFloat(this.throttle).toFixed(1);
+    };
+
     throttleDown = () => {
         if(parseFloat(this.throttle) > 0){
             this.throttle = (parseFloat(this.throttle) - 0.1).toFixed(1);
         }
-        console.log(`throttle: ${this.throttle}`);
+        this.updateThrottleReadout();
     };
 
     throttleUp = () => {
         if(parseFloat(this.throttle) < this.config.speed){
             this.throttle = (parseFloat(this.throttle) + 0.1).toFixed(1);
         }
-        console.log(`throttle: ${this.throttle}`);
+        this.updateThrottleReadout();
     };
 
     onKeyDown = function( keyCode ) {
-        console.log(`onKeyDown: ${keyCode}`);
         switch ( keyCode ) {
 
             case 16: /* shift */ this.movementSpeedMultiplier = .1; break;
@@ -268,6 +278,7 @@ export default class FlyControls {
                     name: this.ships[nextTargetIndex].name,
                     designation: this.ships[nextTargetIndex].designation,
                     userId: this.ships[nextTargetIndex].userId,  // add this
+                    speed: this.ships[nextTargetIndex].speed,
                 });
             } else {
                 nextTargetIndex = this.ships.length - 1;
@@ -284,6 +295,7 @@ export default class FlyControls {
                         name: nextTarget.name,
                         designation: nextTarget.designation,
                         userId: nextTarget.userId,  // add this
+                        speed: nextTarget.speed,
                     });
                 }
             }

@@ -34,8 +34,8 @@
 
 .panel-title {
     font-family: 'Courier New', monospace;
-    font-size: 8px;
-    letter-spacing: 3px;
+    font-size: 12px;
+    letter-spacing: 2px;
     color: #3a7a3a;
     margin-bottom: 8px;
     text-align: center;
@@ -47,8 +47,8 @@
 /* ── Segmented bars ── */
 .bar-label {
     font-family: 'Courier New', monospace;
-    font-size: 8px;
-    letter-spacing: 2px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
     color: #3a7a3a;
     margin-bottom: 3px;
     text-align: center;
@@ -172,8 +172,8 @@
 
 #target-name {
     font-family: 'Courier New', monospace;
-    font-size: 8px;
-    letter-spacing: 3px;
+    font-size: 12px;
+    letter-spacing: 2px;
     color: #cc6600;
     text-shadow: 0 0 6px #cc6600;
     margin-bottom: 4px;
@@ -191,8 +191,8 @@
 /* ── Readout line ── */
 .panel-readout {
     font-family: 'Courier New', monospace;
-    font-size: 8px;
-    letter-spacing: 2px;
+    font-size: 11px;
+    letter-spacing: 1px;
     color: #3a7a3a;
     text-align: center;
     margin-top: 4px;

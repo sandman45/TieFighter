@@ -11,7 +11,10 @@ export default (scene, gameObjMesh, config, command, direction, collisionManager
     } else if(command === "fire") {
         fireWeapon(gameObjMesh, config, laser);
     } else if(command === "burstFire") {
-        burstFire(gameObjMesh, config, laser);
+        // `target`, when supplied, is a () => boolean re-aim check run before
+        // each shot in the burst — without it, a burst keeps firing on its
+        // 300ms timer even after the ship has turned away mid-burst
+        burstFire(gameObjMesh, config, laser, target);
     } else if(command === "moveToward") {
         collision = moveToward(gameObjMesh, config, target, collisionManager);
     } else if(command === "lookAtTarget") {
@@ -128,19 +131,25 @@ function flightUpdate(mesh, config, target, collisionManager) {
         .subVectors(targetPos, mesh.position)
         .normalize();
 
-    const TURN_RATE = config.turnRate || 0.006; // very gradual — wide sweeping arcs
-    const BANK_RATE = 0.05;
-    const MAX_BANK  = 0.4;
-    const SPEED     = config.speed;
+    // agility is derived from the ship's rollSpeed — the same per-ship-type value
+    // FlyControls uses for the player — so an AI-flown ship steers/banks/accelerates
+    // at a rate consistent with how the player would fly that same craft.
+    const BASE_ROLL_SPEED = 0.009;
+    const agility   = (config.rollSpeed || BASE_ROLL_SPEED) / BASE_ROLL_SPEED;
+
+    const TURN_RATE  = config.turnRate || 0.006 * agility; // wide sweeping arcs, scaled by agility
+    const BANK_RATE  = 0.05 * agility;
+    const MAX_BANK   = THREE.MathUtils.clamp(0.4 * agility, 0.2, 0.6);
+    const ACCEL_RATE = 0.02 * agility;
+    const SPEED      = config.speed;
 
     // gently steer velocity toward desired direction
     const newVelocity = f.velocity.clone().lerp(
         desired.clone().multiplyScalar(SPEED),
         TURN_RATE
     );
-    // with this:
     const currentLen = newVelocity.length();
-    const targetLen = THREE.MathUtils.lerp(currentLen, SPEED, 0.02); // gradual acceleration
+    const targetLen = THREE.MathUtils.lerp(currentLen, SPEED, ACCEL_RATE); // gradual acceleration
     newVelocity.setLength(Math.min(targetLen, SPEED));
     f.velocity.copy(newVelocity);
 
@@ -230,7 +239,7 @@ function fireWeapon(mesh, config, laser) {
  * burstFire
  * fires a burst of shots with a cooldown between bursts
  */
-function burstFire(mesh, config, laser) {
+function burstFire(mesh, config, laser, canFireNow) {
     if(!laser) return;
 
     // initialise burst state on config if not present
@@ -247,12 +256,32 @@ function burstFire(mesh, config, laser) {
         config.weapons.inBurst = true;
         config.weapons.burstCount = 0;
 
+        // fire the first shot immediately — setInterval doesn't invoke its
+        // callback until after the first 300ms delay, which was letting a
+        // fast-moving fighter fly past the target before even the first
+        // shot of the burst went out
+        laser.fire(mesh, 2, mesh.faction);
+        config.weapons.burstCount++;
+
         const burstInterval = setInterval(() => {
             if(mesh.hull <= 0) {
                 clearInterval(burstInterval);
                 config.weapons.inBurst = false;
                 return;
             }
+
+            // the ship may have turned away since the burst started (e.g.
+            // banking off toward an egress waypoint) — bail out rather than
+            // firing the remaining shots off into space
+            if(canFireNow && !canFireNow()) {
+                clearInterval(burstInterval);
+                config.weapons.inBurst = false;
+                // short retry cooldown so it can resume firing as soon as it
+                // lines back up, instead of waiting the full burst cooldown
+                config.weapons.burstCooldown = Date.now() + 300;
+                return;
+            }
+
             laser.fire(mesh, 2, mesh.faction);
             config.weapons.burstCount++;
             if(config.weapons.burstCount >= 3) {

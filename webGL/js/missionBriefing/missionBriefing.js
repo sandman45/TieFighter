@@ -63,27 +63,33 @@ function wp(waypoint) {
     };
 }
 
-function drawFlightPath() {
-    if(!MISSION) return;
-    const path  = MISSION.flightPath;
-    const wpMap = {};
-    MISSION.mapWaypoints.forEach(w => { wpMap[w.id] = w; });
-
-    ctx.setLineDash([4, 6]);
-    ctx.lineWidth = 1;
-
+function drawPath(path, wpMap, strokeStyle) {
+    if(!path || !path.length) return;
     for (let i = 0; i < path.length - 1; i++) {
         const a = wpMap[path[i]];
         const b = wpMap[path[i + 1]];
         if (!a || !b) continue;
         const pa = wp(a), pb = wp(b);
         ctx.lineDashOffset = -(animFrame * 0.3) % 20;
-        ctx.strokeStyle = 'rgba(0, 170, 255, 0.35)';
+        ctx.strokeStyle = strokeStyle;
         ctx.beginPath();
         ctx.moveTo(pa.x, pa.y);
         ctx.lineTo(pb.x, pb.y);
         ctx.stroke();
     }
+}
+
+function drawFlightPath() {
+    if(!MISSION) return;
+    const wpMap = {};
+    MISSION.mapWaypoints.forEach(w => { wpMap[w.id] = w; });
+
+    ctx.setLineDash([4, 6]);
+    ctx.lineWidth = 1;
+
+    drawPath(MISSION.flightPath, wpMap, 'rgba(0, 170, 255, 0.35)');
+    // enemy attack run — same dash style, red to match the enemy waypoint color
+    drawPath(MISSION.enemyFlightPath, wpMap, 'rgba(204, 34, 0, 0.4)');
 
     ctx.setLineDash([]);
     ctx.lineDashOffset = 0;
@@ -192,6 +198,7 @@ export function initBriefing(campaignConfig, onLaunch) {
     MISSION = campaignConfig.briefing;
     MISSION.flightPath  = campaignConfig.briefing.flightPath;
     MISSION.mapWaypoints = campaignConfig.briefing.mapWaypoints;
+    MISSION.enemyFlightPath = campaignConfig.briefing.enemyFlightPath || [];
 
     // populate header fields from campaign config
     document.getElementById('briefing-mission-title').textContent = campaignConfig.title;
