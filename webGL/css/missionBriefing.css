@@ -20,7 +20,8 @@
     --font-title:    'Orbitron', sans-serif;
 }
 
-#mission-briefing {
+#mission-briefing,
+#mission-debrief {
     width: 100%;
     height: 100%;
     background: var(--bg);
@@ -31,13 +32,15 @@
     inset: 0;
 }
 
-#mission-briefing[style*="display: none"] {
+#mission-briefing[style*="display: none"],
+#mission-debrief[style*="display: none"] {
     pointer-events: none;
     visibility: hidden;
 }
 
 /* scanline overlay */
-#mission-briefing::before {
+#mission-briefing::before,
+#mission-debrief::before {
     content: '';
     position: absolute; inset: 0;
     background: repeating-linear-gradient(
@@ -52,12 +55,34 @@
 }
 
 /* CRT vignette */
-#mission-briefing::after {
+#mission-briefing::after,
+#mission-debrief::after {
     content: '';
     position: absolute; inset: 0;
     background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%);
     pointer-events: none;
     z-index: 999;
+}
+
+/* ── MISSION DEBRIEF ── */
+#mission-debrief .main-content {
+    align-items: center;
+    justify-content: center;
+}
+
+.debrief-panel {
+    width: 100%;
+    max-width: 640px;
+}
+
+.debrief-panel .briefing-header.success {
+    color: var(--green);
+    text-shadow: 0 0 10px var(--green);
+}
+
+.debrief-panel .briefing-header.failure {
+    color: var(--red);
+    text-shadow: 0 0 10px var(--red);
 }
 
 .briefing-screen {

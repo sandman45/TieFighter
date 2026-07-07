@@ -9,6 +9,8 @@ import GeneralLights from "../../sceneSubjects/GeneralLights.js";
 import WeaponsCollisionManager from "../../controls/WeaponsCollisionManager.js";
 import ModelLoader, { Model } from "../../utils/ModelLoader.js";
 import FlyControls from "../../controls/FlyControls.js";
+import MissionObjectives from "./MissionObjectives.js";
+import DockingManager from "../../controls/DockingManager.js";
 
 import {parseConfiguration} from "../../utils/SceneConfigUtils.js";
 import globalConfiguration from "../../../sceneConfig.js";
@@ -70,7 +72,21 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
 
     const explosion = Explosion(scene, "EXPLOSION", audio, camera);
 
+    if(campaignConfiguration.objectives) {
+        MissionObjectives({
+            config: campaignConfiguration.objectives,
+            playerDesignation: campaignConfiguration.player.designation
+        });
 
+        const dockTarget = ships.find(ship => ship.mesh.designation === campaignConfiguration.objectives.dockDesignation);
+        const dockingManager = DockingManager({
+            playerMesh: playerShip.mesh,
+            targetMesh: dockTarget && dockTarget.mesh,
+            flyControls: controls
+        });
+        controls.dockingManager = dockingManager;
+        sceneSubjects.push(dockingManager);
+    }
 
     const sc = [
         GeneralLights(scene),

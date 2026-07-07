@@ -27,6 +27,7 @@ export default class FlyControls {
         this.audio = audio;
         this.throttle = 0;
         this.collisionManager = collisionManager;
+        this.dockingManager = null;
         this.goal = new THREE.Object3D();
         object.add( this.goal );
         this.goal.position.set(0, 5, 20);
@@ -143,6 +144,7 @@ export default class FlyControls {
                 break;
             case 32: this.fireCannons(this.object); break;
             case 84: this.acquireTarget(); break;
+            case 71: /*G*/ if(this.dockingManager) this.dockingManager.attemptDock(); break;
 
         }
 

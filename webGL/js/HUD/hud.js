@@ -31,9 +31,28 @@ export function updateBar(barId, current, max) {
     });
 }
 
+let toastTimeout = null;
+
+export function showToast(message, durationMs = 8000) {
+    const toast = document.getElementById('mission-toast');
+    if(!toast) return;
+
+    toast.textContent = message;
+    toast.classList.add('visible');
+
+    if(toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+        toast.classList.remove('visible');
+    }, durationMs);
+}
+
 export function initHUD(playerConfig) {
     updateBar('shield-bar', playerConfig.shields, playerConfig.shields);
     updateBar('hull-bar', playerConfig.hull, playerConfig.hull);
+
+    EventBus.subscribe(events.MISSION_OBJECTIVES_MET, () => {
+        showToast('OBJECTIVES COMPLETE — RETURN TO ISD VICTORIOUS AND DOCK');
+    });
 
     EventBus.subscribe(events.PLAYER_DAMAGED, ({ shields, maxShields, hull, maxHull }) => {
         updateBar('shield-bar', shields, maxShields);
