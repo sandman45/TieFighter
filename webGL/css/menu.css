@@ -165,7 +165,7 @@
     padding-bottom: 20px;
     visibility: hidden;
     display: flex;
-    height: 40%;
+    height: 52%;
     width: 80%;
     gap: 12px;
 }
@@ -181,7 +181,7 @@
 
 .ship-info-left h5 {
     font-family: var(--font-title);
-    font-size: 11px;
+    font-size: 13px;
     letter-spacing: 3px;
     color: var(--green);
     text-shadow: 0 0 8px var(--green);
@@ -193,14 +193,14 @@
 .ship-info-left p {
     display: block;
     font-family: var(--font-mono);
-    font-size: 9px;
+    font-size: 12px;
     line-height: 1.7;
     color: var(--text-dim);
     margin-bottom: 8px;
 }
 
 .ship-info-left img {
-    height: 160px;
+    height: 130px;
     filter: drop-shadow(0 0 8px rgba(0,204,68,0.4));
     display: block;
     margin: 10px auto 0;
