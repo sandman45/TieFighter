@@ -24,11 +24,15 @@ export default {
                 { id: 'nav2',      x: 0.72, y: 0.48, label: 'NAV 2',           type: 'nav',     primary: true  },
                 { id: 'transport', x: 0.80, y: 0.50, label: 'TRANSPORT ALPHA', type: 'friendly'               },
                 { id: 'nav3',      x: 0.72, y: 0.40, label: 'NAV 3',           type: 'nav',     primary: true  },
-                { id: 'reb1',      x: 0.20, y: 0.65, label: 'GOLD LEADER',     type: 'enemy'                  },
-                { id: 'reb2',      x: 0.15, y: 0.72, label: 'GOLD TWO',        type: 'enemy'                  },
-                { id: 'reb3',      x: 0.18, y: 0.60, label: 'GOLD THREE',      type: 'enemy'                  },
+                // V formation — GOLD_LEADER at the tip nearest the ISD, GOLD_TWO/THREE
+                // trailing behind on either side, matching their in-game spawn wedge
+                { id: 'reb1',      x: 0.22, y: 0.63, label: 'GOLD LEADER',     type: 'enemy'                  },
+                { id: 'reb2',      x: 0.22, y: 0.70, label: 'GOLD TWO',        type: 'enemy'                  },
+                { id: 'reb3',      x: 0.15, y: 0.63, label: 'GOLD THREE',      type: 'enemy'                  },
+                { id: 'atkwp',     x: 0.42, y: 0.43, label: 'ATTACK VECTOR',   type: 'target'                 },
             ],
             flightPath: ['start', 'nav1', 'shuttle', 'nav2', 'transport', 'nav3', 'isd'],
+            enemyFlightPath: ['reb1', 'atkwp', 'isd'],
             topics: {
                 situation: {
                     header: 'SITUATION REPORT',
@@ -185,7 +189,7 @@ export default {
             {
                 designation: "GOLD_LEADER",
                 name: 'Y_WING',
-                position: { x: -1000, y: 1, z: -1000 },
+                position: { x: -775, y: 1, z: -850 },  // tip of the V, leading TWO/THREE toward the ISD
                 rotation: { y: 3.15, x:0, z:0, rotating: false },
                 speed: .25,
                 scale: 5,
@@ -202,7 +206,7 @@ export default {
             {
                 designation: "GOLD_TWO",
                 name: 'Y_WING',
-                position: { x: -810, y: 1, z: -885 },  // offset left of leader
+                position: { x: -855, y: 1, z: -875 },  // trailing left of leader
                 rotation: { y: 3.15, x:0, z:0, rotating: false },
                 speed: .25,
                 scale: 5,
@@ -219,7 +223,7 @@ export default {
             {
                 designation: "GOLD_THREE",
                 name: 'Y_WING',
-                position: { x: -820, y: 1, z: -875 },  // offset right of leader
+                position: { x: -800, y: 1, z: -930 },  // trailing right of leader
                 rotation: { y: 3.15, x:0, z:0, rotating: false },
                 speed: .25,
                 scale: 5,

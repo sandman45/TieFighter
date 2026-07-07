@@ -38,6 +38,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
     group.userId = modelConfiguration.userId ? modelConfiguration.userId : modelConfiguration.designation;
     group.designation = modelConfiguration.designation;
     group.faction = modelConfiguration.faction;
+    group.speed = modelConfiguration.speed;
     group.position.set(modelConfiguration.position.x, modelConfiguration.position.y, modelConfiguration.position.z);
 
     if(modelGltf) {

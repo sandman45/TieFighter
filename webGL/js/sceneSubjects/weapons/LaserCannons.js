@@ -17,6 +17,7 @@ export default (scene, config, collisionManager, audio) => {
     const lasers = [];
 
     function fire(sourceShipMesh, numberOfLasers, laserType) {
+        console.log(`${sourceShipMesh.designation || sourceShipMesh.userId} (${sourceShipMesh.name}) fired`);
         const l = new Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, laserType);
         let blastType = "BLAST";
         if(laserType === "REBELLION"){
@@ -62,31 +63,25 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
 
     sourceMesh = sourceShipMesh.clone();
     sourceMesh.userId = sourceShipMesh.userId;
+    sourceMesh.designation = sourceShipMesh.designation;
 
-    const angle = sourceMesh.rotation.y * 180 / Math.PI;
-    const simpleAngle = ((angle * Math.PI / 360) % Math.PI) * 360 / Math.PI;
+    // wing-mounted cannon offset, perpendicular to the ship's actual current
+    // facing — works at any heading, unlike a cardinal-angle special case which
+    // left both balls stacked at the same spot the rest of the time
+    const rotationMatrix = new THREE.Matrix4().makeRotationFromEuler(sourceMesh.rotation);
+    const right = new THREE.Vector3(1, 0, 0).applyMatrix4(rotationMatrix).normalize();
 
     for(let l=0; l<numberOfLasers; l++){
         const laserRadius = 0.2;
-        let xPos = sourceMesh.position.x;
-        let yPos = sourceMesh.position.y;
-        let zPos = sourceMesh.position.z;
-
-        if((Math.abs(simpleAngle) >= 0 && Math.abs(simpleAngle) <= 1) ||
-            (Math.abs(simpleAngle) >= 179 && Math.abs(simpleAngle) <= 180)){
-            xPos = l === 0 ? sourceMesh.position.x - .5 : sourceMesh.position.x + .5;
-        }
-        if(Math.abs(simpleAngle) >= 89 && Math.abs(simpleAngle) <= 90 ||
-            (Math.abs(simpleAngle) >= 269 && Math.abs(simpleAngle) <= 270)){
-            zPos = l === 0 ? sourceMesh.position.z - .5 : sourceMesh.position.z + .5;
-        }
+        const side = l === 0 ? -0.5 : 0.5;
+        const spawnPos = sourceMesh.position.clone().addScaledVector(right, side);
 
         const laser = new THREE.Mesh(
             new THREE.SphereBufferGeometry(laserRadius, 14, 10),
             ballMaterial
         );
         scene.add(laser);
-        laser.position.set(xPos, yPos, zPos);
+        laser.position.copy(spawnPos);
         laserSet.push({ laser, sourceMesh });
     }
 
@@ -135,8 +130,11 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
             }
 
             // laser is inside the bounding box — do precise raycast check
-            // cast a ray from slightly behind the laser toward its travel direction
-            const matrix = new THREE.Matrix4().extractRotation(sourceMesh.matrix);
+            // cast a ray from slightly behind the laser toward its travel direction.
+            // build the matrix from .rotation, NOT .matrix — .matrix on the cloned
+            // sourceMesh was only as fresh as the shooter's matrix at fire time, which
+            // is refreshed by the render pass and so lags one tick behind .rotation
+            const matrix = new THREE.Matrix4().makeRotationFromEuler(sourceMesh.rotation);
             const laserDir = new THREE.Vector3(0, 0, 1).applyMatrix4(matrix).normalize();
 
             // cast from a small distance behind the laser position
@@ -154,7 +152,7 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
             const intersects = raycaster.intersectObjects(meshesToCheck, false);
 
             if(intersects.length > 0) {
-                console.log(`precise laser HIT ${name}: ${id} at distance ${intersects[0].distance}`);
+                console.log(`precise laser HIT ${name}: ${id} at distance ${intersects[0].distance} — fired by ${sourceMesh.designation || sourceMesh.userId} (${sourceMesh.name})`);
                 cleanup(laser.laser, i);
                 // return the actual world-space hit point
                 collisionRes = {
@@ -188,8 +186,9 @@ function Laser(scene, sourceShipMesh, numberOfLasers, config, collisionManager, 
     }
 
     function calculateDirectionVector(sourceShipMesh) {
+        // .rotation, not .matrix — see note above on stale-matrix lag
         const matrix = new THREE.Matrix4();
-        matrix.extractRotation(sourceShipMesh.matrix);
+        matrix.makeRotationFromEuler(sourceShipMesh.rotation);
         const directionVector = new THREE.Vector3(0, 0, 1);
         directionVector.applyMatrix4(matrix);
         return directionVector;
