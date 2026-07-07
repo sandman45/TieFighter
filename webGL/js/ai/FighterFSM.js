@@ -1,5 +1,5 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
-import FiniteStateMachine from "../utils/FiniteStateMachine.js";
+import FiniteStateMachine from "./FiniteStateMachine.js";
 import NpcControls from "../controls/NpcControls.js";
 
 export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio, laser }) => {
