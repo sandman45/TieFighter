@@ -201,3 +201,63 @@
 .panel-readout span {
     color: #00cc44;
 }
+
+/* ── Mission toast (objective updates) ── */
+.mission-toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1500;
+    background: #050d05;
+    border: 1px solid #00cc44;
+    box-shadow: 0 0 12px rgba(0,204,68,0.4);
+    color: #00cc44;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    padding: 10px 24px;
+    text-align: center;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+.mission-toast.visible {
+    opacity: 1;
+}
+
+/* ── Dock prompt ── */
+.dock-prompt {
+    position: fixed;
+    bottom: 340px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1500;
+    background: #050d05;
+    border: 1px solid #cc6600;
+    box-shadow: 0 0 12px rgba(204,102,0,0.5);
+    color: #cc6600;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    padding: 8px 20px;
+    text-align: center;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    animation: pulse-dock 1.5s infinite;
+}
+
+.dock-prompt .key {
+    display: inline-block;
+    border: 1px solid #cc6600;
+    padding: 1px 6px;
+    margin: 0 3px;
+    color: #ffcc66;
+    text-shadow: 0 0 6px #cc6600;
+}
+
+@keyframes pulse-dock {
+    0%, 100% { box-shadow: 0 0 12px rgba(204,102,0,0.5); }
+    50%      { box-shadow: 0 0 20px rgba(204,102,0,0.9); }
+}

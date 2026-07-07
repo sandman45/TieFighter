@@ -93,6 +93,11 @@ export default {
             autoForward: false,
             faction: "IMPERIAL"
         },
+        objectives: {
+            destroyDesignations: ["GOLD_LEADER", "GOLD_TWO", "GOLD_THREE"],
+            protectDesignations: ["VICTORIOUS", "TYDERIAN", "TRANSPORT_A"],
+            dockDesignation: "VICTORIOUS"
+        },
         weapons: [
             {
                 name: "laser",

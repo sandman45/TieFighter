@@ -6,6 +6,7 @@ import EventBus from "./eventBus/EventBus.js";
 import events from "./eventBus/events.js";
 import LocalStorage from "./localStorage/localStorage.js";
 import { initBriefing } from './missionBriefing/missionBriefing.js';
+import { initDebrief } from './missionBriefing/missionDebrief.js';
 import campaign from "./campaignMenu/campaign.js"; // add this import
 
 initSocketIO(onKeyUp, onKeyDown);
@@ -27,6 +28,31 @@ bindEventListeners();
 startRenderLoop();
 let showMenu = false;
 let campaignMenu = false;
+let activeCampaignConfig = null;
+
+EventBus.subscribe(events.MISSION_COMPLETE, () => {
+	showDebrief('success', null);
+});
+
+EventBus.subscribe(events.MISSION_FAILED, ({ reason }) => {
+	showDebrief('failure', reason);
+});
+
+function showDebrief(result, reason) {
+	document.getElementById('heads-up-display').style.visibility = 'hidden';
+
+	const debriefEl = document.getElementById('mission-debrief');
+	debriefEl.style.display    = 'block';
+	debriefEl.style.visibility = 'visible';
+
+	initDebrief(activeCampaignConfig, result, reason, () => {
+		debriefEl.style.display    = 'none';
+		debriefEl.style.visibility = 'hidden';
+
+		sceneManager = SceneManager(views, "menu");
+		bindEventListeners();
+	});
+}
 
 function bindEventListeners() {
 	handler.currentSelectionInView();
@@ -280,6 +306,7 @@ function showMissionBriefing(missionKey) {
 
 	// pass campaign config for this mission to initBriefing
 	const campaignConfig = campaign[missionKey];
+	activeCampaignConfig = campaignConfig;
 
 	initBriefing(campaignConfig, () => {
 		briefingEl.style.display    = 'none';

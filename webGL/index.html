@@ -64,6 +64,27 @@
 				</div>
 			</div>
 		</div>
+		<div id="mission-debrief" style="display:none; position:fixed; inset:0; z-index:2000;">
+			<div class="briefing-screen">
+				<div class="top-bar">
+					<div class="empire-logo">GALACTIC EMPIRE · IMPERIAL NAVY</div>
+					<div class="mission-title" id="debrief-mission-title">MISSION DEBRIEF</div>
+					<div class="classification">TOP SECRET</div>
+				</div>
+				<div class="main-content">
+					<div class="briefing-panel debrief-panel">
+						<div class="briefing-header success" id="debrief-result-header">MISSION SUCCESSFUL</div>
+						<div class="briefing-text" id="debrief-text"></div>
+					</div>
+				</div>
+				<div class="bottom-bar">
+					<div class="status-text">
+						PILOT: <span id="debrief-pilot-name">ALPHA ONE</span>
+					</div>
+					<button class="nav-btn launch" id="debriefReturnBtn">RETURN TO MENU ►</button>
+				</div>
+			</div>
+		</div>
 		<div id="heads-up-display" class="hud">
 			<div class="hud-container">
 
@@ -139,6 +160,8 @@
 				</div>
 			</div>
 		</div>
+		<div id="mission-toast" class="mission-toast"></div>
+		<div id="dock-prompt" class="dock-prompt" style="visibility:hidden;">PRESS <span class="key">G</span> TO DOCK</div>
 		<div id="loading">
 			<div>
 				<div >...loading...</div>
