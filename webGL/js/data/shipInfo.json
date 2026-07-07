@@ -9,7 +9,7 @@
     },
     "TIE_INTERCEPTOR": {
         "title": "TIE/IN INTERCEPTOR",
-        "image": "images/tie-fighter-silhouette.png",
+        "image": "images/tie-interceptor.png",
         "paragraphs": [
             "The TIE/in interceptor was developed from the standard TIE/ln fighter, trading cargo space for four wing-mounted laser cannons and sharper maneuverability.",
             "Feared for its speed and firepower, the interceptor became the Empire's answer to the increasingly capable starfighters fielded by the Rebel Alliance."
@@ -25,7 +25,7 @@
     },
     "TIE_DEFENDER": {
         "title": "TIE/D DEFENDER",
-        "image": "images/tie-fighter-silhouette.png",
+        "image": "images/tie-defender.png",
         "paragraphs": [
             "The TIE/D Defender was among the most advanced starfighters ever fielded by the Empire, boasting three wings, deflector shields, a hyperdrive, and heavy weaponry.",
             "Its unmatched combination of speed, firepower, and durability made it a symbol of Sienar Fleet Systems' engineering ambition late in the Galactic Civil War."
@@ -33,7 +33,7 @@
     },
     "TIE_BOMBER": {
         "title": "TIE/SA BOMBER",
-        "image": "images/tie-fighter-silhouette.png",
+        "image": "images/tie-bomber.png",
         "paragraphs": [
             "The TIE/sa bomber traded speed and agility for a twin-pod hull capable of carrying heavy ordnance, making it the Empire's primary strike craft against capital ships and ground targets.",
             "Slow and lightly armed for dogfighting, bombers typically flew escorted by fighters or interceptors to and from their targets."
@@ -41,7 +41,7 @@
     },
     "A_WING": {
         "title": "RZ-1 A-WING",
-        "image": "images/silhouette-ships.gif",
+        "image": "images/a-wing.png",
         "paragraphs": [
             "The RZ-1 A-wing interceptor was the fastest starfighter in the Rebel Alliance's arsenal, prized for hit-and-run strikes and running down fleeing targets.",
             "Its minimal armor and cramped cockpit demanded a skilled pilot, but in the right hands the A-wing was nearly impossible to catch."
@@ -57,7 +57,7 @@
     },
     "B_WING": {
         "title": "A/SF-01 B-WING",
-        "image": "images/silhouette-ships.gif",
+        "image": "images/b-wing.png",
         "paragraphs": [
             "The A/SF-01 B-wing was a heavy assault starfighter built around a rotating cockpit and gyroscopically stabilized wings, carrying more firepower than any other Rebel fighter.",
             "Difficult to fly but devastating in combat, the B-wing excelled at punching through capital ship shields and heavy escort formations."
@@ -65,7 +65,7 @@
     },
     "Y_WING": {
         "title": "BTL-A4 Y-WING",
-        "image": "images/silhouette-ships.gif",
+        "image": "images/y-wing.png",
         "paragraphs": [
             "The BTL-A4 Y-wing was a rugged, older-model starfighter/bomber that served the Rebellion reliably thanks to its heavy payload and easy maintenance.",
             "Though slower and less agile than newer designs, its durability and versatility kept it in frontline service throughout the Galactic Civil War."
