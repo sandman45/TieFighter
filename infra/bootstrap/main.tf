@@ -171,3 +171,21 @@ resource "aws_iam_role_policy_attachment" "gh_actions_terraform_plan_readonly" {
   role       = aws_iam_role.gh_actions_terraform_plan.name
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
+
+# ReadOnlyAccess doesn't cover the state lock: even a read-only `plan`
+# still acquires/releases the S3 backend's DynamoDB lock, which needs
+# write access to that one table.
+resource "aws_iam_role_policy" "gh_actions_terraform_plan_state_lock" {
+  name = "state-lock"
+  role = aws_iam_role.gh_actions_terraform_plan.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid      = "StateLockTable"
+      Effect   = "Allow"
+      Action   = ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem"]
+      Resource = aws_dynamodb_table.tf_lock.arn
+    }]
+  })
+}
