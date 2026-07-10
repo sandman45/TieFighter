@@ -6,8 +6,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Star Wars TIE Fighter browser game: a Three.js (WebGL) client with single-player campaign missions and a Socket.IO-based multiplayer mode, backed by a small Node/Express real-time server. There are two independent npm packages in this repo (`server/` and `webGL/`), tied together only by the root `package.json` orchestration scripts — they do not share `node_modules` or build tooling.
 
-`ClientExamples/` (Android + plain-Node socket clients) is reference/prototype code, not part of the main build.
-
 ## Commands
 
 Install dependencies for both sub-projects from the repo root:
