@@ -8,3 +8,10 @@
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
