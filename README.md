@@ -67,19 +67,3 @@ npm test
 
 This spawns the real server on a scratch port and checks it over HTTP/Socket.IO the same way a browser would (index page, client JS, CSS, a ship model, and the Socket.IO handshake). It uses Node's built-in test runner, so no extra install is needed.
 
-## Running on an EC2 instance ** for my EC2 its older and node 17.9.1 only works ** 
-I would have to re-create a new EC2 instance with newer distro
-- curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-- Install NVM
-- nvm install v17.9.1
-- 
-
-## Scene
-
-The scene is built with Three.js (WebGL) and runs into your browser.
-
-
-### Realtime scene configuration
-
-The webapp contains a control window that can be used to update in realtime all the configurations in the config file.
-
