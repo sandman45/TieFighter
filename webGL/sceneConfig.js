@@ -386,9 +386,9 @@ const config = {
     },
     audio: {
         music: true,
-        musicVolume: .35,
+        musicVolume: .25,
         sfx: true,
-        sfxVolume: .35,
+        sfxVolume: 2,
     },
     floor: {
         size: { x: 3000, y: 3000, z: 3000 },
