@@ -4,7 +4,7 @@ import events from "../eventBus/events.js";
 
 const SEGMENT_COUNT = 10;
 
-export function updateBar(barId, current, max) {
+export function updateBar(barId, current, max, flash = true) {
     const bar = document.getElementById(barId);
     if (!bar) return;
 
@@ -12,9 +12,13 @@ export function updateBar(barId, current, max) {
     const activePct = max > 0 ? current / max : 0;
     const activeCount = Math.ceil(activePct * SEGMENT_COUNT);
 
-    bar.classList.remove('hit');
-    void bar.offsetWidth;
-    bar.classList.add('hit');
+    // skip the flash-on-hit animation for bars that update continuously
+    // (like the recharging weapon bar) — it would just strobe otherwise
+    if (flash) {
+        bar.classList.remove('hit');
+        void bar.offsetWidth;
+        bar.classList.add('hit');
+    }
 
     segments.forEach((seg, i) => {
         const isActive = i < activeCount;
@@ -49,6 +53,7 @@ export function showToast(message, durationMs = 8000) {
 export function initHUD(playerConfig) {
     updateBar('shield-bar', playerConfig.shields, playerConfig.shields);
     updateBar('hull-bar', playerConfig.hull, playerConfig.hull);
+    updateBar('laser-bar', 1, 1, false);
 
     EventBus.subscribe(events.MISSION_OBJECTIVES_MET, () => {
         showToast('OBJECTIVES COMPLETE — RETURN TO ISD VICTORIOUS AND DOCK');
@@ -59,18 +64,23 @@ export function initHUD(playerConfig) {
         updateBar('hull-bar', hull, maxHull);
     });
 
+    EventBus.subscribe(events.WEAPON_ENERGY_CHANGED, ({ energy, maxEnergy }) => {
+        updateBar('laser-bar', energy, maxEnergy, false);
+    });
+
     // userId is now destructured from the event payload
-    EventBus.subscribe(events.TARGET_CHANGED, ({ shields, maxShields, hull, maxHull, name, designation, userId, speed }) => {
+    EventBus.subscribe(events.TARGET_CHANGED, ({ shields, maxShields, hull, maxHull, name, designation, userId, speed } = {}) => {
+        const label = designation || name || userId;
         const nameEl = document.getElementById('target-name');
         if(nameEl) {
-            nameEl.textContent = designation || name || userId;
-            nameEl.dataset.targetUserId = userId || designation;
+            nameEl.textContent = label || 'NO TARGET';
+            nameEl.dataset.targetUserId = label ? (userId || designation || '') : '';
         }
-        updateBar('target-shield-bar', shields, maxShields);
-        updateBar('target-hull-bar', hull, maxHull);
+        updateBar('target-shield-bar', shields || 0, maxShields || 1);
+        updateBar('target-hull-bar', hull || 0, maxHull || 1);
 
         const speedEl = document.getElementById('target-speed-readout');
-        if(speedEl) speedEl.textContent = speed !== undefined ? speed.toFixed(1) : '--';
+        if(speedEl) speedEl.textContent = (label && speed !== undefined) ? speed.toFixed(1) : '--';
     });
 
     // userId and designation both destructured, currentTargetId read from the element
@@ -127,6 +137,10 @@ export default class HUD {
 
     getCurrentTarget = () => {
         return this.target;
+    }
+
+    clearTarget = () => {
+        this.target = null;
     }
 
     setCameraPositionRelativeToMeshAndFollow = (camera, mesh) => {

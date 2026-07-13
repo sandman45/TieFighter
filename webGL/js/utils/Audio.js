@@ -156,6 +156,18 @@ let musicVolume = 0.1;
 let audioConfig;
 let audioReady = false;
 
+// browsers start every AudioContext suspended until a user gesture unlocks it —
+// the menu music plays before the player has clicked anything, so without this
+// it gets silently scheduled-but-muted and never catches up on its own
+function unlockAudioContext() {
+    const ctx = THREE.AudioContext.getContext();
+    if (ctx.state === 'suspended') {
+        ctx.resume();
+    }
+}
+window.addEventListener('pointerdown', unlockAudioContext);
+window.addEventListener('keydown', unlockAudioContext);
+
 export default (camera, config, callback) => {
     audioConfig = config;
 
@@ -163,11 +175,24 @@ export default (camera, config, callback) => {
         gameCamera = camera;
         gameCamera.add(listener);
 
-        const manager = new THREE.LoadingManager();
-        manager.onLoad = completed;
-        manager.onProgress = onProgress;
-        manager.onError = onError;
-        audioLoader = new THREE.AudioLoader(manager);
+        // AudioLoader's underlying FileLoader reports itemEnd (and so LoadingManager's
+        // onLoad) as soon as the raw bytes are fetched — but decodeAudioData(), which
+        // is what actually resolves *our* per-item callback below and sets `.sound`,
+        // finishes later, asynchronously. Relying on manager.onLoad race-fired
+        // `completed()` before `.sound` existed, and playSound("MUSIC"...) silently
+        // no-op'd. Track completion ourselves against the real per-item callbacks instead.
+        audioLoader = new THREE.AudioLoader();
+
+        let remaining = 0;
+        Object.keys(AudioType).forEach(audio => {
+            if(!AudioType[audio].sound) remaining++;
+        });
+
+        if (remaining === 0) {
+            // nothing new to load — defer so the caller's `const audio = GameAudio(...)`
+            // assignment finishes before we invoke their callback (which closes over `audio`)
+            Promise.resolve().then(completed);
+        }
 
         Object.keys(AudioType).forEach(audio => {
             if(!AudioType[audio].sound) {
@@ -186,6 +211,13 @@ export default (camera, config, callback) => {
                         AudioType[audio].sound.setVolume(config.musicVolume ? config.musicVolume : musicVolume);
                         AudioType[audio].sound.setLoop(true);
                     }
+
+                    remaining--;
+                    if (remaining === 0) completed();
+                }, undefined, (err) => {
+                    onError(err);
+                    remaining--;
+                    if (remaining === 0) completed();
                 });
             } else {
                 // already loaded stop all music for last scene
@@ -193,14 +225,9 @@ export default (camera, config, callback) => {
             }
         });
 
-
     function completed() {
         audioReady = true;
         callback(`Completed loading audio! ${AudioType}`);
-    }
-
-    function onProgress(url, itemsLoaded, itemsTotal) {
-        console.log(`${(itemsLoaded/itemsTotal)*100}% Audio loaded`);
     }
 
     function onError(err){
@@ -210,13 +237,17 @@ export default (camera, config, callback) => {
     function playSound(type, obj) {
         if(audioReady) {
             if(AudioType[type].sound && AudioType[type].sound.isPlaying) {
-                if(AudioType[`${type}2`].sound.isPlaying){
-                    if(AudioType[`${type}3`].sound.isPlaying){
+                // MUSIC types have no "2"/"3" round-robin variants (only SFX do) — a
+                // looping music track being already-playing just means leave it alone
+                if(AudioType[type].type === "MUSIC") return;
+
+                if(AudioType[`${type}2`] && AudioType[`${type}2`].sound.isPlaying){
+                    if(AudioType[`${type}3`] && AudioType[`${type}3`].sound.isPlaying){
                         // dont play anything
-                    } else {
+                    } else if(AudioType[`${type}3`]) {
                         AudioType[`${type}3`].sound.play();
                     }
-                } else {
+                } else if(AudioType[`${type}2`]) {
                     AudioType[`${type}2`].sound.play();
                 }
             } else if(AudioType[type].sound) {

@@ -6,7 +6,7 @@
     z-index: 999;
     bottom: 0;
     position: absolute;
-    height: 320px;
+    height: 360px;
     width: 100%;
     background: linear-gradient(to top, rgba(0,8,0,0.85) 0%, transparent 100%);
 }
@@ -26,7 +26,7 @@
     background: #050d05;
     border: 1px solid #1a3a1a;
     clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
-    padding: 10px 16px;
+    padding: 14px 20px;
     flex: 1;
     font-family: 'Courier New', monospace;
     position: relative;
@@ -34,36 +34,36 @@
 
 .panel-title {
     font-family: 'Courier New', monospace;
-    font-size: 12px;
+    font-size: 15px;
     letter-spacing: 2px;
     color: #3a7a3a;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     text-align: center;
     border-bottom: 1px solid #1a3a1a;
-    padding-bottom: 5px;
+    padding-bottom: 6px;
     text-shadow: 0 0 6px #1a5a1a;
 }
 
 /* ── Segmented bars ── */
 .bar-label {
     font-family: 'Courier New', monospace;
-    font-size: 11px;
+    font-size: 13px;
     letter-spacing: 1.5px;
     color: #3a7a3a;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     text-align: center;
 }
 
 .segmented-bar {
     display: flex;
     flex-direction: row;
-    gap: 2px;
-    margin-bottom: 6px;
+    gap: 3px;
+    margin-bottom: 8px;
 }
 
 .segment {
     flex: 1;
-    height: 10px;
+    height: 14px;
     background-color: #0d1a0d;
     border: 1px solid #1a3a1a;
     transition: background-color 0.2s ease;
@@ -97,6 +97,13 @@
     animation: flicker 0.7s infinite alternate;
 }
 
+/* Lasers – amber, recharges over time */
+#laser-bar .segment.active {
+    background-color: #ffaa00;
+    border-color: #ffaa00;
+    box-shadow: 0 0 4px #ffaa00;
+}
+
 /* Target hull */
 #target-hull-bar .segment.active {
     background-color: #cc6600;
@@ -117,7 +124,7 @@
 
 #target-shield-bar .segment,
 #target-hull-bar .segment {
-    height: 18px;
+    height: 22px;
 }
 
 #target-shield-bar,
@@ -143,7 +150,7 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    min-height: 120px;
+    min-height: 150px;
 }
 
 /* ── Target computer ── */
@@ -156,10 +163,10 @@
 
 .targetComputer {
     width: 100%;
-    height: 150px;
+    height: 170px;
     background-color: #030d06;
     border: 1px solid #1a3a1a;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     display: block;
 }
 
@@ -172,11 +179,11 @@
 
 #target-name {
     font-family: 'Courier New', monospace;
-    font-size: 12px;
+    font-size: 15px;
     letter-spacing: 2px;
     color: #cc6600;
     text-shadow: 0 0 6px #cc6600;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
     text-align: center;
 }
 
@@ -185,17 +192,17 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    min-height: 120px;
+    min-height: 150px;
 }
 
 /* ── Readout line ── */
 .panel-readout {
     font-family: 'Courier New', monospace;
-    font-size: 11px;
+    font-size: 13px;
     letter-spacing: 1px;
     color: #3a7a3a;
     text-align: center;
-    margin-top: 4px;
+    margin-top: 5px;
 }
 
 .panel-readout span {
@@ -214,9 +221,9 @@
     box-shadow: 0 0 12px rgba(0,204,68,0.4);
     color: #00cc44;
     font-family: 'Courier New', monospace;
-    font-size: 12px;
+    font-size: 14px;
     letter-spacing: 2px;
-    padding: 10px 24px;
+    padding: 12px 28px;
     text-align: center;
     clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
     opacity: 0;
@@ -231,7 +238,7 @@
 /* ── Dock prompt ── */
 .dock-prompt {
     position: fixed;
-    bottom: 340px;
+    bottom: 380px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1500;
@@ -240,9 +247,9 @@
     box-shadow: 0 0 12px rgba(204,102,0,0.5);
     color: #cc6600;
     font-family: 'Courier New', monospace;
-    font-size: 12px;
+    font-size: 14px;
     letter-spacing: 2px;
-    padding: 8px 20px;
+    padding: 10px 22px;
     text-align: center;
     clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
     animation: pulse-dock 1.5s infinite;
@@ -251,7 +258,7 @@
 .dock-prompt .key {
     display: inline-block;
     border: 1px solid #cc6600;
-    padding: 1px 6px;
+    padding: 2px 7px;
     margin: 0 3px;
     color: #ffcc66;
     text-shadow: 0 0 6px #cc6600;

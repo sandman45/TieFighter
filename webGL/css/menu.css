@@ -48,7 +48,7 @@
 #sub-menu::before {
     content: 'GALACTIC EMPIRE · IMPERIAL NAVY';
     font-family: var(--font-title);
-    font-size: 9px;
+    font-size: 13px;
     letter-spacing: 4px;
     color: var(--text-dim);
     position: absolute;
@@ -91,10 +91,10 @@
 .sub-menu-item,
 .btn-item {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 15px;
     letter-spacing: 3px;
-    padding: 10px 32px;
-    width: 260px;
+    padding: 16px 32px;
+    width: 320px;
     background: var(--panel-bg);
     color: var(--text-dim);
     border: 1px solid var(--border-bright);
@@ -155,8 +155,8 @@
 .btn-item {
     width: auto;
     flex: unset;
-    padding: 8px 24px;
-    font-size: 9px;
+    padding: 12px 30px;
+    font-size: 12px;
 }
 
 /* ── SHIP INFO PANEL ─────────────────────────────────────────────────────────── */
