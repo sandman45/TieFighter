@@ -8,6 +8,12 @@ import GameAudio from "../../utils/Audio.js";
 import SkyBox from "../../sceneSubjects/SkyBox.js";
 import ModelLoader, { Model } from "../../utils/ModelLoader.js";
 
+// the very first "menu" scene load of a session is always the moment the
+// pilot-selection gate is showing on top of it (see main.js) — play the
+// same track used when heading into multiplayer for that first appearance,
+// then fall back to the normal menu music on every later visit
+let isFirstLoad = true;
+
 export default (canvas, models) => {
     let skyBox = null;
     const sceneConstants = parseConfiguration(sceneConfiguration);
@@ -15,7 +21,8 @@ export default (canvas, models) => {
     const renderer = buildRender(canvas);
     const camera = buildCamera(canvas);
     const audio = GameAudio(camera, sceneConfiguration.audio, () => {
-        audio.playSound("MUSIC_MENU", camera);
+        audio.playSound(isFirstLoad ? "MUSIC_SELECT" : "MUSIC_MENU", camera);
+        isFirstLoad = false;
     });
 
     buildLight(scene);

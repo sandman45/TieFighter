@@ -1,3 +1,6 @@
+import PilotStore from "../pilot/PilotStore.js";
+import { paintStarfield } from "../utils/StarfieldRenderer.js";
+
 // ── MISSION DATA ──────────────────────────────────────────────────────────────
 // MISSION is now set dynamically from campaign config — see initBriefing
 let MISSION = null;
@@ -43,17 +46,7 @@ export function resizeMap() {
 }
 
 function drawStars() {
-    const seed = 42;
-    for (let i = 0; i < 180; i++) {
-        const sx     = (Math.sin(i * 127.1 + seed) * 0.5 + 0.5) * mapCanvas.width;
-        const sy     = (Math.sin(i * 311.7 + seed) * 0.5 + 0.5) * mapCanvas.height;
-        const size   = (Math.sin(i * 77.3)  * 0.5 + 0.5) * 1.2 + 0.3;
-        const bright = (Math.sin(i * 53.1 + animFrame * 0.02) * 0.5 + 0.5) * 0.6 + 0.2;
-        ctx.globalAlpha = bright;
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(sx, sy, size, size);
-    }
-    ctx.globalAlpha = 1;
+    paintStarfield(ctx, mapCanvas.width, mapCanvas.height, animFrame);
 }
 
 function wp(waypoint) {
@@ -201,6 +194,8 @@ export function initBriefing(campaignConfig, onLaunch) {
     MISSION.enemyFlightPath = campaignConfig.briefing.enemyFlightPath || [];
 
     // populate header fields from campaign config
+    document.getElementById('pilotName').textContent = PilotStore.getActivePilot().name;
+    document.getElementById('pilotCallsign').textContent = (campaignConfig.player.designation || '').replace(/_/g, ' ');
     document.getElementById('briefing-mission-title').textContent = campaignConfig.title;
     document.getElementById('briefing-sector-label').textContent  = campaignConfig.briefing.sector;
     document.getElementById('briefing-officer-name').textContent  = campaignConfig.briefing.officer.name;

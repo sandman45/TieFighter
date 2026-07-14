@@ -1,0 +1,127 @@
+/* ── PILOT PORTRAIT ── */
+.pilot-portrait-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.pilot-portrait-box {
+    width: 140px; height: 140px;
+    background: #010e03;
+    border: 1px solid var(--border-bright);
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    position: relative;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+}
+.pilot-portrait-box::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,204,68,0.04) 3px, rgba(0,204,68,0.04) 4px);
+}
+.pilot-portrait-box svg {
+    width: 90px; height: 90px;
+    fill: var(--green);
+    filter: drop-shadow(0 0 6px var(--green));
+}
+.pilot-portrait-box[data-variant="amber"] svg { fill: var(--amber); filter: drop-shadow(0 0 6px var(--amber)); }
+.pilot-portrait-box[data-variant="red"] svg { fill: var(--red); filter: drop-shadow(0 0 6px var(--red)); }
+.pilot-portrait-photo {
+    width: 100%; height: 100%;
+    object-fit: cover;
+}
+
+.pilot-portrait-arrow {
+    font-size: 12px;
+    padding: 10px 10px;
+}
+
+/* ── PILOT NAME FIELD ── */
+.pilot-name-field {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+}
+.pilot-name-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+}
+.pilot-name-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+#pilot-name-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-bright);
+    color: var(--green);
+    font-family: var(--font-mono);
+    font-size: 16px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-shadow: 0 0 6px var(--green);
+    text-align: center;
+    width: 240px;
+    padding: 4px 2px;
+}
+#pilot-name-input:focus {
+    outline: none;
+    border-bottom-color: var(--green);
+}
+.pilot-name-input-wrap .cursor {
+    color: var(--green);
+    font-size: 16px;
+    text-shadow: 0 0 6px var(--green);
+}
+
+/* ── PILOT STATS PANEL ── */
+.pilot-stats {
+    width: 280px;
+    flex: unset;
+    margin-top: 6px;
+}
+.pilot-stats .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+.pilot-stats .stat-row:last-child { border-bottom: none; }
+.pilot-stats .stat-label { color: var(--text-dim); letter-spacing: 2px; }
+.pilot-stats .stat-value { color: var(--green); text-shadow: 0 0 6px var(--green); font-weight: bold; }
+
+/* ── PILOT INDEX INDICATOR ── */
+#pilot-index-indicator {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-top: 4px;
+}
+
+/* ── PILOT CYCLE ARROWS ── */
+.pilot-arrows {
+    display: flex;
+    gap: 20px;
+    margin-top: 6px;
+}
+#pilot-arrows .ship-arrow-btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+    pointer-events: none;
+}
+
+/* ── ACTIONS ── */
+.pilot-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}

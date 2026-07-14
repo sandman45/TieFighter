@@ -58,6 +58,15 @@ choose "Run".
 The game will be available at `http://localhost:3000/` (or whatever port
 you set `WEB_SERVER` to).
 
+### Pilot record
+
+The first thing you'll see is a pilot terminal (modeled on the original TIE
+Fighter's pilot record screen) — name your pilot, pick a portrait, and it
+tracks Rank/Score/Missions Flown as you play. Pilot data is stored in your
+browser's `localStorage`, so it's local to that browser/device (no accounts,
+nothing sent to the server) — you can keep multiple pilots and cycle between
+them with the arrows. Hit **CONTINUE ►** to reach the main menu.
+
 ### Controls
 
 - **Mouse** — move to steer (no need to hold a button), click to fire lasers

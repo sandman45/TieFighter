@@ -1,0 +1,78 @@
+#campaign-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: var(--bg);
+    visibility: hidden;
+}
+
+.campaign-main-content {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.campaign-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+}
+.campaign-mission-title {
+    font-family: var(--font-title);
+    font-size: 24px;
+    letter-spacing: 4px;
+    color: var(--green);
+    text-shadow: 0 0 16px var(--green);
+}
+.campaign-tagline {
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    font-style: italic;
+}
+
+.campaign-hero-panel {
+    width: 100%;
+    max-width: 640px;
+    height: 260px;
+    background: #010801;
+    border: 1px solid var(--border-bright);
+    position: relative;
+    overflow: hidden;
+    clip-path: polygon(14px 0%, 100% 0%, calc(100% - 14px) 100%, 0% 100%);
+}
+#campaignHeroCanvas { width: 100%; height: 100%; display: block; }
+.campaign-hero-sector {
+    position: absolute;
+    left: 14px; bottom: 10px;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--amber);
+    text-shadow: 0 0 8px var(--amber);
+    background: rgba(2,10,3,0.55);
+    padding: 4px 10px;
+    border: 1px solid var(--amber);
+}
+
+.campaign-empty {
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    padding: 60px 0;
+}
+
+.campaign-browse-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.campaign-page-indicator {
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    min-width: 50px;
+    text-align: center;
+}

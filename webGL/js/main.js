@@ -8,6 +8,9 @@ import LocalStorage from "./localStorage/localStorage.js";
 import { initBriefing } from './missionBriefing/missionBriefing.js';
 import { initDebrief } from './missionBriefing/missionDebrief.js';
 import campaign from "./campaignMenu/campaign.js"; // add this import
+import PilotStore from "./pilot/PilotStore.js";
+import PilotScreen from "./pilot/PilotScreen.js";
+import { getMissionScore } from "./scenes/campaign/MissionObjectives.js";
 
 initSocketIO(onKeyUp, onKeyDown);
 // initial state is menu
@@ -26,26 +29,57 @@ views.push(new View(canvas2));
 let sceneManager = SceneManager(views, "menu");
 bindEventListeners();
 startRenderLoop();
+
+// require pilot selection before reaching the main menu, matching the
+// original game's flow. SceneManager's menu-scene load is async and makes
+// #menu visible on its own once it finishes — race against that by forcing
+// it back to hidden for as long as the pilot gate hasn't been dismissed yet.
+let pilotGateActive = true;
+const menuEl = document.getElementById("menu");
+const pilotGateMenuObserver = new MutationObserver(() => {
+	if (pilotGateActive && menuEl.style.visibility === 'visible') {
+		menuEl.style.visibility = 'hidden';
+	}
+});
+pilotGateMenuObserver.observe(menuEl, { attributes: true, attributeFilter: ['style'] });
+
+document.getElementById("pilot-screen").style.visibility = "visible";
+PilotScreen.buildScreen();
+PilotScreen.renderActivePilot();
+bindEventListeners(); // re-run so the freshly-injected pilot-screen buttons get wired
+
 let showMenu = false;
 let campaignMenu = false;
 let activeCampaignConfig = null;
 
 EventBus.subscribe(events.MISSION_COMPLETE, () => {
-	showDebrief('success', null);
+	PilotStore.incrementMissionsFlown();
+	const bonus = PilotStore.awardMissionCompleteBonus();
+	showDebrief('success', null, getMissionScore() + bonus);
 });
 
 EventBus.subscribe(events.MISSION_FAILED, ({ reason }) => {
-	showDebrief('failure', reason);
+	PilotStore.incrementMissionsFlown();
+	showDebrief('failure', reason, getMissionScore());
 });
 
-function showDebrief(result, reason) {
+function showDebrief(result, reason, scoreEarned) {
 	document.getElementById('heads-up-display').style.visibility = 'hidden';
 
 	const debriefEl = document.getElementById('mission-debrief');
 	debriefEl.style.display    = 'block';
 	debriefEl.style.visibility = 'visible';
 
-	initDebrief(activeCampaignConfig, result, reason, () => {
+	const activePilot = PilotStore.getActivePilot();
+	const stats = {
+		pilotName: activePilot.name,
+		scoreEarned,
+		totalScore: activePilot.score,
+		rank: activePilot.rank,
+		missionsFlown: activePilot.missionsFlown,
+	};
+
+	initDebrief(activeCampaignConfig, result, reason, stats, () => {
 		debriefEl.style.display    = 'none';
 		debriefEl.style.visibility = 'hidden';
 
@@ -86,6 +120,12 @@ function bindEventListeners() {
 	const arrowRight = document.getElementById('arrowRight');
 	if (arrowLeft)  arrowLeft.onclick  = () => sceneManager.onKeyDown(37, 1000);
 	if (arrowRight) arrowRight.onclick = () => sceneManager.onKeyDown(39, 1000);
+
+	// pilot cycle arrows
+	const pilotArrowLeft  = document.getElementById('pilotArrowLeft');
+	const pilotArrowRight = document.getElementById('pilotArrowRight');
+	if (pilotArrowLeft)  pilotArrowLeft.onclick  = () => { PilotStore.cyclePrev(); PilotScreen.renderActivePilot(); };
+	if (pilotArrowRight) pilotArrowRight.onclick = () => { PilotStore.cycleNext(); PilotScreen.renderActivePilot(); };
 
 	resizeCanvas();
 }
@@ -136,6 +176,18 @@ function onMenuItemClick(event) {
 		const subMenu = document.getElementById("sub-menu");
 		subMenu.style.visibility = "visible";
 		document.getElementById('ship-select-arrows').style.display = 'flex';
+	} else if(menuItem === "pilot") {
+		// hide main menu, show pilot screen and rebind listeners (so the
+		// freshly-injected pilot-screen buttons get wired), but skip the
+		// SceneManager call below — "pilot" isn't a valid scene key, and
+		// skipping it lets the menu's 3D background keep animating underneath,
+		// same trick showMissionBriefing() uses
+		document.getElementById("menu").style.visibility = "hidden";
+		document.getElementById("pilot-screen").style.visibility = "visible";
+		PilotScreen.buildScreen();
+		PilotScreen.renderActivePilot();
+		bindEventListeners();
+		return;
 	} else {
 		// hide main menu
 		const menu = document.getElementById("menu");
@@ -213,6 +265,9 @@ function onSubMenuItemClick(event) {
         document.getElementById("connect").disabled = true;
         document.getElementById("selectBtn").disabled = false;
 		handler.connectToServer();
+	} else if(subMenuItem === "pilotnew") {
+		PilotStore.createPilot();
+		PilotScreen.renderActivePilot();
 	} else if(subMenuItem === "leaveserver") {
 		// clear canvas
 		const canvas = document.getElementById('canvas');
@@ -247,6 +302,11 @@ function onSubMenuItemClick(event) {
 		const canvas = document.getElementById('canvas');
 		canvas.innerHTML = "";
 
+		// once the player has dismissed the pilot gate (via any "back" button,
+		// including the pilot screen's own CONTINUE), stop forcing #menu hidden
+		pilotGateActive = false;
+		pilotGateMenuObserver.disconnect();
+
 		// hide all except menu
 		const element = document.getElementById("btn-container");
 		element.style.visibility = "hidden";
@@ -265,6 +325,8 @@ function onSubMenuItemClick(event) {
 
 		const element6 = document.getElementById("campaign-menu");
 		element6.style.visibility = "hidden";
+
+		document.getElementById("pilot-screen").style.visibility = "hidden";
 
 		const loadingElem = document.getElementById('loading');
 		loadingElem.style.visibility = 'visible';
