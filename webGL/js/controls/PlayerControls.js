@@ -2,6 +2,7 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 import eventBus from "../eventBus/EventBus.js";
 import eventBusEvents from "../eventBus/events.js";
+import WeaponsEnergy from "./WeaponsEnergy.js";
 export default (mesh, laser, camera, config, collisionManager, audio) => {
 
 	const keycodes = {
@@ -14,13 +15,18 @@ export default (mesh, laser, camera, config, collisionManager, audio) => {
         Q: 81,
         E: 69,
         V: 86,
-        B: 66,
-        SPACE: 32
+        B: 66
     };
 
     let forward = false;
     let backward = false;
     let rotating = false;
+    let lastEnergyTick = null;
+    const weaponsEnergy = WeaponsEnergy();
+    eventBus.post(eventBusEvents.WEAPON_ENERGY_CHANGED, {
+        energy: weaponsEnergy.getEnergy(),
+        maxEnergy: weaponsEnergy.getMaxEnergy(),
+    });
 
     setCameraPositionRelativeToMesh(camera, mesh, config);
 
@@ -52,16 +58,16 @@ export default (mesh, laser, camera, config, collisionManager, audio) => {
             rotate(Math.PI/2, duration);
         }
 
-        // space fire cannons
-        else if(keyCode === keycodes.SPACE) {
-            fireCannons(mesh);
-        }
-
     }
 
     function fireCannons(mesh) {
+        if(!weaponsEnergy.trySpend()) return;  // recharging — can't fire yet
         // move / translate them on the game world
         laser.fire(mesh, 2, mesh.faction);
+        eventBus.post(eventBusEvents.WEAPON_ENERGY_CHANGED, {
+            energy: weaponsEnergy.getEnergy(),
+            maxEnergy: weaponsEnergy.getMaxEnergy(),
+        });
         // collision for lazers
     }
 

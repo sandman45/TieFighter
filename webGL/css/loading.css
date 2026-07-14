@@ -30,7 +30,7 @@
 #loading::before {
     content: 'GALACTIC EMPIRE · IMPERIAL NAVY';
     font-family: 'Orbitron', sans-serif;
-    font-size: 9px;
+    font-size: 13px;
     letter-spacing: 4px;
     color: #3a7a3a;
     position: absolute;
@@ -58,7 +58,7 @@
 
 #loading > div > div:first-child {
     font-family: 'Orbitron', sans-serif;
-    font-size: 13px;
+    font-size: 17px;
     letter-spacing: 6px;
     color: #00cc44;
     text-shadow: 0 0 20px #00cc44, 0 0 40px rgba(0,204,68,0.3);
@@ -70,7 +70,7 @@
     content: 'INITIALISING SYSTEMS';
     display: block;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 4px;
     color: #3a7a3a;
     margin-bottom: 20px;
@@ -107,7 +107,7 @@
     content: 'LOADING ASSETS';
     display: block;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 8px;
+    font-size: 11px;
     letter-spacing: 3px;
     color: #3a7a3a;
     text-align: center;

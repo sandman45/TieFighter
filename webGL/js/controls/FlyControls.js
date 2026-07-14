@@ -4,6 +4,7 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 import eventBus from "../eventBus/EventBus.js";
 import eventBusEvents from "../eventBus/events.js";
+import WeaponsEnergy from "./WeaponsEnergy.js";
 
 function bind( scope, fn ) {
     return function () {
@@ -29,6 +30,12 @@ export default class FlyControls {
         this.updateThrottleReadout();
         this.collisionManager = collisionManager;
         this.dockingManager = null;
+        this.weaponsEnergy = WeaponsEnergy();
+        this._lastEnergyTick = null;
+        eventBus.post(eventBusEvents.WEAPON_ENERGY_CHANGED, {
+            energy: this.weaponsEnergy.getEnergy(),
+            maxEnergy: this.weaponsEnergy.getMaxEnergy(),
+        });
         this.goal = new THREE.Object3D();
         object.add( this.goal );
         this.goal.position.set(0, 5, 20);
@@ -65,6 +72,41 @@ export default class FlyControls {
         };
         this.moveVector = new THREE.Vector3(0, 0, 0);
         this.rotationVector = new THREE.Vector3(0, 0, 0);
+
+        // stop the targeting computer from tracking ships after they're destroyed —
+        // `this.ships` is a snapshot built once at scene load, so without this it keeps
+        // cycling to (and locking onto) meshes that have already been removed from the scene
+        eventBus.subscribe(eventBusEvents.SHIP_DESTROYED, ({ userId: destroyedUserId, designation: destroyedDesignation }) => {
+            const idx = this.ships.findIndex(ship =>
+                (destroyedUserId !== undefined && ship.userId === destroyedUserId) ||
+                (destroyedDesignation !== undefined && ship.designation === destroyedDesignation)
+            );
+            if (idx === -1) return;
+
+            const destroyedMesh = this.ships[idx];
+            this.ships.splice(idx, 1);
+
+            if (this.hud && this.hud.getCurrentTarget() === destroyedMesh) {
+                const nextTarget = this.ships[this.ships.length - 1] || null;
+                if (nextTarget) {
+                    this.hud.acquireNewTarget(nextTarget);
+                    eventBus.post(eventBusEvents.TARGET_CHANGED, {
+                        mesh: nextTarget,
+                        shields: nextTarget.shields,
+                        maxShields: nextTarget.maxShields,
+                        hull: nextTarget.hull,
+                        maxHull: nextTarget.maxHull,
+                        name: nextTarget.name,
+                        designation: nextTarget.designation,
+                        userId: nextTarget.userId,
+                        speed: nextTarget.speed,
+                    });
+                } else {
+                    this.hud.clearTarget();
+                    eventBus.post(eventBusEvents.TARGET_CHANGED, { mesh: null });
+                }
+            }
+        });
 
         const _mousemove = bind( this, this.mousemove );
         const _mousedown = bind( this, this.mousedown );
@@ -152,7 +194,6 @@ export default class FlyControls {
             case 189: /*-*/
                 this.throttleDown();
                 break;
-            case 32: this.fireCannons(this.object); break;
             case 84: this.acquireTarget(); break;
             case 71: /*G*/ if(this.dockingManager) this.dockingManager.attemptDock(); break;
 
@@ -304,10 +345,15 @@ export default class FlyControls {
 
     fireCannons = function(mesh) {
         if(mesh.hull <= 0) return;  // add this guard
+        if(!this.weaponsEnergy.trySpend()) return;  // recharging — can't fire yet
         // move / translate them on the game world
         // console.log(`firing lasers`);
         this.laser.fire(mesh, 2, mesh.faction);
         this.updateServer(mesh,"LASERS");
+        eventBus.post(eventBusEvents.WEAPON_ENERGY_CHANGED, {
+            energy: this.weaponsEnergy.getEnergy(),
+            maxEnergy: this.weaponsEnergy.getMaxEnergy(),
+        });
         // collision for lazers
     };
 
@@ -320,8 +366,20 @@ export default class FlyControls {
         });
     };
 
-    update = function( delta ) {
+    update = function( elapsedTime ) {
         if(this.object.hull <= 0) return;
+
+        // SceneManager calls update() with total elapsed time, not a per-frame
+        // delta, so derive the delta here for the recharge-rate math
+        const energyDt = (this._lastEnergyTick === null) ? 0 : Math.max(0, elapsedTime - this._lastEnergyTick);
+        this._lastEnergyTick = elapsedTime;
+        if (this.weaponsEnergy.update(energyDt)) {
+            eventBus.post(eventBusEvents.WEAPON_ENERGY_CHANGED, {
+                energy: this.weaponsEnergy.getEnergy(),
+                maxEnergy: this.weaponsEnergy.getMaxEnergy(),
+            });
+        }
+
         const matrix = new THREE.Matrix4();
         matrix.extractRotation( this.object.matrix );
 
