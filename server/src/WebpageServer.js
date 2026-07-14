@@ -17,15 +17,13 @@ let gameState = {
     // }
 };
 
-let webpageReady = false;
-
-function WebpageServer(callbacks) {
-    startServer(callbacks);
+function WebpageServer() {
+    startServer();
 }
 
-function startServer(callbacks) {
+function startServer() {
     startHttpServer();
-    initSocketIOServer(callbacks);
+    initSocketIOServer();
 }
 
 function allowCrossOrigin(req, res, next) {
@@ -70,12 +68,11 @@ function cleanUpUsersInRooms(id) {
     return ret;
 }
 
-function initSocketIOServer(callbacks) {
+function initSocketIOServer() {
     socketIO.on('connection', socket => {
         socketCount++;
         const key = socketCount;
         sockets[key] = socket;
-        webpageReady = true;
         console.log("webpage ready");
         console.log(`socket id: ${sockets[key].id}`);
 
@@ -95,7 +92,6 @@ function initSocketIOServer(callbacks) {
                 });
             }
             delete sockets[key];
-            webpageReady = false;
             console.log("webpage disconnected");
             socketCount--;
             console.log(`socket count: ${socketCount}`);
@@ -164,7 +160,7 @@ function initSocketIOServer(callbacks) {
 
         socket.on(events.START_GAME, data => {
             const room = data.room;
-            socketIO.of("/").in(room).clients((err, data) => {
+            socketIO.of("/").in(room).clients((err) => {
                if(err){
                    console.log(err);
                }
@@ -196,8 +192,4 @@ function initSocketIOServer(callbacks) {
     });
 }
 
-function isWebpageReady() {
-    return webpageReady;
-}
-
-module.exports = { WebpageServer, isWebpageReady };
+module.exports = { WebpageServer };
