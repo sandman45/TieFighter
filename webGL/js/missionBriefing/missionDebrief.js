@@ -1,9 +1,24 @@
-export function initDebrief(campaignConfig, result, reason, onReturnToMenu) {
+export function initDebrief(campaignConfig, result, reason, stats, onReturnToMenu) {
     const titleEl  = document.getElementById('debrief-mission-title');
     const headerEl = document.getElementById('debrief-result-header');
     const textEl   = document.getElementById('debrief-text');
+    const pilotNameEl     = document.getElementById('debrief-pilot-name');
+    const pilotCallsignEl = document.getElementById('debrief-pilot-callsign');
+    const scoreEarnedEl   = document.getElementById('debrief-score-earned');
+    const totalScoreEl    = document.getElementById('debrief-total-score');
+    const rankEl           = document.getElementById('debrief-rank');
+    const missionsFlownEl = document.getElementById('debrief-missions-flown');
 
     if(titleEl) titleEl.textContent = campaignConfig.title;
+    if(pilotCallsignEl) pilotCallsignEl.textContent = (campaignConfig.player.designation || '').replace(/_/g, ' ');
+
+    if(stats) {
+        if(pilotNameEl)     pilotNameEl.textContent     = stats.pilotName;
+        if(scoreEarnedEl)   scoreEarnedEl.textContent   = `+${stats.scoreEarned ?? 0}`;
+        if(totalScoreEl)    totalScoreEl.textContent    = stats.totalScore ?? '—';
+        if(rankEl)          rankEl.textContent          = stats.rank ?? '—';
+        if(missionsFlownEl) missionsFlownEl.textContent = stats.missionsFlown ?? '—';
+    }
 
     if(result === 'success') {
         if(headerEl) {

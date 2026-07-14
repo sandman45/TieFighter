@@ -40,7 +40,8 @@
 
 /* scanline overlay */
 #mission-briefing::before,
-#mission-debrief::before {
+#mission-debrief::before,
+#campaign-menu::before {
     content: '';
     position: absolute; inset: 0;
     background: repeating-linear-gradient(
@@ -56,7 +57,8 @@
 
 /* CRT vignette */
 #mission-briefing::after,
-#mission-debrief::after {
+#mission-debrief::after,
+#campaign-menu::after {
     content: '';
     position: absolute; inset: 0;
     background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%);
@@ -66,8 +68,10 @@
 
 /* ── MISSION DEBRIEF ── */
 #mission-debrief .main-content {
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 12px;
 }
 
 .debrief-panel {
@@ -84,6 +88,25 @@
     color: var(--red);
     text-shadow: 0 0 10px var(--red);
 }
+
+/* ── DEBRIEF STATS PANEL ── */
+.debrief-stats-panel {
+    width: 100%;
+    max-width: 640px;
+    flex: unset;
+}
+.debrief-stats-panel .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+.debrief-stats-panel .stat-row:last-child { border-bottom: none; }
+.debrief-stats-panel .stat-label { color: var(--text-dim); letter-spacing: 2px; }
+.debrief-stats-panel .stat-value { color: var(--green); text-shadow: 0 0 6px var(--green); font-weight: bold; }
 
 .briefing-screen {
     width: 100%; height: 100%;
@@ -161,7 +184,7 @@
 
 /* ── RIGHT COLUMN ── */
 .right-column {
-    width: 340px;
+    width: 420px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
@@ -175,12 +198,14 @@
     background: var(--panel-bg);
     clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
     display: flex;
-    gap: 10px;
-    padding: 10px 14px;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
 }
 .officer-portrait {
-    width: 72px; height: 72px;
+    width: 100%; height: 190px;
     background: #010e03;
     border: 1px solid var(--border-bright);
     flex-shrink: 0;
@@ -188,13 +213,12 @@
     overflow: hidden;
     display: flex; align-items: center; justify-content: center;
 }
-.officer-portrait svg { width: 60px; height: 60px; }
 .officer-portrait::after {
     content: '';
     position: absolute; inset: 0;
     background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,204,68,0.04) 3px, rgba(0,204,68,0.04) 4px);
 }
-.officer-info { flex: 1; }
+.officer-info { flex: 1; padding: 8px 14px; }
 .officer-name {
     font-family: var(--font-title);
     font-size: 10px;

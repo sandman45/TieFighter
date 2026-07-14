@@ -80,12 +80,6 @@ function startGame() {
     hudElem.style.visibility = 'visible';
 }
 
-function pilotName() {
-    const pilot = document.getElementById("pilotName").getAttribute("value");
-    console.log(`Set ${pilot} as Pilot Name`);
-    LocalStorage.setItem("PILOT_NAME", pilot);
-}
-
 function currentSelectionInView() {
     EventBus.subscribe(events.SHIP_SELECTION_CHANGE, d => {
         console.log(`${events.SHIP_SELECTION_CHANGE} to ${d}`);
@@ -98,7 +92,6 @@ function currentSelectionInView() {
 export default {
     currentSelectionInView,
     connectToServer,
-    pilotName,
     startGame,
     onSubMenuItemClick,
     btnClickFromMenu

@@ -17,8 +17,8 @@
 
 /* ── SHARED MENU BASE ────────────────────────────────────────────────────────── */
 #menu,
-#campaign-menu,
-#sub-menu {
+#sub-menu,
+#pilot-screen {
     z-index: 999;
     position: absolute;
     left: 0; top: 0;
@@ -42,10 +42,17 @@
             radial-gradient(ellipse at center, rgba(0,20,5,0.97) 0%, rgba(0,5,2,0.99) 100%);
 }
 
+/* pilot selection gates the main menu on first load (like the original
+   game's pilot terminal before the battle hub) — always sit on top of #menu
+   regardless of load-order timing */
+#pilot-screen {
+    z-index: 1000;
+}
+
 /* ── EMPIRE HEADER ───────────────────────────────────────────────────────────── */
 #menu::before,
-#campaign-menu::before,
-#sub-menu::before {
+#sub-menu::before,
+#pilot-screen::before {
     content: 'GALACTIC EMPIRE · IMPERIAL NAVY';
     font-family: var(--font-title);
     font-size: 13px;
@@ -58,8 +65,8 @@
 }
 
 #menu::after,
-#campaign-menu::after,
-#sub-menu::after {
+#sub-menu::after,
+#pilot-screen::after {
     content: '';
     position: absolute;
     top: 40px;

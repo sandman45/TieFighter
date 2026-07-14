@@ -4,6 +4,9 @@ export default {
         type: "CAMPAIGN",
         menuName: "Mission One",
         title: "Skirmish at Outpost D-34",
+        // one-line summary shown on the campaign/battle-select screen — any
+        // mission flipped to active:true should supply one too
+        tagline: "Intercept Rebel smugglers fleeing through the Javin sector.",
         prelude: "Following the recent Rebel defeat on the planet Hoth, freighter traffic began to increase in the Javin sector. Imperial Intelligence suspected a connection and believed that the Rebels would try to pass through this checkpoint. One of their pilots, Maarek Stele, who had been stationed there following Admiral Mordon's death would prove that hypothesis.",
         aftermath: "The captured freighter carried 10 individuals, some of them were Mugaari sympathisers. Imperial Intelligence hoped to learn more about the Rebel activity in the sector through the prisoners. Admiral Flanken and Major Thorbo were the ones who interrogated the prisoners for the desired base of operations and plans using an Interrogation droid to extract every detail they could get. To Stele it reminded him of being a Bordali prisoner, but figured that it served the Rebels right.\n" +
             "\n" +

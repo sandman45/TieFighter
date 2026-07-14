@@ -8,6 +8,8 @@
 		<link rel="stylesheet" href="./css/menu.css">
 		<link rel="stylesheet" href="./css/hud.css">
 		<link rel="stylesheet" href="./css/missionBriefing.css">
+		<link rel="stylesheet" href="./css/campaignMenu.css">
+		<link rel="stylesheet" href="./css/pilot.css">
 		<script src="/socket.io/socket.io.js"></script>
 	</head>
 
@@ -57,6 +59,7 @@
 					<button class="nav-btn" id="briefingBackBtn">◄ BACK</button>
 					<div class="status-text">
 						PILOT: <span id="pilotName">ALPHA ONE</span>
+						&nbsp;|&nbsp; CALLSIGN: <span id="pilotCallsign">ALPHA ONE</span>
 						&nbsp;|&nbsp; CRAFT: <span>TIE/LN</span>
 						&nbsp;|&nbsp; STATUS: <span>READY</span>
 					</div>
@@ -76,10 +79,18 @@
 						<div class="briefing-header success" id="debrief-result-header">MISSION SUCCESSFUL</div>
 						<div class="briefing-text" id="debrief-text"></div>
 					</div>
+					<div class="panel debrief-stats-panel" id="debriefStatsPanel">
+						<div class="panel-title">IMPERIAL SERVICE RECORD</div>
+						<div class="stat-row"><span class="stat-label">SCORE EARNED</span><span class="stat-value" id="debrief-score-earned">+0</span></div>
+						<div class="stat-row"><span class="stat-label">TOTAL SCORE</span><span class="stat-value" id="debrief-total-score">—</span></div>
+						<div class="stat-row"><span class="stat-label">RANK</span><span class="stat-value" id="debrief-rank">—</span></div>
+						<div class="stat-row"><span class="stat-label">MISSIONS FLOWN</span><span class="stat-value" id="debrief-missions-flown">—</span></div>
+					</div>
 				</div>
 				<div class="bottom-bar">
 					<div class="status-text">
 						PILOT: <span id="debrief-pilot-name">ALPHA ONE</span>
+						&nbsp;|&nbsp; CALLSIGN: <span id="debrief-pilot-callsign">ALPHA ONE</span>
 					</div>
 					<button class="nav-btn launch" id="debriefReturnBtn">RETURN TO MENU ►</button>
 				</div>
@@ -190,11 +201,41 @@
 				<div class="menu-title">IMPERIAL COMBAT SIMULATOR</div>
 				<div class="menu-item" name="shipselect">MULTI-PLAYER</div>
 				<div class="menu-item" name="campaign">CAMPAIGN</div>
+				<div class="menu-item" name="pilot">PILOT</div>
 			</div>
 		</div>
 		<div id="campaign-menu">
-
+			<div class="briefing-screen">
+				<div class="top-bar">
+					<div class="empire-logo">GALACTIC EMPIRE · IMPERIAL NAVY</div>
+					<div class="mission-title" id="campaignBattleLabel">BATTLE 1</div>
+					<div class="classification">CAMPAIGN</div>
+				</div>
+				<div class="main-content campaign-main-content">
+					<div class="campaign-header">
+						<div class="campaign-mission-title" id="campaignMissionTitle">MISSION TITLE</div>
+						<div class="campaign-tagline" id="campaignTagline">Tagline text.</div>
+					</div>
+					<div class="campaign-hero-panel">
+						<canvas id="campaignHeroCanvas"></canvas>
+						<div class="campaign-hero-sector" id="campaignHeroSector">SECTOR</div>
+					</div>
+					<div class="campaign-empty" id="campaignEmptyState" style="display:none;">
+						NO ACTIVE CAMPAIGNS AVAILABLE.
+					</div>
+				</div>
+				<div class="bottom-bar">
+					<button class="nav-btn sub-menu-item" id="campaignMainMenuBtn" name="back">◄ MAIN MENU</button>
+					<div class="campaign-browse-row">
+						<button class="ship-arrow-btn" id="campaignPrevBtn">◄</button>
+						<div class="campaign-page-indicator" id="campaignPageIndicator">1 / 1</div>
+						<button class="ship-arrow-btn" id="campaignNextBtn">►</button>
+					</div>
+					<button class="nav-btn launch sub-menu-item" id="campaignJoinBtn" name="missionOne">JOIN BATTLE ►</button>
+				</div>
+			</div>
 		</div>
+		<div id="pilot-screen"></div>
 		<div id="sub-menu" class="sub-menu-items">
 				<button id="back" class="sub-menu-item" name="back">
 					MAIN MENU
