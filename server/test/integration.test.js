@@ -46,7 +46,7 @@ test('serves the game index page', async () => {
     const res = await fetch(BASE_URL + '/');
     assert.strictEqual(res.status, 200);
     const body = await res.text();
-    assert.match(body, /<title>WebGLScene<\/title>/);
+    assert.match(body, /<title>TIE Fighter<\/title>/);
 });
 
 test('serves the client bootstrap module', async () => {
