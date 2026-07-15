@@ -239,7 +239,7 @@ test.describe('Pilot profile system', () => {
         });
         await page.waitForTimeout(500);
 
-        await expect(page.locator('#mission-debrief')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('#mission-debrief')).toBeVisible({ timeout: 8000 });
         await expect(page.locator('#debrief-result-header')).toHaveText('MISSION SUCCESSFUL');
         await expect(page.locator('#debrief-pilot-name')).toHaveText('SCORE TEST');
         await expect(page.locator('#debrief-score-earned')).toHaveText('+800');
@@ -274,7 +274,7 @@ test.describe('Pilot profile system', () => {
         });
         await page.waitForTimeout(500);
 
-        await expect(page.locator('#mission-debrief')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('#mission-debrief')).toBeVisible({ timeout: 8000 });
         await expect(page.locator('#debrief-result-header')).toHaveText('MISSION FAILED');
         await expect(page.locator('#debrief-score-earned')).toHaveText('+0');
 
