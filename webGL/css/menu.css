@@ -96,7 +96,8 @@
 /* ── SHARED BUTTON STYLE ─────────────────────────────────────────────────────── */
 .menu-item,
 .sub-menu-item,
-.btn-item {
+.btn-item,
+.pause-menu-item {
     font-family: var(--font-mono);
     font-size: 15px;
     letter-spacing: 3px;
@@ -114,7 +115,8 @@
 
 .menu-item::before,
 .sub-menu-item::before,
-.btn-item::before {
+.btn-item::before,
+.pause-menu-item::before {
     content: '> ';
     color: var(--border-bright);
     transition: color 0.15s;
@@ -122,7 +124,8 @@
 
 .menu-item:hover,
 .sub-menu-item:hover,
-.btn-item:hover {
+.btn-item:hover,
+.pause-menu-item:hover {
     background: #071408;
     border-color: var(--green);
     color: var(--green);
@@ -132,13 +135,15 @@
 
 .menu-item:hover::before,
 .sub-menu-item:hover::before,
-.btn-item:hover::before {
+.btn-item:hover::before,
+.pause-menu-item:hover::before {
     color: var(--green);
 }
 
 .menu-item:disabled,
 .sub-menu-item:disabled,
-.btn-item:disabled {
+.btn-item:disabled,
+.pause-menu-item:disabled {
     opacity: 0.25;
     cursor: default;
     pointer-events: none;
@@ -272,4 +277,44 @@
 #sub-menu::before,
 #sub-menu::after {
     display: none;
+}
+
+/* ── ACTIVE PILOT BADGE ──────────────────────────────────────────────────────── */
+/* Persistent corner readout of the currently-selected pilot, shown on every
+   screen except the Pilot screen itself (where the name is already the whole
+   point of the screen). Sits above every other screen's own z-index. */
+.active-pilot-badge {
+    position: fixed;
+    top: 44px;
+    left: 16px;
+    z-index: 3000;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    background: rgba(2,10,3,0.55);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    pointer-events: none;
+}
+.active-pilot-badge .active-pilot-badge-name {
+    color: var(--green);
+    text-shadow: 0 0 6px var(--green);
+    font-weight: bold;
+}
+
+/* ── PAUSE MENU ──────────────────────────────────────────────────────────────── */
+/* Shown on Esc during actual gameplay (campaign mission or multiplayer match) —
+   deliberately its own small menu, not the Battle/Campaign-select or ship-select
+   screens, which don't make sense to land on mid-flight. Sits above the HUD/
+   reticle overlay so it's usable regardless of which gameplay screen is active. */
+#pause-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 2500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,5,2,0.85);
+    visibility: hidden;
 }

@@ -32,8 +32,38 @@ test.describe('Pilot profile system', () => {
 
         // still able to reach campaign/multiplayer after the gate
         await page.locator('.menu-item[name="campaign"]').click();
-        await page.waitForTimeout(700);
         await expect(page.locator('#campaign-menu')).toBeVisible();
+
+        expect(pageErrors).toEqual([]);
+    });
+
+    test('active pilot indicator shows on the main menu and is woven into the campaign top-bar', async ({ page }) => {
+        const pageErrors = [];
+        page.on('pageerror', err => pageErrors.push(err.message));
+
+        await page.goto('/');
+
+        // hidden on the pilot gate itself
+        await expect(page.locator('#active-pilot-badge')).toBeHidden();
+
+        const input = page.locator('#pilot-name-input');
+        await input.fill('');
+        await input.type('BADGE TEST');
+        await clickById(page, 'pilotBackBtn');
+
+        // visible on the main menu (floating corner badge), with the right name
+        await expect(page.locator('#active-pilot-badge')).toBeVisible();
+        await expect(page.locator('#active-pilot-badge')).toContainText('BADGE TEST');
+
+        // campaign/battle select: woven into the top-bar header instead of the floating
+        // badge (its content sits too close to the top for the floating badge to fit
+        // without covering something, e.g. the briefing's sector label) -- the other
+        // top-bar screens (briefing, debrief) share this same treatment and aren't
+        // separately re-checked here to keep this test to a couple of screens.
+        await page.locator('.menu-item[name="campaign"]').click();
+        await expect(page.locator('#campaign-menu')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('#active-pilot-badge')).toBeHidden();
+        await expect(page.locator('#campaign-menu .top-bar .empire-logo')).toContainText('BADGE TEST');
 
         expect(pageErrors).toEqual([]);
     });
@@ -174,11 +204,14 @@ test.describe('Pilot profile system', () => {
         await clickById(page, 'pilotBackBtn');
 
         await page.locator('.menu-item[name="campaign"]').click();
-        await page.waitForTimeout(700);
+        await expect(page.locator('#campaign-menu')).toBeVisible();
         await clickById(page, 'campaignJoinBtn');
-        await page.waitForTimeout(1500);
+        await expect(page.locator('#mission-briefing')).toBeVisible();
         await clickById(page, 'launchBtn');
-        await page.waitForTimeout(4000);
+        // heads-up-display becomes visible before the mission scene (and its
+        // MissionObjectives EventBus subscription) finishes loading, so this
+        // can't be a condition-based wait — it has to outlast scene setup.
+        await page.waitForTimeout(8000);
 
         await page.evaluate(async () => {
             const { default: EventBus } = await import('/js/eventBus/EventBus.js');
@@ -192,7 +225,7 @@ test.describe('Pilot profile system', () => {
         });
         await page.waitForTimeout(500);
 
-        await expect(page.locator('#mission-debrief')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('#mission-debrief')).toBeVisible({ timeout: 8000 });
         await expect(page.locator('#debrief-result-header')).toHaveText('MISSION SUCCESSFUL');
         await expect(page.locator('#debrief-pilot-name')).toHaveText('SCORE TEST');
         await expect(page.locator('#debrief-score-earned')).toHaveText('+800');
@@ -214,11 +247,14 @@ test.describe('Pilot profile system', () => {
         await page.goto('/');
         await clickById(page, 'pilotBackBtn');
         await page.locator('.menu-item[name="campaign"]').click();
-        await page.waitForTimeout(700);
+        await expect(page.locator('#campaign-menu')).toBeVisible();
         await clickById(page, 'campaignJoinBtn');
-        await page.waitForTimeout(1500);
+        await expect(page.locator('#mission-briefing')).toBeVisible();
         await clickById(page, 'launchBtn');
-        await page.waitForTimeout(4000);
+        // heads-up-display becomes visible before the mission scene (and its
+        // MissionObjectives EventBus subscription) finishes loading, so this
+        // can't be a condition-based wait — it has to outlast scene setup.
+        await page.waitForTimeout(8000);
 
         await page.evaluate(async () => {
             const { default: EventBus } = await import('/js/eventBus/EventBus.js');
@@ -227,7 +263,7 @@ test.describe('Pilot profile system', () => {
         });
         await page.waitForTimeout(500);
 
-        await expect(page.locator('#mission-debrief')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('#mission-debrief')).toBeVisible({ timeout: 8000 });
         await expect(page.locator('#debrief-result-header')).toHaveText('MISSION FAILED');
         await expect(page.locator('#debrief-score-earned')).toHaveText('+0');
 
