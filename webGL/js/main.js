@@ -121,12 +121,6 @@ function bindEventListeners() {
 	if (arrowLeft)  arrowLeft.onclick  = () => sceneManager.onKeyDown(37, 1000);
 	if (arrowRight) arrowRight.onclick = () => sceneManager.onKeyDown(39, 1000);
 
-	// pilot cycle arrows
-	const pilotArrowLeft  = document.getElementById('pilotArrowLeft');
-	const pilotArrowRight = document.getElementById('pilotArrowRight');
-	if (pilotArrowLeft)  pilotArrowLeft.onclick  = () => { PilotStore.cyclePrev(); PilotScreen.renderActivePilot(); };
-	if (pilotArrowRight) pilotArrowRight.onclick = () => { PilotStore.cycleNext(); PilotScreen.renderActivePilot(); };
-
 	resizeCanvas();
 }
 
@@ -266,8 +260,7 @@ function onSubMenuItemClick(event) {
         document.getElementById("selectBtn").disabled = false;
 		handler.connectToServer();
 	} else if(subMenuItem === "pilotnew") {
-		PilotStore.createPilot();
-		PilotScreen.renderActivePilot();
+		PilotScreen.createNewPilot();
 	} else if(subMenuItem === "leaveserver") {
 		// clear canvas
 		const canvas = document.getElementById('canvas');
