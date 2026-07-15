@@ -17,11 +17,11 @@ test.describe('Pause menu', () => {
         await expect(page.locator('#pilot-screen')).toBeVisible();
         await clickById(page, 'pilotBackBtn');
         await page.locator('.menu-item[name="campaign"]').click();
-        await page.waitForTimeout(700);
+        await expect(page.locator('#campaign-menu')).toBeVisible();
         await clickById(page, 'campaignJoinBtn');
-        await page.waitForTimeout(1500);
+        await expect(page.locator('#mission-briefing')).toBeVisible();
         await clickById(page, 'launchBtn');
-        await page.waitForTimeout(5000);
+        await expect(page.locator('#heads-up-display')).toBeVisible({ timeout: 10000 });
 
         // Esc during gameplay -> pause menu, not the campaign-select screen
         await page.keyboard.press('Escape');
@@ -40,11 +40,11 @@ test.describe('Pause menu', () => {
         await expect(page.locator('#pilot-screen')).toBeVisible();
         await clickById(page, 'pilotBackBtn');
         await page.locator('.menu-item[name="campaign"]').click();
-        await page.waitForTimeout(700);
+        await expect(page.locator('#campaign-menu')).toBeVisible();
         await clickById(page, 'campaignJoinBtn');
-        await page.waitForTimeout(1500);
+        await expect(page.locator('#mission-briefing')).toBeVisible();
         await clickById(page, 'launchBtn');
-        await page.waitForTimeout(5000);
+        await expect(page.locator('#heads-up-display')).toBeVisible({ timeout: 10000 });
 
         await page.keyboard.press('Escape');
         await expect(page.locator('#pause-menu')).toBeVisible();
@@ -58,11 +58,11 @@ test.describe('Pause menu', () => {
         await expect(page.locator('#pilot-screen')).toBeVisible();
         await clickById(page, 'pilotBackBtn');
         await page.locator('.menu-item[name="campaign"]').click();
-        await page.waitForTimeout(700);
+        await expect(page.locator('#campaign-menu')).toBeVisible();
         await clickById(page, 'campaignJoinBtn');
-        await page.waitForTimeout(1500);
+        await expect(page.locator('#mission-briefing')).toBeVisible();
         await clickById(page, 'launchBtn');
-        await page.waitForTimeout(5000);
+        await expect(page.locator('#heads-up-display')).toBeVisible({ timeout: 10000 });
 
         await page.keyboard.press('Escape');
         await expect(page.locator('#pause-menu')).toBeVisible();

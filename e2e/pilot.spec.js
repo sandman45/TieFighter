@@ -32,7 +32,6 @@ test.describe('Pilot profile system', () => {
 
         // still able to reach campaign/multiplayer after the gate
         await page.locator('.menu-item[name="campaign"]').click();
-        await page.waitForTimeout(700);
         await expect(page.locator('#campaign-menu')).toBeVisible();
 
         expect(pageErrors).toEqual([]);
@@ -66,19 +65,19 @@ test.describe('Pilot profile system', () => {
         // badge (its content sits too close to the top for the floating badge to fit
         // without covering something, e.g. the briefing's sector label)
         await page.locator('.menu-item[name="campaign"]').click();
-        await page.waitForTimeout(700);
+        await expect(page.locator('#campaign-menu')).toBeVisible();
         await expect(page.locator('#active-pilot-badge')).toBeHidden();
         await expect(page.locator('#campaign-menu .top-bar .empire-logo')).toContainText('BADGE TEST');
 
         // mission briefing: same top-bar treatment
         await clickById(page, 'campaignJoinBtn');
-        await page.waitForTimeout(1200);
+        await expect(page.locator('#mission-briefing')).toBeVisible();
         await expect(page.locator('#active-pilot-badge')).toBeHidden();
         await expect(page.locator('#mission-briefing .top-bar .empire-logo')).toContainText('BADGE TEST');
 
         // gameplay HUD: back to the floating badge (no top-bar here)
         await clickById(page, 'launchBtn');
-        await page.waitForTimeout(6000);
+        await expect(page.locator('#heads-up-display')).toBeVisible({ timeout: 10000 });
         await expect(page.locator('#active-pilot-badge')).toBeVisible();
         await expect(page.locator('#active-pilot-badge')).toContainText('BADGE TEST');
 
@@ -221,11 +220,14 @@ test.describe('Pilot profile system', () => {
         await clickById(page, 'pilotBackBtn');
 
         await page.locator('.menu-item[name="campaign"]').click();
-        await page.waitForTimeout(700);
+        await expect(page.locator('#campaign-menu')).toBeVisible();
         await clickById(page, 'campaignJoinBtn');
-        await page.waitForTimeout(1500);
+        await expect(page.locator('#mission-briefing')).toBeVisible();
         await clickById(page, 'launchBtn');
-        await page.waitForTimeout(4000);
+        // heads-up-display becomes visible before the mission scene (and its
+        // MissionObjectives EventBus subscription) finishes loading, so this
+        // can't be a condition-based wait — it has to outlast scene setup.
+        await page.waitForTimeout(8000);
 
         await page.evaluate(async () => {
             const { default: EventBus } = await import('/js/eventBus/EventBus.js');
@@ -261,11 +263,14 @@ test.describe('Pilot profile system', () => {
         await page.goto('/');
         await clickById(page, 'pilotBackBtn');
         await page.locator('.menu-item[name="campaign"]').click();
-        await page.waitForTimeout(700);
+        await expect(page.locator('#campaign-menu')).toBeVisible();
         await clickById(page, 'campaignJoinBtn');
-        await page.waitForTimeout(1500);
+        await expect(page.locator('#mission-briefing')).toBeVisible();
         await clickById(page, 'launchBtn');
-        await page.waitForTimeout(4000);
+        // heads-up-display becomes visible before the mission scene (and its
+        // MissionObjectives EventBus subscription) finishes loading, so this
+        // can't be a condition-based wait — it has to outlast scene setup.
+        await page.waitForTimeout(8000);
 
         await page.evaluate(async () => {
             const { default: EventBus } = await import('/js/eventBus/EventBus.js');
