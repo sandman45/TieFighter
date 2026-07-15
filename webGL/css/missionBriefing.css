@@ -131,6 +131,17 @@
     letter-spacing: 4px;
     color: var(--text-dim);
 }
+.top-bar .empire-logo .top-bar-pilot-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+}
+.top-bar .empire-logo .top-bar-pilot-name {
+    color: var(--green);
+    text-shadow: 0 0 6px var(--green);
+    font-weight: bold;
+}
 .top-bar .mission-title {
     font-family: var(--font-title);
     font-size: 13px;

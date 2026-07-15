@@ -38,6 +38,53 @@ test.describe('Pilot profile system', () => {
         expect(pageErrors).toEqual([]);
     });
 
+    test('active pilot indicator shows on every screen except the pilot screen itself', async ({ page }) => {
+        const pageErrors = [];
+        page.on('pageerror', err => pageErrors.push(err.message));
+
+        await page.goto('/');
+
+        // hidden on the pilot gate itself
+        await expect(page.locator('#active-pilot-badge')).toBeHidden();
+
+        const input = page.locator('#pilot-name-input');
+        await input.fill('');
+        await input.type('BADGE TEST');
+        await clickById(page, 'pilotBackBtn');
+
+        // visible on the main menu (floating corner badge), with the right name
+        await expect(page.locator('#active-pilot-badge')).toBeVisible();
+        await expect(page.locator('#active-pilot-badge')).toContainText('BADGE TEST');
+
+        // hidden again on a revisit to the pilot screen, visible again after leaving
+        await page.locator('.menu-item[name="pilot"]').click();
+        await expect(page.locator('#active-pilot-badge')).toBeHidden();
+        await clickById(page, 'pilotBackBtn');
+        await expect(page.locator('#active-pilot-badge')).toBeVisible();
+
+        // campaign/battle select: woven into the top-bar header instead of the floating
+        // badge (its content sits too close to the top for the floating badge to fit
+        // without covering something, e.g. the briefing's sector label)
+        await page.locator('.menu-item[name="campaign"]').click();
+        await page.waitForTimeout(700);
+        await expect(page.locator('#active-pilot-badge')).toBeHidden();
+        await expect(page.locator('#campaign-menu .top-bar .empire-logo')).toContainText('BADGE TEST');
+
+        // mission briefing: same top-bar treatment
+        await clickById(page, 'campaignJoinBtn');
+        await page.waitForTimeout(1200);
+        await expect(page.locator('#active-pilot-badge')).toBeHidden();
+        await expect(page.locator('#mission-briefing .top-bar .empire-logo')).toContainText('BADGE TEST');
+
+        // gameplay HUD: back to the floating badge (no top-bar here)
+        await clickById(page, 'launchBtn');
+        await page.waitForTimeout(6000);
+        await expect(page.locator('#active-pilot-badge')).toBeVisible();
+        await expect(page.locator('#active-pilot-badge')).toContainText('BADGE TEST');
+
+        expect(pageErrors).toEqual([]);
+    });
+
     test('default pilot is seeded and displayed', async ({ page }) => {
         await page.goto('/');
 

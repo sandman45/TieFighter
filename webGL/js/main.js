@@ -26,6 +26,12 @@ const canvas2 = document.getElementById('targetComputer');
 views.push(new View(canvas));
 views.push(new View(canvas2));
 
+let showMenu = false;
+let campaignMenu = false;
+let activeCampaignConfig = null;
+let inMission = false;
+let paused = false;
+
 let sceneManager = SceneManager(views, "menu");
 bindEventListeners();
 startRenderLoop();
@@ -48,9 +54,10 @@ PilotScreen.buildScreen();
 PilotScreen.renderActivePilot();
 bindEventListeners(); // re-run so the freshly-injected pilot-screen buttons get wired
 
-let showMenu = false;
-let campaignMenu = false;
-let activeCampaignConfig = null;
+// pause menu buttons are static markup, wired once — deliberately not using the
+// .menu-item class (which the generic onMenuItemClick dispatch would misroute)
+document.getElementById('pauseResumeBtn').addEventListener('click', resumeFromPause);
+document.getElementById('pauseQuitBtn').addEventListener('click', quitToMainMenuFromPause);
 
 EventBus.subscribe(events.MISSION_COMPLETE, () => {
 	PilotStore.incrementMissionsFlown();
@@ -64,6 +71,8 @@ EventBus.subscribe(events.MISSION_FAILED, ({ reason }) => {
 });
 
 function showDebrief(result, reason, scoreEarned) {
+	inMission = false;
+	paused = false;
 	document.getElementById('heads-up-display').style.visibility = 'hidden';
 
 	const debriefEl = document.getElementById('mission-debrief');
@@ -88,7 +97,49 @@ function showDebrief(result, reason, scoreEarned) {
 	});
 }
 
+function isTopBarScreenVisible() {
+	// campaign-menu / mission-briefing / mission-debrief all use the
+	// .briefing-screen/.top-bar layout, whose content starts close enough to
+	// the top that a floating corner badge collides with it (e.g. the
+	// briefing's sector label) — these get the pilot name woven into their
+	// existing header row instead (see below), not the floating badge.
+	const campaignMenu = document.getElementById('campaign-menu');
+	const briefing = document.getElementById('mission-briefing');
+	const debrief = document.getElementById('mission-debrief');
+	return campaignMenu.style.visibility === 'visible'
+		|| briefing.style.visibility === 'visible'
+		|| debrief.style.visibility === 'visible';
+}
+
+function updateActivePilotBadge() {
+	const pilotScreenVisible = document.getElementById('pilot-screen').style.visibility === 'visible';
+	const pilot = pilotScreenVisible ? null : PilotStore.getActivePilot();
+	const pilotLabel = pilot ? (pilot.name || 'UNNAMED') : '';
+
+	document.querySelectorAll('.top-bar .empire-logo').forEach(el => {
+		el.innerHTML = pilotLabel
+			? `GALACTIC EMPIRE · IMPERIAL NAVY <span class="top-bar-pilot-label">| PILOT: <span class="top-bar-pilot-name">${escapeHtml(pilotLabel)}</span></span>`
+			: 'GALACTIC EMPIRE · IMPERIAL NAVY';
+	});
+
+	const badge = document.getElementById('active-pilot-badge');
+	if (!badge) return;
+	if (!pilotLabel || isTopBarScreenVisible()) {
+		badge.style.visibility = 'hidden';
+		return;
+	}
+	badge.innerHTML = `PILOT: <span class="active-pilot-badge-name">${escapeHtml(pilotLabel)}</span>`;
+	badge.style.visibility = 'visible';
+}
+
+function escapeHtml(str) {
+	const div = document.createElement('div');
+	div.textContent = str;
+	return div.innerHTML;
+}
+
 function bindEventListeners() {
+	updateActivePilotBadge();
 	handler.currentSelectionInView();
 	window.onresize = resizeCanvas;
 	window.onkeydown = onKeyDown;
@@ -252,6 +303,7 @@ function onSubMenuItemClick(event) {
 		sceneManager = SceneManager(views, "multiplayer");
 		bindEventListeners();
         handler.startGame();
+        inMission = true;
 	} else if(subMenuItem === "connect") {
 		// const element3 = document.getElementById("start");
 		// element3.style.disabled = false;
@@ -265,6 +317,10 @@ function onSubMenuItemClick(event) {
 		// clear canvas
 		const canvas = document.getElementById('canvas');
 		canvas.innerHTML = "";
+
+		inMission = false;
+		paused = false;
+		document.getElementById('pause-menu').style.visibility = 'hidden';
 
 		const element2 = document.getElementById("menu");
 		element2.style.visibility = "hidden";
@@ -369,14 +425,46 @@ function showMissionBriefing(missionKey) {
 		briefingEl.style.zIndex     = '-1';
 
 		document.getElementById('heads-up-display').style.visibility = 'visible';
+		inMission = true;
 
 		sceneManager = SceneManager(views, missionKey);
 		bindEventListeners();
 	});
 }
 
+function togglePauseMenu() {
+	paused = !paused;
+	document.getElementById('pause-menu').style.visibility = paused ? 'visible' : 'hidden';
+}
+
+function resumeFromPause() {
+	paused = false;
+	document.getElementById('pause-menu').style.visibility = 'hidden';
+}
+
+function quitToMainMenuFromPause() {
+	inMission = false;
+	paused = false;
+	document.getElementById('pause-menu').style.visibility = 'hidden';
+	document.getElementById('heads-up-display').style.visibility = 'hidden';
+
+	const canvas = document.getElementById('canvas');
+	canvas.innerHTML = "";
+
+	sceneManager = SceneManager(views, "menu");
+	bindEventListeners();
+}
+
 function onKeyDown(event, duration) {
 	if(event.keyCode === 27){
+		// during actual gameplay (campaign mission or multiplayer match), Esc
+		// opens a dedicated pause menu instead of the Battle/Campaign-select or
+		// ship-select screens — those don't make sense to land on mid-flight
+		if(inMission){
+			togglePauseMenu();
+			return;
+		}
+
 		const element3 = document.getElementById("sub-menu");
 		// show menu
 		if(showMenu && !campaignMenu){
@@ -407,6 +495,6 @@ function onKeyUp(event) {
 
 function startRenderLoop(time) {
     requestAnimationFrame(startRenderLoop);
-	sceneManager.update();
+	if(!paused) sceneManager.update();
 	TWEEN.update(time);
 }
