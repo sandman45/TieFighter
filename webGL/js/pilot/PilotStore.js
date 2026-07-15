@@ -108,24 +108,6 @@ function setPilotPortrait(id, portraitId) {
     writePilots(pilots);
 }
 
-function cycleBy(step) {
-    const pilots = getPilots();
-    if (pilots.length <= 1) return getActivePilot();
-    const activeId = LocalStorage.getItem(ACTIVE_PILOT_ID_KEY);
-    const currentIndex = Math.max(0, pilots.findIndex(p => p.id === activeId));
-    const nextIndex = (currentIndex + step + pilots.length) % pilots.length;
-    setActivePilotId(pilots[nextIndex].id);
-    return withRank(pilots[nextIndex]);
-}
-
-function cycleNext() {
-    return cycleBy(1);
-}
-
-function cyclePrev() {
-    return cycleBy(-1);
-}
-
 function awardKillScore() {
     const pilots = getPilots();
     const activeId = LocalStorage.getItem(ACTIVE_PILOT_ID_KEY);
@@ -144,6 +126,21 @@ function awardMissionCompleteBonus() {
     return SCORE_VALUES.MISSION_COMPLETE_BONUS;
 }
 
+function deletePilot(id) {
+    const pilots = getPilots().filter(p => p.id !== id);
+    writePilots(pilots);
+
+    if (LocalStorage.getItem(ACTIVE_PILOT_ID_KEY) !== id) return;
+
+    if (pilots.length > 0) {
+        setActivePilotId(pilots[pilots.length - 1].id);
+    } else {
+        // leave PILOTS as an empty array — the next getPilots() call
+        // auto-reseeds a fresh default pilot and makes it active
+        LocalStorage.removeItem(ACTIVE_PILOT_ID_KEY);
+    }
+}
+
 function incrementMissionsFlown() {
     const pilots = getPilots();
     const activeId = LocalStorage.getItem(ACTIVE_PILOT_ID_KEY);
@@ -160,10 +157,9 @@ export default {
     getActivePilot,
     setActivePilotId,
     createPilot,
+    deletePilot,
     renamePilot,
     setPilotPortrait,
-    cycleNext,
-    cyclePrev,
     awardKillScore,
     awardMissionCompleteBonus,
     incrementMissionsFlown,

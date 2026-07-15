@@ -48,9 +48,8 @@ test.describe('Pilot profile system', () => {
         await expect(page.locator('#pilot-stat-rank')).toHaveText('FLT. CADET');
         await expect(page.locator('#pilot-stat-score')).toHaveText('0');
         await expect(page.locator('#pilot-stat-missions')).toHaveText('0');
-        await expect(page.locator('#pilot-index-indicator')).toHaveText('PILOT 1 / 1');
-        await expect(page.locator('#pilotArrowLeft')).toBeDisabled();
-        await expect(page.locator('#pilotArrowRight')).toBeDisabled();
+        await expect(page.locator('.pilot-list-item')).toHaveCount(1);
+        await expect(page.locator('.pilot-list-item')).toHaveClass(/active/);
     });
 
     test('renaming persists across reload', async ({ page }) => {
@@ -67,27 +66,99 @@ test.describe('Pilot profile system', () => {
         await expect(page.locator('#pilot-name-input')).toHaveValue('TEST PILOT');
     });
 
-    test('create new pilot and cycle with wraparound', async ({ page }) => {
+    test('create new pilot and select from the list', async ({ page }) => {
         await page.goto('/');
 
+        const input = page.locator('#pilot-name-input');
+        await input.fill('');
+        await input.type('RICK');
+
         await page.locator('#pilotNewBtn').click();
-        await expect(page.locator('#pilot-index-indicator')).toHaveText('PILOT 2 / 2');
+        await page.waitForTimeout(200);
+        await input.fill('');
+        await input.type('SQUAKE');
+
+        await expect(page.locator('.pilot-list-item')).toHaveCount(2);
 
         const pilots = await page.evaluate(() => JSON.parse(localStorage.getItem('TIE_FIGHTER:PILOTS')));
         expect(pilots.length).toBe(2);
         const activeId = await page.evaluate(() => JSON.parse(localStorage.getItem('TIE_FIGHTER:ACTIVE_PILOT_ID')));
         expect(activeId).toBe(pilots[1].id);
+        await expect(page.locator('.pilot-list-item', { hasText: 'SQUAKE' })).toHaveClass(/active/);
 
-        await expect(page.locator('#pilotArrowLeft')).toBeEnabled();
-        await expect(page.locator('#pilotArrowRight')).toBeEnabled();
+        // select the other pilot from the list
+        await page.locator('.pilot-list-item', { hasText: 'RICK' }).click();
+        await expect(page.locator('#pilot-name-input')).toHaveValue('RICK');
+        await expect(page.locator('.pilot-list-item', { hasText: 'RICK' })).toHaveClass(/active/);
+        await expect(page.locator('.pilot-list-item', { hasText: 'SQUAKE' })).not.toHaveClass(/active/);
+    });
 
-        // wrap forward from pilot 2 -> pilot 1
-        await page.locator('#pilotArrowRight').click();
-        await expect(page.locator('#pilot-index-indicator')).toHaveText('PILOT 1 / 2');
+    test('delete pilot requires confirmation, deleting the only pilot reseeds a default', async ({ page }) => {
+        const pageErrors = [];
+        page.on('pageerror', err => pageErrors.push(err.message));
 
-        // wrap backward from pilot 1 -> pilot 2
-        await page.locator('#pilotArrowLeft').click();
-        await expect(page.locator('#pilot-index-indicator')).toHaveText('PILOT 2 / 2');
+        await page.goto('/');
+
+        const input = page.locator('#pilot-name-input');
+        await input.fill('');
+        await input.type('DOOMED PILOT');
+
+        // opening the confirm dialog doesn't delete anything
+        await page.locator('#pilotDeleteBtn').click();
+        await expect(page.locator('#pilot-delete-confirm')).toBeVisible();
+        await expect(page.locator('#pilot-delete-confirm-text')).toContainText('DOOMED PILOT');
+
+        // cancel leaves the pilot untouched
+        await page.locator('#pilotDeleteCancelBtn').click();
+        await expect(page.locator('#pilot-delete-confirm')).toBeHidden();
+        await expect(page.locator('#pilot-name-input')).toHaveValue('DOOMED PILOT');
+        let pilots = await page.evaluate(() => JSON.parse(localStorage.getItem('TIE_FIGHTER:PILOTS')));
+        expect(pilots.length).toBe(1);
+
+        // confirming deletes the only pilot — getPilots() auto-reseeds a fresh default
+        await page.locator('#pilotDeleteBtn').click();
+        await page.locator('#pilotDeleteConfirmBtn').click();
+        await expect(page.locator('#pilot-delete-confirm')).toBeHidden();
+        await expect(page.locator('#mission-toast')).toContainText('DELETED');
+        await expect(page.locator('#pilot-name-input')).toHaveValue('ALPHA ONE');
+        pilots = await page.evaluate(() => JSON.parse(localStorage.getItem('TIE_FIGHTER:PILOTS')));
+        expect(pilots.length).toBe(1);
+        expect(pilots[0].name).toBe('ALPHA ONE');
+
+        expect(pageErrors).toEqual([]);
+    });
+
+    test('deleting one of several pilots keeps the others', async ({ page }) => {
+        await page.goto('/');
+
+        await page.locator('#pilotNewBtn').click();
+        await page.waitForTimeout(200);
+        const input = page.locator('#pilot-name-input');
+        await input.fill('');
+        await input.type('SURVIVOR');
+
+        await page.locator('#pilotDeleteBtn').click();
+        await page.locator('#pilotDeleteConfirmBtn').click();
+        await page.waitForTimeout(200);
+
+        const pilots = await page.evaluate(() => JSON.parse(localStorage.getItem('TIE_FIGHTER:PILOTS')));
+        expect(pilots.length).toBe(1);
+        expect(pilots[0].name).toBe('ALPHA ONE');
+        await expect(page.locator('.pilot-list-item')).toHaveCount(1);
+    });
+
+    test('creating a new pilot gives clear feedback (toast + focused blank name field)', async ({ page }) => {
+        await page.goto('/');
+
+        await page.locator('#pilotNewBtn').click();
+
+        await expect(page.locator('#mission-toast')).toHaveClass(/visible/);
+        await expect(page.locator('#mission-toast')).toContainText('NEW PILOT CREATED');
+        await expect(page.locator('#pilot-name-input')).toHaveValue('');
+        await expect(page.locator('#pilot-name-input')).toHaveAttribute('placeholder', 'ENTER PILOT NAME');
+
+        const isFocused = await page.evaluate(() => document.activeElement.id === 'pilot-name-input');
+        expect(isFocused).toBe(true);
     });
 
     test('scoring flow: kills + mission complete update pilot and debrief screen', async ({ page }) => {
