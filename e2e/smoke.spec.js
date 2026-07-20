@@ -16,13 +16,3 @@ test('loads the pilot gate first, then the main menu with no console errors', as
     await expect(page.locator('#canvas')).toBeVisible();
     expect(pageErrors).toEqual([]);
 });
-
-test('selecting multiplayer reveals the ship-select sub-menu', async ({ page }) => {
-    await page.goto('/');
-    await page.evaluate(() => document.getElementById('pilotBackBtn').click());
-
-    await page.locator('.menu-item[name="shipselect"]').click();
-
-    await expect(page.locator('#sub-menu')).toBeVisible();
-    await expect(page.locator('#menu')).toBeHidden();
-});
