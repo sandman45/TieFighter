@@ -466,6 +466,12 @@ function quitToMainMenuFromPause() {
 	bindEventListeners();
 }
 
+function isMainMenuAreaVisible() {
+	return document.getElementById('menu').style.visibility === 'visible'
+		|| document.getElementById('pilot-screen').style.visibility === 'visible'
+		|| document.getElementById('settings-screen').style.visibility === 'visible';
+}
+
 function onKeyDown(event, duration) {
 	if(event.keyCode === 27){
 		// during actual gameplay (campaign mission or multiplayer match), Esc
@@ -475,6 +481,12 @@ function onKeyDown(event, duration) {
 			togglePauseMenu();
 			return;
 		}
+
+		// the sub-menu/campaign-menu toggle below is only meaningful while actually
+		// inside the ship-select or campaign-select flow — on the main menu, pilot
+		// screen, or settings screen there's nothing for Esc to show, so bail out
+		// rather than have stale showMenu/campaignMenu state pop up an unrelated menu
+		if(isMainMenuAreaVisible()) return;
 
 		const element3 = document.getElementById("sub-menu");
 		// show menu
