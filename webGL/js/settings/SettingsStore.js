@@ -5,9 +5,9 @@ const SETTINGS_KEY = "AUDIO_SETTINGS";
 
 const DEFAULTS = {
     musicEnabled: true,
-    musicVolumePct: 100,
+    musicVolumePct: 80,
     sfxEnabled: true,
-    sfxVolumePct: 100,
+    sfxVolumePct: 80,
 };
 
 function getSettings() {
