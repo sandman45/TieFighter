@@ -10,7 +10,7 @@ function portraitMarkup() {
             <circle cx="32" cy="22" r="14"/>
             <path d="M8 58 C8 40 20 34 32 34 C44 34 56 40 56 58 Z"/>
         </svg>
-        <img class="pilot-portrait-photo" style="display:none;" alt="pilot portrait" />
+        <div class="pilot-portrait-photo" style="display:none;"></div>
     `;
 }
 
@@ -20,41 +20,51 @@ export function buildScreen() {
 
     const container = document.getElementById('pilot-screen');
     container.innerHTML = `
-        <div class="menu">
-            <div class="menu-title">PILOT RECORD</div>
-
-            <div class="pilot-portrait-row">
-                <button class="ship-arrow-btn pilot-portrait-arrow" id="pilotPortraitPrev">&#9664;</button>
-                <div class="pilot-portrait-box" id="pilotPortraitBox" data-variant="standard">
-                    ${portraitMarkup()}
-                </div>
-                <button class="ship-arrow-btn pilot-portrait-arrow" id="pilotPortraitNext">&#9654;</button>
+        <div class="pilot-screen-row">
+            <div class="pilot-dossier-flank pilot-dossier-flank-left">
+                <img src="./images/tie-pilot-2.png" alt="TIE pilot" />
             </div>
 
-            <div class="pilot-panels">
-                <div class="pilot-list-panel panel">
-                    <div class="panel-title">PILOTS</div>
-                    <div class="pilot-list" id="pilot-list"></div>
-                    <div class="pilot-name-field">
-                        <span class="pilot-name-input-wrap" id="pilot-name-input-wrap">
-                            <input id="pilot-name-input" maxlength="20" autocomplete="off" spellcheck="false" placeholder="ENTER PILOT NAME" />
-                            <span class="cursor">_</span>
-                        </span>
+            <div class="menu">
+                <div class="menu-title">PILOT RECORD</div>
+
+                <div class="pilot-portrait-row">
+                    <button class="ship-arrow-btn pilot-portrait-arrow" id="pilotPortraitPrev">&#9664;</button>
+                    <div class="pilot-portrait-box" id="pilotPortraitBox" data-variant="standard">
+                        ${portraitMarkup()}
+                    </div>
+                    <button class="ship-arrow-btn pilot-portrait-arrow" id="pilotPortraitNext">&#9654;</button>
+                </div>
+
+                <div class="pilot-panels">
+                    <div class="pilot-list-panel panel">
+                        <div class="panel-title">PILOTS</div>
+                        <div class="pilot-list" id="pilot-list"></div>
+                        <div class="pilot-name-field">
+                            <span class="pilot-name-input-wrap" id="pilot-name-input-wrap">
+                                <input id="pilot-name-input" maxlength="20" autocomplete="off" spellcheck="false" placeholder="ENTER PILOT NAME" />
+                                <span class="cursor">_</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="panel pilot-stats">
+                        <div class="panel-title">IMPERIAL DATABASE</div>
+                        <div class="stat-row"><span class="stat-label">RANK</span><span class="stat-value" id="pilot-stat-rank"></span></div>
+                        <div class="stat-row"><span class="stat-label">SCORE</span><span class="stat-value" id="pilot-stat-score"></span></div>
+                        <div class="stat-row"><span class="stat-label">MISSIONS FLOWN</span><span class="stat-value" id="pilot-stat-missions"></span></div>
                     </div>
                 </div>
 
-                <div class="panel pilot-stats">
-                    <div class="panel-title">IMPERIAL DATABASE</div>
-                    <div class="stat-row"><span class="stat-label">RANK</span><span class="stat-value" id="pilot-stat-rank"></span></div>
-                    <div class="stat-row"><span class="stat-label">SCORE</span><span class="stat-value" id="pilot-stat-score"></span></div>
-                    <div class="stat-row"><span class="stat-label">MISSIONS FLOWN</span><span class="stat-value" id="pilot-stat-missions"></span></div>
+                <div class="pilot-actions">
+                    <button id="pilotNewBtn" class="sub-menu-item" name="pilotnew">NEW PILOT</button>
+                    <button id="pilotDeleteBtn" class="sub-menu-item pilot-delete-btn" name="pilotdelete">DELETE PILOT</button>
+                    <button id="pilotBackBtn" class="nav-btn launch sub-menu-item" name="back">CONTINUE ►</button>
                 </div>
             </div>
 
-            <div class="pilot-actions">
-                <button id="pilotNewBtn" class="sub-menu-item" name="pilotnew">NEW PILOT</button>
-                <button id="pilotDeleteBtn" class="sub-menu-item pilot-delete-btn" name="pilotdelete">DELETE PILOT</button>
-                <button id="pilotBackBtn" class="nav-btn launch sub-menu-item" name="back">CONTINUE ►</button>
+            <div class="pilot-dossier-flank pilot-dossier-flank-right">
+                <img src="./images/impirials/admiral-piett.png" alt="Imperial officer" />
             </div>
         </div>
 
@@ -117,14 +127,16 @@ function renderPortrait(pilot) {
     const box = document.getElementById('pilotPortraitBox');
     const portrait = portraits.find(p => p.id === pilot.portraitId) || portraits[0];
     const svg = box.querySelector('svg');
-    const img = box.querySelector('img');
+    const photo = box.querySelector('.pilot-portrait-photo');
 
     if (portrait.type === 'photo') {
         svg.style.display = 'none';
-        img.style.display = 'block';
-        img.src = portrait.src;
+        photo.style.display = 'block';
+        photo.style.backgroundImage = `url(${portrait.src})`;
+        photo.style.backgroundPosition = portrait.position;
+        photo.style.backgroundSize = portrait.size;
     } else {
-        img.style.display = 'none';
+        photo.style.display = 'none';
         svg.style.display = 'block';
         box.setAttribute('data-variant', portrait.variant);
     }

@@ -1,3 +1,50 @@
+/* ── SCREEN ROW (flanking dossier photos either side of the pilot record) ── */
+.pilot-screen-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    width: 100%;
+}
+
+.pilot-dossier-flank {
+    flex: 0 0 auto;
+    width: 200px;
+    height: 460px;
+    background: #010e03;
+    border: 1px solid var(--border-bright);
+    clip-path: polygon(12px 0%, 100% 0%, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0% 100%, 0% 12px);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+.pilot-dossier-flank::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0) 35%, rgba(0,0,0,0.65) 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+.pilot-dossier-flank::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,204,68,0.04) 3px, rgba(0,204,68,0.04) 4px);
+    pointer-events: none;
+    z-index: 2;
+}
+.pilot-dossier-flank img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    filter: grayscale(1) sepia(1) hue-rotate(75deg) saturate(2.5) brightness(0.65) contrast(1.2);
+}
+@media (max-width: 1200px) {
+    .pilot-dossier-flank { display: none; }
+}
+
 /* ── PILOT PORTRAIT ── */
 .pilot-portrait-row {
     display: flex;
@@ -28,7 +75,8 @@
 .pilot-portrait-box[data-variant="red"] svg { fill: var(--red); filter: drop-shadow(0 0 6px var(--red)); }
 .pilot-portrait-photo {
     width: 100%; height: 100%;
-    object-fit: cover;
+    background-repeat: no-repeat;
+    filter: contrast(1.1) saturate(1.15);
 }
 
 .pilot-portrait-arrow {

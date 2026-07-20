@@ -1,10 +1,11 @@
 // Manifest of selectable pilot portraits. `type: 'icon'` renders the shared
 // inline SVG bust with a CSS color variant (no image asset). `type: 'photo'`
-// renders an <img src>. To add a real cropped photo later: drop the file in
-// webGL/images/pilots/ and add a `{ id, type: 'photo', src }` entry here —
-// no other code changes needed, PilotScreen.js renders whatever this list contains.
+// renders a real TIE pilot headshot photo; `position`/`size` are the CSS
+// background-position/background-size used to crop in on the helmet.
 export default [
-    { id: "tie-pilot-standard", type: "icon", variant: "standard" },
-    { id: "tie-pilot-amber",    type: "icon", variant: "amber" },
-    { id: "tie-pilot-red",      type: "icon", variant: "red" },
+    { id: "tie-pilot-1", type: "photo", src: "./images/impirials/tie-pilot-1.jpg", position: "50% 6%",  size: "145% auto" },
+    { id: "tie-pilot-2", type: "photo", src: "./images/impirials/tie-pilot-2.jpg", position: "50% 8%",  size: "165% auto" },
+    { id: "tie-pilot-3", type: "photo", src: "./images/impirials/tie-pilot-3.jpg", position: "50% 9%",  size: "260% auto" },
+    { id: "tie-pilot-4", type: "photo", src: "./images/impirials/tie-pilot-4.jpg", position: "50% 32%", size: "115% auto" },
+    { id: "tie-pilot-5", type: "photo", src: "./images/impirials/tie-pilot-5.jpg", position: "50% 3%",  size: "120% auto" },
 ];
