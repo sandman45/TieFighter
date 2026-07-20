@@ -196,13 +196,49 @@ export function playSound(type, obj) {
                 if(AudioType[`${type}3`] && AudioType[`${type}3`].sound.isPlaying){
                     // dont play anything
                 } else if(AudioType[`${type}3`]) {
-                    AudioType[`${type}3`].sound.play();
+                    play(AudioType[`${type}3`], obj);
                 }
             } else if(AudioType[`${type}2`]) {
-                AudioType[`${type}2`].sound.play();
+                play(AudioType[`${type}2`], obj);
             }
         } else if(AudioType[type].sound) {
-            AudioType[type].sound.play();
+            play(AudioType[type], obj);
+        }
+    }
+}
+
+// A PositionalAudio node only reports the correct spatial position once its
+// own matrixWorld reflects where the emitting object actually is — it's never
+// added anywhere else, so without this it plays from wherever it was last
+// left (effectively the world origin), regardless of where the shooter or
+// player's own ship actually is. Copy the emitter's current world position
+// onto it directly rather than reparenting it under that object: reparenting
+// (obj.add(entry.sound)) previously made the shared sound a permanent child
+// of e.g. the player's ship, and LaserCannons snapshots the shooter via
+// sourceShipMesh.clone() on every shot — three.js can't clone a PositionalAudio
+// (its clone() needs a `listener` the generic Object3D clone doesn't supply),
+// so firing crashed as soon as the flyby sound had attached once. Since
+// entry.sound is never parented, its local position IS its world position;
+// updateMatrixWorld(true) forces the panner to pick that up immediately
+// instead of waiting for the next render pass.
+//
+// play() must run FIRST: PositionalAudio.updateMatrixWorld() no-ops while
+// isPlaying is false, so calling it before play() silently never updated the
+// panner at all — the position write happened, but the panner never saw it.
+//
+// Callers with no specific in-world emitter (e.g. the settings screen's
+// preview blast, obj passed as null) fall back to the current scene's camera
+// — placing the sound essentially at the listener eliminates distance
+// falloff, instead of leaving it wherever it was last positioned by real
+// gameplay (often nowhere near this scene's camera at all, so it played back
+// quiet even at full sfxVolume).
+function play(entry, obj) {
+    entry.sound.play();
+    if (entry.type === "SFX") {
+        const positionSource = (obj && typeof obj.getWorldPosition === "function") ? obj : gameCamera;
+        if (positionSource) {
+            positionSource.getWorldPosition(entry.sound.position);
+            entry.sound.updateMatrixWorld(true);
         }
     }
 }

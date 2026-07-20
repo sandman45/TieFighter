@@ -127,7 +127,7 @@ export default (mesh, laser, camera, config, collisionManager, audio) => {
         }
 
 		if(forward || backward) {
-            audio.playSound(mesh, "FLYBY");
+            audio.playSound("FLYBY", mesh);
             const direction = backward ? 1 : -1;
             const stepVector = directionVector.multiplyScalar( config.speed * direction );
             const tPosition = mesh.position.clone().add(stepVector);
