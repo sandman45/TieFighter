@@ -10,6 +10,7 @@ import { initDebrief } from './missionBriefing/missionDebrief.js';
 import campaign from "./campaignMenu/campaign.js"; // add this import
 import PilotStore from "./pilot/PilotStore.js";
 import PilotScreen from "./pilot/PilotScreen.js";
+import SettingsScreen from "./settings/SettingsScreen.js";
 import { getMissionScore } from "./scenes/campaign/MissionObjectives.js";
 
 initSocketIO(onKeyUp, onKeyDown);
@@ -233,6 +234,15 @@ function onMenuItemClick(event) {
 		PilotScreen.renderActivePilot();
 		bindEventListeners();
 		return;
+	} else if(menuItem === "settings") {
+		// same DOM-overlay trick as "pilot" above — not a valid scene key,
+		// skip the SceneManager call so the menu's 3D background keeps animating
+		document.getElementById("menu").style.visibility = "hidden";
+		document.getElementById("settings-screen").style.visibility = "visible";
+		SettingsScreen.buildScreen();
+		SettingsScreen.renderSettings();
+		bindEventListeners();
+		return;
 	} else {
 		// hide main menu
 		const menu = document.getElementById("menu");
@@ -376,6 +386,7 @@ function onSubMenuItemClick(event) {
 		element6.style.visibility = "hidden";
 
 		document.getElementById("pilot-screen").style.visibility = "hidden";
+		document.getElementById("settings-screen").style.visibility = "hidden";
 
 		const loadingElem = document.getElementById('loading');
 		loadingElem.style.visibility = 'visible';
@@ -455,6 +466,12 @@ function quitToMainMenuFromPause() {
 	bindEventListeners();
 }
 
+function isMainMenuAreaVisible() {
+	return document.getElementById('menu').style.visibility === 'visible'
+		|| document.getElementById('pilot-screen').style.visibility === 'visible'
+		|| document.getElementById('settings-screen').style.visibility === 'visible';
+}
+
 function onKeyDown(event, duration) {
 	if(event.keyCode === 27){
 		// during actual gameplay (campaign mission or multiplayer match), Esc
@@ -464,6 +481,12 @@ function onKeyDown(event, duration) {
 			togglePauseMenu();
 			return;
 		}
+
+		// the sub-menu/campaign-menu toggle below is only meaningful while actually
+		// inside the ship-select or campaign-select flow — on the main menu, pilot
+		// screen, or settings screen there's nothing for Esc to show, so bail out
+		// rather than have stale showMenu/campaignMenu state pop up an unrelated menu
+		if(isMainMenuAreaVisible()) return;
 
 		const element3 = document.getElementById("sub-menu");
 		// show menu

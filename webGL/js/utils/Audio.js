@@ -168,6 +168,89 @@ function unlockAudioContext() {
 window.addEventListener('pointerdown', unlockAudioContext);
 window.addEventListener('keydown', unlockAudioContext);
 
+// Live-applies a settings change (e.g. from the settings screen) to whatever
+// sounds are already loaded. GameAudio() only bakes volume into a THREE.Audio
+// at buffer-load time, so without this a slider drag mid-session would have
+// no audible effect until the next scene change re-triggers a load.
+export function updateVolumes(config) {
+    audioConfig = config;
+    Object.keys(AudioType).forEach(key => {
+        const entry = AudioType[key];
+        if (!entry.sound) return;
+        if (entry.type === "MUSIC") {
+            entry.sound.setVolume(config.music ? config.musicVolume : 0);
+        } else if (entry.type === "SFX") {
+            entry.sound.setVolume(config.sfx ? config.sfxVolume : 0);
+        }
+    });
+}
+
+export function playSound(type, obj) {
+    if(audioReady) {
+        if(AudioType[type].sound && AudioType[type].sound.isPlaying) {
+            // MUSIC types have no "2"/"3" round-robin variants (only SFX do) — a
+            // looping music track being already-playing just means leave it alone
+            if(AudioType[type].type === "MUSIC") return;
+
+            if(AudioType[`${type}2`] && AudioType[`${type}2`].sound.isPlaying){
+                if(AudioType[`${type}3`] && AudioType[`${type}3`].sound.isPlaying){
+                    // dont play anything
+                } else if(AudioType[`${type}3`]) {
+                    play(AudioType[`${type}3`], obj);
+                }
+            } else if(AudioType[`${type}2`]) {
+                play(AudioType[`${type}2`], obj);
+            }
+        } else if(AudioType[type].sound) {
+            play(AudioType[type], obj);
+        }
+    }
+}
+
+// A PositionalAudio node only reports the correct spatial position once its
+// own matrixWorld reflects where the emitting object actually is — it's never
+// added anywhere else, so without this it plays from wherever it was last
+// left (effectively the world origin), regardless of where the shooter or
+// player's own ship actually is. Copy the emitter's current world position
+// onto it directly rather than reparenting it under that object: reparenting
+// (obj.add(entry.sound)) previously made the shared sound a permanent child
+// of e.g. the player's ship, and LaserCannons snapshots the shooter via
+// sourceShipMesh.clone() on every shot — three.js can't clone a PositionalAudio
+// (its clone() needs a `listener` the generic Object3D clone doesn't supply),
+// so firing crashed as soon as the flyby sound had attached once. Since
+// entry.sound is never parented, its local position IS its world position;
+// updateMatrixWorld(true) forces the panner to pick that up immediately
+// instead of waiting for the next render pass.
+//
+// play() must run FIRST: PositionalAudio.updateMatrixWorld() no-ops while
+// isPlaying is false, so calling it before play() silently never updated the
+// panner at all — the position write happened, but the panner never saw it.
+//
+// Callers with no specific in-world emitter (e.g. the settings screen's
+// preview blast, obj passed as null) fall back to the current scene's camera
+// — placing the sound essentially at the listener eliminates distance
+// falloff, instead of leaving it wherever it was last positioned by real
+// gameplay (often nowhere near this scene's camera at all, so it played back
+// quiet even at full sfxVolume).
+function play(entry, obj) {
+    entry.sound.play();
+    if (entry.type === "SFX") {
+        const positionSource = (obj && typeof obj.getWorldPosition === "function") ? obj : gameCamera;
+        if (positionSource) {
+            positionSource.getWorldPosition(entry.sound.position);
+            entry.sound.updateMatrixWorld(true);
+        }
+    }
+}
+
+export function stopPlaying() {
+    Object.keys(AudioType).forEach(audio => {
+        if(AudioType[audio].sound && AudioType[audio].type === "MUSIC" && AudioType[audio].sound.isPlaying) {
+            AudioType[audio].sound.stop();
+        }
+    });
+}
+
 export default (camera, config, callback) => {
     audioConfig = config;
 
@@ -197,18 +280,20 @@ export default (camera, config, callback) => {
         Object.keys(AudioType).forEach(audio => {
             if(!AudioType[audio].sound) {
                 audioLoader.load(AudioType[audio].url, (buffer) => {
-                    if (AudioType[audio].type === "SFX" && audioConfig.sfx) {
+                    // Sound objects are always created (and the network fetch above
+                    // always happens) regardless of the enabled flag — otherwise a
+                    // type that starts disabled would have no `.sound` for
+                    // updateVolumes()/playSound() to ever act on later, and toggling
+                    // it on in the settings screen would stay silent until the next
+                    // scene reload. Muting is just an initial volume of 0 instead.
+                    if (AudioType[audio].type === "SFX") {
                         AudioType[audio].sound = new THREE.PositionalAudio(listener);
                         AudioType[audio].sound.setBuffer(buffer);
-                    } else if(AudioType[audio].type === "MUSIC" && audioConfig.music) {
+                        AudioType[audio].sound.setVolume(audioConfig.sfx ? (config.sfxVolume || sfxVolume) : 0);
+                    } else if(AudioType[audio].type === "MUSIC") {
                         AudioType[audio].sound = new THREE.Audio(listener);
                         AudioType[audio].sound.setBuffer(buffer);
-                    }
-
-                    if (AudioType[audio].type === "SFX" && audioConfig.sfx) {
-                        AudioType[audio].sound.setVolume(config.sfxVolume ? config.sfxVolume : sfxVolume);
-                    } else if(AudioType[audio].type === "MUSIC" && audioConfig.music) {
-                        AudioType[audio].sound.setVolume(config.musicVolume ? config.musicVolume : musicVolume);
+                        AudioType[audio].sound.setVolume(audioConfig.music ? (config.musicVolume || musicVolume) : 0);
                         AudioType[audio].sound.setLoop(true);
                     }
 
@@ -232,36 +317,6 @@ export default (camera, config, callback) => {
 
     function onError(err){
         console.log(`Error: ${err}`);
-    }
-
-    function playSound(type, obj) {
-        if(audioReady) {
-            if(AudioType[type].sound && AudioType[type].sound.isPlaying) {
-                // MUSIC types have no "2"/"3" round-robin variants (only SFX do) — a
-                // looping music track being already-playing just means leave it alone
-                if(AudioType[type].type === "MUSIC") return;
-
-                if(AudioType[`${type}2`] && AudioType[`${type}2`].sound.isPlaying){
-                    if(AudioType[`${type}3`] && AudioType[`${type}3`].sound.isPlaying){
-                        // dont play anything
-                    } else if(AudioType[`${type}3`]) {
-                        AudioType[`${type}3`].sound.play();
-                    }
-                } else if(AudioType[`${type}2`]) {
-                    AudioType[`${type}2`].sound.play();
-                }
-            } else if(AudioType[type].sound) {
-                AudioType[type].sound.play();
-            }
-        }
-    }
-
-    function stopPlaying() {
-        Object.keys(AudioType).forEach(audio => {
-            if(AudioType[audio].sound && AudioType[audio].type === "MUSIC" && AudioType[audio].sound.isPlaying) {
-                AudioType[audio].sound.stop();
-            }
-        });
     }
 
     return {

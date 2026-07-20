@@ -1,0 +1,102 @@
+/* ── SETTINGS PANELS ── */
+.settings-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 420px;
+    margin-top: 14px;
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.settings-row + .settings-row {
+    margin-top: 14px;
+}
+
+.settings-row-label {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+}
+
+/* ── ON/OFF TOGGLE ── */
+.settings-toggle-btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 2px;
+    padding: 6px 18px;
+    min-width: 64px;
+    text-align: center;
+    background: var(--panel-bg);
+    border: 1px solid var(--green);
+    color: var(--green);
+    text-shadow: 0 0 6px var(--green);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.settings-toggle-btn:hover {
+    background: #071408;
+    box-shadow: 0 0 10px rgba(0,204,68,0.2);
+}
+.settings-toggle-btn.is-off {
+    border-color: var(--red);
+    color: var(--red);
+    text-shadow: 0 0 6px var(--red);
+}
+.settings-toggle-btn.is-off:hover {
+    background: #1a0505;
+    box-shadow: 0 0 10px rgba(204,34,0,0.2);
+}
+
+/* ── VOLUME SLIDER ── */
+.settings-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 3px;
+    background: var(--border-bright);
+    outline: none;
+}
+.settings-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    cursor: pointer;
+}
+.settings-slider::-moz-range-thumb {
+    width: 14px; height: 14px;
+    border: none;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    cursor: pointer;
+}
+
+.settings-volume-readout {
+    width: 44px;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--green);
+    text-shadow: 0 0 6px var(--green);
+}
+
+.settings-panel[data-enabled="false"] .settings-slider,
+.settings-panel[data-enabled="false"] .settings-volume-readout {
+    opacity: 0.35;
+}
+
+/* ── ACTIONS ── */
+.settings-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}

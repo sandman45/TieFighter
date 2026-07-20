@@ -23,7 +23,7 @@ export default (scene, config, collisionManager, audio) => {
         if(laserType === "REBELLION"){
             blastType = "REBEL_BLAST";
         }
-        audio.playSound(blastType, l.laserSet[0]);
+        audio.playSound(blastType, l.laserSet[0].laser);
         lasers.push(l);
     }
 

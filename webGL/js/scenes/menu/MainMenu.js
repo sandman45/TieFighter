@@ -7,6 +7,7 @@ import sceneConfiguration from "../../../sceneConfig.js";
 import GameAudio from "../../utils/Audio.js";
 import SkyBox from "../../sceneSubjects/SkyBox.js";
 import ModelLoader, { Model } from "../../utils/ModelLoader.js";
+import SettingsStore from "../../settings/SettingsStore.js";
 
 // the very first "menu" scene load of a session is always the moment the
 // pilot-selection gate is showing on top of it (see main.js) — play the
@@ -20,7 +21,7 @@ export default (canvas, models) => {
     const scene = buildScene(sceneConstants);
     const renderer = buildRender(canvas);
     const camera = buildCamera(canvas);
-    const audio = GameAudio(camera, sceneConfiguration.audio, () => {
+    const audio = GameAudio(camera, SettingsStore.getAudioConfig(), () => {
         audio.playSound(isFirstLoad ? "MUSIC_SELECT" : "MUSIC_MENU", camera);
         isFirstLoad = false;
     });
