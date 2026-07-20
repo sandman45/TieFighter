@@ -168,6 +168,23 @@ function unlockAudioContext() {
 window.addEventListener('pointerdown', unlockAudioContext);
 window.addEventListener('keydown', unlockAudioContext);
 
+// Live-applies a settings change (e.g. from the settings screen) to whatever
+// sounds are already loaded. GameAudio() only bakes volume into a THREE.Audio
+// at buffer-load time, so without this a slider drag mid-session would have
+// no audible effect until the next scene change re-triggers a load.
+export function updateVolumes(config) {
+    audioConfig = config;
+    Object.keys(AudioType).forEach(key => {
+        const entry = AudioType[key];
+        if (!entry.sound) return;
+        if (entry.type === "MUSIC") {
+            entry.sound.setVolume(config.music ? config.musicVolume : 0);
+        } else if (entry.type === "SFX") {
+            entry.sound.setVolume(config.sfx ? config.sfxVolume : 0);
+        }
+    });
+}
+
 export default (camera, config, callback) => {
     audioConfig = config;
 

@@ -17,6 +17,7 @@ import globalConfiguration from "../../../sceneConfig.js";
 import GameAudio from "../../utils/Audio.js";
 import SkyBox from "../../sceneSubjects/SkyBox.js";
 import HUD, { initHUD } from "../../HUD/hud.js";
+import SettingsStore from "../../settings/SettingsStore.js";
 
 export default (canvas, canvas2, models, campaignConfiguration) => {
     let skyBox = null;
@@ -26,7 +27,7 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
     const renderer = buildRender(canvas);
     const targetRenderer = buildTargetRender(canvas2);
     const camera = buildCamera(canvas);
-    const audio = GameAudio(camera, sceneGlobalConstants.audio, () => {
+    const audio = GameAudio(camera, SettingsStore.getAudioConfig(), () => {
         audio.playSound("MUSIC", camera);
     });
 

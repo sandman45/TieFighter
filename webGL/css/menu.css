@@ -18,7 +18,8 @@
 /* ── SHARED MENU BASE ────────────────────────────────────────────────────────── */
 #menu,
 #sub-menu,
-#pilot-screen {
+#pilot-screen,
+#settings-screen {
     z-index: 999;
     position: absolute;
     left: 0; top: 0;
@@ -52,7 +53,8 @@
 /* ── EMPIRE HEADER ───────────────────────────────────────────────────────────── */
 #menu::before,
 #sub-menu::before,
-#pilot-screen::before {
+#pilot-screen::before,
+#settings-screen::before {
     content: 'GALACTIC EMPIRE · IMPERIAL NAVY';
     font-family: var(--font-title);
     font-size: 13px;
@@ -66,7 +68,8 @@
 
 #menu::after,
 #sub-menu::after,
-#pilot-screen::after {
+#pilot-screen::after,
+#settings-screen::after {
     content: '';
     position: absolute;
     top: 40px;

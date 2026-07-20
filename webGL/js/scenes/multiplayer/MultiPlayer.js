@@ -6,6 +6,7 @@ import {parseConfiguration} from "../../utils/SceneConfigUtils.js";
 import sceneConfiguration from "../../../sceneConfig.js";
 import GameAudio from "../../utils/Audio.js";
 import SkyBox from "../../sceneSubjects/SkyBox.js";
+import SettingsStore from "../../settings/SettingsStore.js";
 import eventBus from "../../eventBus/EventBus.js";
 import eventBusEvents from "../../eventBus/events.js";
 import ModelLoader, { Model } from "../../utils/ModelLoader.js";
@@ -26,7 +27,7 @@ export default (canvas, canvas2, sceneSubjects) => {
     const targetRenderer = buildTargetRender(canvas2);
     const camera = buildCamera(canvas);
     let targetCamera;
-    const audio = GameAudio(camera, sceneConfiguration.audio, () => {
+    const audio = GameAudio(camera, SettingsStore.getAudioConfig(), () => {
         audio.playSound("MUSIC", camera);
     });
     let userId = null;
