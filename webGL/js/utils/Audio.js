@@ -185,6 +185,36 @@ export function updateVolumes(config) {
     });
 }
 
+export function playSound(type, obj) {
+    if(audioReady) {
+        if(AudioType[type].sound && AudioType[type].sound.isPlaying) {
+            // MUSIC types have no "2"/"3" round-robin variants (only SFX do) — a
+            // looping music track being already-playing just means leave it alone
+            if(AudioType[type].type === "MUSIC") return;
+
+            if(AudioType[`${type}2`] && AudioType[`${type}2`].sound.isPlaying){
+                if(AudioType[`${type}3`] && AudioType[`${type}3`].sound.isPlaying){
+                    // dont play anything
+                } else if(AudioType[`${type}3`]) {
+                    AudioType[`${type}3`].sound.play();
+                }
+            } else if(AudioType[`${type}2`]) {
+                AudioType[`${type}2`].sound.play();
+            }
+        } else if(AudioType[type].sound) {
+            AudioType[type].sound.play();
+        }
+    }
+}
+
+export function stopPlaying() {
+    Object.keys(AudioType).forEach(audio => {
+        if(AudioType[audio].sound && AudioType[audio].type === "MUSIC" && AudioType[audio].sound.isPlaying) {
+            AudioType[audio].sound.stop();
+        }
+    });
+}
+
 export default (camera, config, callback) => {
     audioConfig = config;
 
@@ -214,18 +244,20 @@ export default (camera, config, callback) => {
         Object.keys(AudioType).forEach(audio => {
             if(!AudioType[audio].sound) {
                 audioLoader.load(AudioType[audio].url, (buffer) => {
-                    if (AudioType[audio].type === "SFX" && audioConfig.sfx) {
+                    // Sound objects are always created (and the network fetch above
+                    // always happens) regardless of the enabled flag — otherwise a
+                    // type that starts disabled would have no `.sound` for
+                    // updateVolumes()/playSound() to ever act on later, and toggling
+                    // it on in the settings screen would stay silent until the next
+                    // scene reload. Muting is just an initial volume of 0 instead.
+                    if (AudioType[audio].type === "SFX") {
                         AudioType[audio].sound = new THREE.PositionalAudio(listener);
                         AudioType[audio].sound.setBuffer(buffer);
-                    } else if(AudioType[audio].type === "MUSIC" && audioConfig.music) {
+                        AudioType[audio].sound.setVolume(audioConfig.sfx ? (config.sfxVolume || sfxVolume) : 0);
+                    } else if(AudioType[audio].type === "MUSIC") {
                         AudioType[audio].sound = new THREE.Audio(listener);
                         AudioType[audio].sound.setBuffer(buffer);
-                    }
-
-                    if (AudioType[audio].type === "SFX" && audioConfig.sfx) {
-                        AudioType[audio].sound.setVolume(config.sfxVolume ? config.sfxVolume : sfxVolume);
-                    } else if(AudioType[audio].type === "MUSIC" && audioConfig.music) {
-                        AudioType[audio].sound.setVolume(config.musicVolume ? config.musicVolume : musicVolume);
+                        AudioType[audio].sound.setVolume(audioConfig.music ? (config.musicVolume || musicVolume) : 0);
                         AudioType[audio].sound.setLoop(true);
                     }
 
@@ -249,36 +281,6 @@ export default (camera, config, callback) => {
 
     function onError(err){
         console.log(`Error: ${err}`);
-    }
-
-    function playSound(type, obj) {
-        if(audioReady) {
-            if(AudioType[type].sound && AudioType[type].sound.isPlaying) {
-                // MUSIC types have no "2"/"3" round-robin variants (only SFX do) — a
-                // looping music track being already-playing just means leave it alone
-                if(AudioType[type].type === "MUSIC") return;
-
-                if(AudioType[`${type}2`] && AudioType[`${type}2`].sound.isPlaying){
-                    if(AudioType[`${type}3`] && AudioType[`${type}3`].sound.isPlaying){
-                        // dont play anything
-                    } else if(AudioType[`${type}3`]) {
-                        AudioType[`${type}3`].sound.play();
-                    }
-                } else if(AudioType[`${type}2`]) {
-                    AudioType[`${type}2`].sound.play();
-                }
-            } else if(AudioType[type].sound) {
-                AudioType[type].sound.play();
-            }
-        }
-    }
-
-    function stopPlaying() {
-        Object.keys(AudioType).forEach(audio => {
-            if(AudioType[audio].sound && AudioType[audio].type === "MUSIC" && AudioType[audio].sound.isPlaying) {
-                AudioType[audio].sound.stop();
-            }
-        });
     }
 
     return {

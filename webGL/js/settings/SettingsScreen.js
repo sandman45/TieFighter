@@ -1,5 +1,11 @@
 import SettingsStore from "./SettingsStore.js";
-import { updateVolumes } from "../utils/Audio.js";
+import { updateVolumes, playSound } from "../utils/Audio.js";
+
+// short, punchy SFX sample used to preview the current sound-effects volume —
+// music doesn't need this since the already-playing track is its own live
+// feedback as the slider moves, but SFX has nothing playing to reveal the
+// level unless we trigger something
+const SFX_PREVIEW_SOUND = "BLAST";
 
 let built = false;
 
@@ -49,8 +55,10 @@ export function buildScreen() {
         applySettings();
     });
     document.getElementById('sfxToggleBtn').addEventListener('click', () => {
-        SettingsStore.setSfxEnabled(!SettingsStore.getSettings().sfxEnabled);
+        const nowEnabled = !SettingsStore.getSettings().sfxEnabled;
+        SettingsStore.setSfxEnabled(nowEnabled);
         applySettings();
+        if (nowEnabled) playSound(SFX_PREVIEW_SOUND, null);
     });
     document.getElementById('musicVolumeSlider').addEventListener('input', (e) => {
         SettingsStore.setMusicVolumePct(Number(e.target.value));
@@ -59,6 +67,11 @@ export function buildScreen() {
     document.getElementById('sfxVolumeSlider').addEventListener('input', (e) => {
         SettingsStore.setSfxVolumePct(Number(e.target.value));
         applySettings();
+    });
+    // preview once per commit (mouse release / arrow-key press) rather than on
+    // every 'input' tick, so dragging doesn't machine-gun the sample
+    document.getElementById('sfxVolumeSlider').addEventListener('change', () => {
+        if (SettingsStore.getSettings().sfxEnabled) playSound(SFX_PREVIEW_SOUND, null);
     });
 }
 
