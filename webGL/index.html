@@ -201,8 +201,8 @@
 		<div id="menu">
 			<div class="menu">
 				<div class="menu-title">IMPERIAL COMBAT SIMULATOR</div>
-				<div class="menu-item" name="shipselect">MULTI-PLAYER</div>
 				<div class="menu-item" name="campaign">CAMPAIGN</div>
+				<div class="menu-item" name="shipselect">MULTI-PLAYER</div>
 				<div class="menu-item" name="pilot">PILOT</div>
 				<div class="menu-item" name="settings">SETTINGS</div>
 			</div>
@@ -211,7 +211,18 @@
 			<div class="menu">
 				<div class="menu-title">PAUSED</div>
 				<div class="pause-menu-item" id="pauseResumeBtn">RESUME</div>
-				<div class="pause-menu-item" id="pauseQuitBtn">RETURN TO MAIN MENU</div>
+				<div class="pause-menu-item" id="pauseSettingsBtn">SETTINGS</div>
+				<div class="pause-menu-item" id="pauseQuitBtn">ABORT MISSION</div>
+			</div>
+			<div id="abort-mission-confirm" class="abort-mission-confirm" style="display:none;">
+				<div class="abort-mission-confirm-box panel">
+					<div class="panel-title">CONFIRM ABORT</div>
+					<div class="abort-mission-confirm-text">ABORT MISSION AND RETURN TO MAIN MENU? PROGRESS ON THIS MISSION WILL BE LOST.</div>
+					<div class="abort-mission-confirm-actions">
+						<button id="abortMissionCancelBtn" class="sub-menu-item" name="abortcancel">CANCEL</button>
+						<button id="abortMissionConfirmBtn" class="sub-menu-item abort-mission-confirm-btn" name="abortconfirm">CONFIRM ABORT</button>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div id="campaign-menu">
