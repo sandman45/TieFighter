@@ -1,5 +1,9 @@
 # Tie Fighter
 
+[![Game Status](https://img.shields.io/website?url=https%3A%2F%2Ftie-fighter.mattsanders.org&up_message=online&down_message=offline&label=game%20status)](https://tie-fighter.mattsanders.org)
+[![CI](https://github.com/sandman45/TieFighter/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/sandman45/TieFighter/actions/workflows/ci.yml)
+[![Deploy](https://github.com/sandman45/TieFighter/actions/workflows/deploy.yml/badge.svg?branch=master)](https://github.com/sandman45/TieFighter/actions/workflows/deploy.yml)
+
 A Star Wars TIE Fighter browser game: a Three.js (WebGL) client with
 single-player campaign missions and a Socket.IO-based multiplayer mode,
 backed by a small Node/Express real-time server.
