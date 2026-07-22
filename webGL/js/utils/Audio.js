@@ -158,12 +158,25 @@ let audioReady = false;
 
 // browsers start every AudioContext suspended until a user gesture unlocks it —
 // the menu music plays before the player has clicked anything, so without this
-// it gets silently scheduled-but-muted and never catches up on its own
+// it gets silently scheduled-but-muted and never catches up on its own. Resuming
+// the context doesn't retroactively make an already-scheduled source audible
+// either, so any music that started while still suspended needs to be replayed
+// once we're actually unlocked, not just left to "catch up".
 function unlockAudioContext() {
     const ctx = THREE.AudioContext.getContext();
     if (ctx.state === 'suspended') {
-        ctx.resume();
+        ctx.resume().then(restartMusicStartedWhileSuspended);
     }
+}
+
+function restartMusicStartedWhileSuspended() {
+    Object.keys(AudioType).forEach(key => {
+        const entry = AudioType[key];
+        if (entry.type === "MUSIC" && entry.sound && entry.sound.isPlaying) {
+            entry.sound.stop();
+            entry.sound.play();
+        }
+    });
 }
 window.addEventListener('pointerdown', unlockAudioContext);
 window.addEventListener('keydown', unlockAudioContext);

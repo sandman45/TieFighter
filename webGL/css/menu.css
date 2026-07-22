@@ -321,3 +321,49 @@
     background: rgba(0,5,2,0.85);
     visibility: hidden;
 }
+
+/* ── ABORT MISSION CONFIRMATION ── */
+.abort-mission-confirm {
+    position: fixed;
+    inset: 0;
+    z-index: 2600;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.abort-mission-confirm-box {
+    width: 420px;
+    flex: unset;
+    border-color: var(--red);
+}
+.abort-mission-confirm-text {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    padding: 6px 0 16px;
+    text-align: center;
+}
+.abort-mission-confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+.abort-mission-confirm-btn {
+    color: var(--red);
+    border-color: var(--red);
+}
+.abort-mission-confirm-btn::before {
+    color: var(--red);
+}
+.abort-mission-confirm-btn:hover {
+    background: #1a0505;
+    border-color: var(--red);
+    color: var(--red);
+    text-shadow: 0 0 8px var(--red);
+    box-shadow: 0 0 12px rgba(204,34,0,0.25);
+}
+.abort-mission-confirm-btn:hover::before {
+    color: var(--red);
+}

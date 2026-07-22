@@ -27,11 +27,12 @@ const canvas2 = document.getElementById('targetComputer');
 views.push(new View(canvas));
 views.push(new View(canvas2));
 
-let showMenu = false;
-let campaignMenu = false;
 let activeCampaignConfig = null;
 let inMission = false;
 let paused = false;
+// tracks whether the settings screen was opened from the pause menu, so its
+// back button returns there instead of running the normal main-menu "back" flow
+let settingsOpenedFromPause = false;
 
 let sceneManager = SceneManager(views, "menu");
 bindEventListeners();
@@ -58,7 +59,10 @@ bindEventListeners(); // re-run so the freshly-injected pilot-screen buttons get
 // pause menu buttons are static markup, wired once — deliberately not using the
 // .menu-item class (which the generic onMenuItemClick dispatch would misroute)
 document.getElementById('pauseResumeBtn').addEventListener('click', resumeFromPause);
-document.getElementById('pauseQuitBtn').addEventListener('click', quitToMainMenuFromPause);
+document.getElementById('pauseSettingsBtn').addEventListener('click', openSettingsFromPause);
+document.getElementById('pauseQuitBtn').addEventListener('click', showAbortMissionConfirm);
+document.getElementById('abortMissionCancelBtn').addEventListener('click', hideAbortMissionConfirm);
+document.getElementById('abortMissionConfirmBtn').addEventListener('click', abortMissionFromPause);
 
 EventBus.subscribe(events.MISSION_COMPLETE, () => {
 	PilotStore.incrementMissionsFlown();
@@ -216,8 +220,6 @@ function onMenuItemClick(event) {
 		const canvas = document.getElementById('canvas');
 		canvas.innerHTML = "";
 
-		campaignMenu = false;
-
 		// show subMenu
 		const subMenu = document.getElementById("sub-menu");
 		subMenu.style.visibility = "visible";
@@ -254,7 +256,6 @@ function onMenuItemClick(event) {
 		// show campaign-menu
 		const subMenu = document.getElementById("campaign-menu");
 		subMenu.style.visibility = "visible";
-		campaignMenu = true;
 		CampaignMenu.buildMenu();
 	}
 	// load scene
@@ -314,6 +315,9 @@ function onSubMenuItemClick(event) {
 		bindEventListeners();
         handler.startGame();
         inMission = true;
+        // clear any stale campaign config from a previous mission so an in-mission
+        // pause/abort here correctly takes the multiplayer path, not the debrief one
+        activeCampaignConfig = null;
 	} else if(subMenuItem === "connect") {
 		// const element3 = document.getElementById("start");
 		// element3.style.disabled = false;
@@ -358,6 +362,15 @@ function onSubMenuItemClick(event) {
 		sceneManager = SceneManager(views, "shipselect");
 		bindEventListeners();
 	} else if(subMenuItem === "back") {
+		// settings opened from the in-mission pause menu should return there,
+		// not run the main-menu "back" flow below (which would drop the mission)
+		if (settingsOpenedFromPause) {
+			settingsOpenedFromPause = false;
+			document.getElementById("settings-screen").style.visibility = "hidden";
+			document.getElementById("pause-menu").style.visibility = "visible";
+			return;
+		}
+
 		const canvas = document.getElementById('canvas');
 		canvas.innerHTML = "";
 
@@ -453,10 +466,40 @@ function resumeFromPause() {
 	document.getElementById('pause-menu').style.visibility = 'hidden';
 }
 
-function quitToMainMenuFromPause() {
+function openSettingsFromPause() {
+	// leave inMission/paused untouched — the game stays frozen behind the
+	// settings screen, same as it was behind the pause menu
+	settingsOpenedFromPause = true;
+	document.getElementById('pause-menu').style.visibility = 'hidden';
+	document.getElementById('settings-screen').style.visibility = 'visible';
+	SettingsScreen.buildScreen();
+	SettingsScreen.renderSettings();
+	bindEventListeners();
+}
+
+function showAbortMissionConfirm() {
+	document.getElementById('abort-mission-confirm').style.display = 'flex';
+}
+
+function hideAbortMissionConfirm() {
+	document.getElementById('abort-mission-confirm').style.display = 'none';
+}
+
+function abortMissionFromPause() {
+	hideAbortMissionConfirm();
+	document.getElementById('pause-menu').style.visibility = 'hidden';
+
+	// the debrief screen is campaign-only (it reads activeCampaignConfig directly) —
+	// a multiplayer match has no campaign config, so it still drops straight to the
+	// main menu instead
+	if (activeCampaignConfig) {
+		PilotStore.incrementMissionsFlown();
+		showDebrief('failure', 'Mission aborted by pilot.', getMissionScore());
+		return;
+	}
+
 	inMission = false;
 	paused = false;
-	document.getElementById('pause-menu').style.visibility = 'hidden';
 	document.getElementById('heads-up-display').style.visibility = 'hidden';
 
 	const canvas = document.getElementById('canvas');
@@ -466,47 +509,15 @@ function quitToMainMenuFromPause() {
 	bindEventListeners();
 }
 
-function isMainMenuAreaVisible() {
-	return document.getElementById('menu').style.visibility === 'visible'
-		|| document.getElementById('pilot-screen').style.visibility === 'visible'
-		|| document.getElementById('settings-screen').style.visibility === 'visible';
-}
-
 function onKeyDown(event, duration) {
 	if(event.keyCode === 27){
-		// during actual gameplay (campaign mission or multiplayer match), Esc
-		// opens a dedicated pause menu instead of the Battle/Campaign-select or
-		// ship-select screens — those don't make sense to land on mid-flight
+		// Esc only does something during actual gameplay (campaign mission or
+		// multiplayer match), opening a dedicated pause menu. On the ship-select or
+		// campaign-select screens it used to hide the whole panel, revealing a stale
+		// scene behind it with no way back, so it's a no-op there now.
 		if(inMission){
 			togglePauseMenu();
-			return;
 		}
-
-		// the sub-menu/campaign-menu toggle below is only meaningful while actually
-		// inside the ship-select or campaign-select flow — on the main menu, pilot
-		// screen, or settings screen there's nothing for Esc to show, so bail out
-		// rather than have stale showMenu/campaignMenu state pop up an unrelated menu
-		if(isMainMenuAreaVisible()) return;
-
-		const element3 = document.getElementById("sub-menu");
-		// show menu
-		if(showMenu && !campaignMenu){
-			element3.style.visibility = "visible";
-			showMenu = false;
-		} else if(!showMenu && !campaignMenu) {
-			element3.style.visibility = "hidden";
-			showMenu = true;
-		}
-		const element = document.getElementById("campaign-menu");
-		// show campaign menu
-		if(showMenu && campaignMenu){
-			element.style.visibility = "visible";
-			showMenu = false;
-		} else if(!showMenu && campaignMenu) {
-			element.style.visibility = "hidden";
-			showMenu = true;
-		}
-
 	} else {
 		sceneManager.onKeyDown(event.keyCode, duration);
 	}
