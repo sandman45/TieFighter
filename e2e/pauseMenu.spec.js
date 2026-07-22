@@ -53,7 +53,7 @@ test.describe('Pause menu', () => {
         await expect(page.locator('#heads-up-display')).toBeVisible();
     });
 
-    test('RETURN TO MAIN MENU exits the mission cleanly, and Esc no longer reopens the pause menu', async ({ page }) => {
+    test('ABORT MISSION asks for confirmation, then routes through debrief, and Esc no longer reopens the pause menu', async ({ page }) => {
         await page.goto('/');
         await expect(page.locator('#pilot-screen')).toBeVisible();
         await clickById(page, 'pilotBackBtn');
@@ -67,11 +67,25 @@ test.describe('Pause menu', () => {
         await page.keyboard.press('Escape');
         await expect(page.locator('#pause-menu')).toBeVisible();
         await clickById(page, 'pauseQuitBtn');
-        await page.waitForTimeout(500);
 
-        await expect(page.locator('#pause-menu')).toBeHidden();
-        await expect(page.locator('#menu')).toBeVisible();
+        // confirmation dialog on top of the (still visible, dimmed) pause menu
+        await expect(page.locator('#abort-mission-confirm')).toBeVisible();
+        await expect(page.locator('#pause-menu')).toBeVisible();
+
+        // cancel backs out without aborting anything
+        await clickById(page, 'abortMissionCancelBtn');
+        await expect(page.locator('#abort-mission-confirm')).toBeHidden();
+        await expect(page.locator('#heads-up-display')).toBeVisible();
+
+        await clickById(page, 'pauseQuitBtn');
+        await clickById(page, 'abortMissionConfirmBtn');
+
+        // a campaign abort routes through the debrief screen like a failure,
+        // not straight to the main menu
+        await expect(page.locator('#mission-debrief')).toBeVisible({ timeout: 8000 });
+        await expect(page.locator('#debrief-result-header')).toHaveText('MISSION FAILED');
         await expect(page.locator('#heads-up-display')).toBeHidden();
+        await expect(page.locator('#pause-menu')).toBeHidden();
 
         // no longer "in mission" -- Esc should not reopen the pause menu
         await page.keyboard.press('Escape');
@@ -79,7 +93,7 @@ test.describe('Pause menu', () => {
         await expect(page.locator('#pause-menu')).toBeHidden();
     });
 
-    test('Esc still toggles sub-menu/campaign-menu normally outside of gameplay', async ({ page }) => {
+    test('Esc has no effect on the ship-select or campaign-select screens outside of gameplay', async ({ page }) => {
         await page.goto('/');
         await expect(page.locator('#pilot-screen')).toBeVisible();
         await clickById(page, 'pilotBackBtn');
@@ -89,9 +103,17 @@ test.describe('Pause menu', () => {
         await expect(page.locator('#sub-menu')).toBeVisible();
 
         await page.keyboard.press('Escape');
-        await expect(page.locator('#sub-menu')).toBeHidden();
-        await page.keyboard.press('Escape');
         await expect(page.locator('#sub-menu')).toBeVisible();
+        await expect(page.locator('#pause-menu')).toBeHidden();
+
+        await clickById(page, 'back');
+        await expect(page.locator('#menu')).toBeVisible();
+
+        await page.locator('.menu-item[name="campaign"]').click();
+        await expect(page.locator('#campaign-menu')).toBeVisible();
+
+        await page.keyboard.press('Escape');
+        await expect(page.locator('#campaign-menu')).toBeVisible();
         await expect(page.locator('#pause-menu')).toBeHidden();
     });
 });
