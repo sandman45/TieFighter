@@ -22,7 +22,7 @@ export default (mesh, laser, camera, config, collisionManager, audio) => {
     let backward = false;
     let rotating = false;
     let lastEnergyTick = null;
-    const weaponsEnergy = WeaponsEnergy();
+    const weaponsEnergy = WeaponsEnergy({ rechargeRate: mesh.laserRechargeRate });
     eventBus.post(eventBusEvents.WEAPON_ENERGY_CHANGED, {
         energy: weaponsEnergy.getEnergy(),
         maxEnergy: weaponsEnergy.getMaxEnergy(),
@@ -115,6 +115,17 @@ export default (mesh, laser, camera, config, collisionManager, audio) => {
     }
 
     function update(time) {
+        // SceneManager calls update() with total elapsed time, not a per-frame
+        // delta, so derive the delta here for the recharge-rate math
+        const energyDt = (lastEnergyTick === null) ? 0 : Math.max(0, time - lastEnergyTick);
+        lastEnergyTick = time;
+        if (weaponsEnergy.update(energyDt)) {
+            eventBus.post(eventBusEvents.WEAPON_ENERGY_CHANGED, {
+                energy: weaponsEnergy.getEnergy(),
+                maxEnergy: weaponsEnergy.getMaxEnergy(),
+            });
+        }
+
         const matrix = new THREE.Matrix4();
         matrix.extractRotation( mesh.matrix );
         let directionVector;

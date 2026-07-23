@@ -30,7 +30,7 @@ export default class FlyControls {
         this.updateThrottleReadout();
         this.collisionManager = collisionManager;
         this.dockingManager = null;
-        this.weaponsEnergy = WeaponsEnergy();
+        this.weaponsEnergy = WeaponsEnergy({ rechargeRate: object.laserRechargeRate });
         this._lastEnergyTick = null;
         eventBus.post(eventBusEvents.WEAPON_ENERGY_CHANGED, {
             energy: this.weaponsEnergy.getEnergy(),
