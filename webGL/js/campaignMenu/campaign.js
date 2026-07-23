@@ -103,6 +103,7 @@ export default {
         objectives: {
             destroyDesignations: ["GOLD_LEADER", "GOLD_TWO", "GOLD_THREE"],
             protectDesignations: ["VICTORIOUS", "TYDERIAN", "TRANSPORT_A"],
+            inspectDesignations: ["TRANSPORT_A"],
             dockDesignation: "VICTORIOUS"
         },
         weapons: [
@@ -183,6 +184,7 @@ export default {
                 turnRate: 0.006,
                 autoForward: false,
                 faction: "IMPERIAL",
+                cargo: "Rebel Sympathizers",
                 weapons: {
                     firing: false
                 }

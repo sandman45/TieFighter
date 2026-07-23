@@ -94,6 +94,9 @@ export default class FlyControls {
                         designation: nextTarget.designation,
                         userId: nextTarget.userId,
                         speed: nextTarget.speed,
+                        identified: nextTarget.identified,
+                        faction: nextTarget.faction,
+                        cargo: nextTarget.cargo,
                     });
                 } else {
                     this.hud.clearTarget();
@@ -288,6 +291,9 @@ export default class FlyControls {
                     designation: this.ships[nextTargetIndex].designation,
                     userId: this.ships[nextTargetIndex].userId,  // add this
                     speed: this.ships[nextTargetIndex].speed,
+                    identified: this.ships[nextTargetIndex].identified,
+                    faction: this.ships[nextTargetIndex].faction,
+                    cargo: this.ships[nextTargetIndex].cargo,
                 });
             } else {
                 nextTargetIndex = this.ships.length - 1;
@@ -305,6 +311,9 @@ export default class FlyControls {
                         designation: nextTarget.designation,
                         userId: nextTarget.userId,  // add this
                         speed: nextTarget.speed,
+                        identified: nextTarget.identified,
+                        faction: nextTarget.faction,
+                        cargo: nextTarget.cargo,
                     });
                 }
             }

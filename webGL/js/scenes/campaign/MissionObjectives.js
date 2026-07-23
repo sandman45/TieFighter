@@ -26,11 +26,26 @@ export default ({ config, playerDesignation }) => {
     missionScore = 0;
     const remainingEnemies = new Set(config.destroyDesignations);
     const protectedDesignations = new Set(config.protectDesignations);
+    const remainingInspections = new Set(config.inspectDesignations);
     let missionEnded = false;
+
+    function checkComplete() {
+        if(remainingEnemies.size === 0 && remainingInspections.size === 0) {
+            EventBus.post(events.MISSION_OBJECTIVES_MET);
+        }
+    }
 
     EventBus.subscribe(events.MISSION_COMPLETE, () => {
         if(runId !== latestRunId) return;
         missionEnded = true;
+    });
+
+    EventBus.subscribe(events.TARGET_IDENTIFIED, ({ designation }) => {
+        if(runId !== latestRunId || missionEnded || !designation) return;
+        if(remainingInspections.has(designation)) {
+            remainingInspections.delete(designation);
+            checkComplete();
+        }
     });
 
     EventBus.subscribe(events.SHIP_DESTROYED, ({ designation }) => {
@@ -49,9 +64,7 @@ export default ({ config, playerDesignation }) => {
             remainingEnemies.delete(designation);
             missionScore += PilotStore.SCORE_VALUES.KILL;
             PilotStore.awardKillScore();
-            if(remainingEnemies.size === 0) {
-                EventBus.post(events.MISSION_OBJECTIVES_MET);
-            }
+            checkComplete();
         }
     });
 };

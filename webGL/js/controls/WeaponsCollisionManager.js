@@ -68,6 +68,8 @@ export default (weapons, userId, scene, sceneConstants) => {
                     eventBus.post(eventType.SHIP_DESTROYED, {
                         userId: obj.mesh.userId,
                         designation: obj.mesh.designation,
+                        name: obj.mesh.name,
+                        faction: obj.mesh.faction,
                     });
 
                     if(sceneConstants.multiPlayer.active){

@@ -36,21 +36,43 @@ export function updateBar(barId, current, max, flash = true) {
 }
 
 let toastTimeout = null;
+const MAX_LOG_ENTRIES = 20;
+
+export function logMessage(message) {
+    const entriesEl = document.getElementById('message-log-entries');
+    if(!entriesEl) return;
+
+    const entry = document.createElement('div');
+    entry.className = 'message-log-entry';
+    const timestamp = new Date().toLocaleTimeString([], { hour12: false });
+    entry.innerHTML = `<span class="log-timestamp">${timestamp}</span>${message}`;
+    entriesEl.appendChild(entry);
+
+    while(entriesEl.children.length > MAX_LOG_ENTRIES) {
+        entriesEl.removeChild(entriesEl.firstChild);
+    }
+    entriesEl.scrollTop = entriesEl.scrollHeight;
+}
 
 export function showToast(message, durationMs = 8000) {
     const toast = document.getElementById('mission-toast');
-    if(!toast) return;
+    if(toast) {
+        toast.textContent = message;
+        toast.classList.add('visible');
 
-    toast.textContent = message;
-    toast.classList.add('visible');
+        if(toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+            toast.classList.remove('visible');
+        }, durationMs);
+    }
 
-    if(toastTimeout) clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => {
-        toast.classList.remove('visible');
-    }, durationMs);
+    logMessage(message);
 }
 
 export function initHUD(playerConfig) {
+    const entriesEl = document.getElementById('message-log-entries');
+    if(entriesEl) entriesEl.innerHTML = '';
+
     updateBar('shield-bar', playerConfig.shields, playerConfig.shields);
     updateBar('hull-bar', playerConfig.hull, playerConfig.hull);
     updateBar('laser-bar', 1, 1, false);
@@ -68,19 +90,58 @@ export function initHUD(playerConfig) {
         updateBar('laser-bar', energy, maxEnergy, false);
     });
 
+    EventBus.subscribe(events.SHIP_DESTROYED, ({ userId, designation, name, faction }) => {
+        const label = designation || name || userId || 'UNKNOWN CONTACT';
+        const side = faction === 'REBELLION' ? 'ENEMY' : 'FRIENDLY';
+        logMessage(`${side} SHIP DESTROYED — ${label}`);
+    });
+
+    // applies the identified look (cargo readout + hostile/friendly name color) —
+    // shared by TARGET_CHANGED (re-locking an already-identified ship) and
+    // TARGET_IDENTIFIED (the moment a ship first gets identified)
+    function applyIdentification(nameEl, faction, cargo) {
+        const cargoEl = document.getElementById('target-cargo-readout');
+        if(cargoEl) cargoEl.textContent = (cargo || 'None').toUpperCase();
+
+        nameEl.classList.remove('hostile', 'friendly');
+        nameEl.classList.add(faction === 'REBELLION' ? 'hostile' : 'friendly');
+    }
+
     // userId is now destructured from the event payload
-    EventBus.subscribe(events.TARGET_CHANGED, ({ shields, maxShields, hull, maxHull, name, designation, userId, speed } = {}) => {
+    EventBus.subscribe(events.TARGET_CHANGED, ({ shields, maxShields, hull, maxHull, name, designation, userId, speed, identified, faction, cargo } = {}) => {
         const label = designation || name || userId;
         const nameEl = document.getElementById('target-name');
         if(nameEl) {
             nameEl.textContent = label || 'NO TARGET';
             nameEl.dataset.targetUserId = label ? (userId || designation || '') : '';
+
+            if(label && identified) {
+                applyIdentification(nameEl, faction, cargo);
+            } else {
+                nameEl.classList.remove('hostile', 'friendly');
+                const cargoEl = document.getElementById('target-cargo-readout');
+                if(cargoEl) cargoEl.textContent = label ? 'UNKNOWN' : '--';
+            }
         }
         updateBar('target-shield-bar', shields || 0, maxShields || 1);
         updateBar('target-hull-bar', hull || 0, maxHull || 1);
 
         const speedEl = document.getElementById('target-speed-readout');
         if(speedEl) speedEl.textContent = (label && speed !== undefined) ? speed.toFixed(1) : '--';
+    });
+
+    // fires once a targeted ship is flown close enough to identify — see InspectionManager
+    EventBus.subscribe(events.TARGET_IDENTIFIED, ({ userId, designation, faction, cargo }) => {
+        const nameEl = document.getElementById('target-name');
+        const currentTargetId = nameEl && nameEl.dataset.targetUserId;
+        if(!currentTargetId || (currentTargetId !== userId && currentTargetId !== designation)) return;
+
+        applyIdentification(nameEl, faction, cargo);
+
+        // recorded in the comms log, but not popped as a toast — with several
+        // ships already in range at mission start, cycling targets would
+        // otherwise fire a toast per ship
+        logMessage(`COMMAND: Contact identified — ${nameEl.textContent} confirmed ${faction || 'UNKNOWN'}.`);
     });
 
     // userId and designation both destructured, currentTargetId read from the element
@@ -96,8 +157,8 @@ export function initHUD(playerConfig) {
 
 export default class HUD {
     constructor(target, camera){
+        this.camera = camera;
         if(target){
-            this.camera = camera;
             this.target = target;
             this.goal = new THREE.Object3D();
             target.add( this.goal );

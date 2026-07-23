@@ -28,6 +28,9 @@ export default (views, screen) => {
     let sceneReady = false;
     let reticle = null;
     let overlayCanvas = null;
+    // green wireframe scan look for the target computer (views[1]) — matches the
+    // HUD's green CRT aesthetic without touching the main view's real materials
+    const targetComputerMaterial = new THREE.MeshBasicMaterial({ color: 0x33ff66, wireframe: true });
 
     let screenDimensions = {
         width: views[0].canvas.width,
@@ -209,9 +212,13 @@ export default (views, screen) => {
                 const camera   = view.camera;
                 const renderer = view.renderer;
                 if (scene && camera && renderer) {
+                    // views[1] is always the target computer — render it with the
+                    // green wireframe override, everything else renders normally
+                    scene.overrideMaterial = (ii === 1) ? targetComputerMaterial : null;
                     renderer.render(scene, camera);
                 }
             }
+            scene.overrideMaterial = null;
         }
 
     }

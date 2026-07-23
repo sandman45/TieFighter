@@ -26,6 +26,9 @@ export default (scene, config) => {
     const cube = new THREE.Mesh(cubeGeometry, cubeMaterials);
     // render skybox behind everything else
     cube.renderOrder = -1;
+    // layer 1 only — main camera opts in (see buildCamera in the scene files),
+    // the target-computer camera stays on the default layer and never sees it
+    cube.layers.set(1);
     scene.add(cube);
 
     // return update so SceneManager can pass camera position each frame

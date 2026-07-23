@@ -100,11 +100,24 @@
 		<div id="heads-up-display" class="hud">
 			<div class="hud-container">
 
-				<!-- DEFLECTORS (Shields) -->
-				<div id="shields" class="shields panel">
-					<div class="panel-title">DEFLECTORS</div>
+				<!-- SHIP STATUS (shields, hull, lasers, throttle/speed) -->
+				<div id="ship-status" class="ship-status panel">
+					<div class="panel-title">SHIP STATUS</div>
 					<div class="bar-label">SHIELDS</div>
 					<div class="segmented-bar" id="shield-bar">
+						<div class="segment" data-index="0"></div>
+						<div class="segment" data-index="1"></div>
+						<div class="segment" data-index="2"></div>
+						<div class="segment" data-index="3"></div>
+						<div class="segment" data-index="4"></div>
+						<div class="segment" data-index="5"></div>
+						<div class="segment" data-index="6"></div>
+						<div class="segment" data-index="7"></div>
+						<div class="segment" data-index="8"></div>
+						<div class="segment" data-index="9"></div>
+					</div>
+					<div class="bar-label">HULL</div>
+					<div class="segmented-bar" id="hull-bar">
 						<div class="segment" data-index="0"></div>
 						<div class="segment" data-index="1"></div>
 						<div class="segment" data-index="2"></div>
@@ -129,6 +142,7 @@
 						<div class="segment" data-index="8"></div>
 						<div class="segment" data-index="9"></div>
 					</div>
+					<div class="panel-readout">THR <span id="throttle-readout">0%</span> · SPD <span id="speed-readout">0.0</span></div>
 				</div>
 
 				<!-- TARGET COMPUTER -->
@@ -137,53 +151,48 @@
 					<canvas id="targetComputer" class="targetComputer"></canvas>
 					<div class="target-hud-overlay">
 						<div class="bar-label" id="target-name">NO TARGET</div>
-						<div class="bar-label">SHIELDS</div>
-						<div class="segmented-bar" id="target-shield-bar">
-							<div class="segment" data-index="0"></div>
-							<div class="segment" data-index="1"></div>
-							<div class="segment" data-index="2"></div>
-							<div class="segment" data-index="3"></div>
-							<div class="segment" data-index="4"></div>
-							<div class="segment" data-index="5"></div>
-							<div class="segment" data-index="6"></div>
-							<div class="segment" data-index="7"></div>
-							<div class="segment" data-index="8"></div>
-							<div class="segment" data-index="9"></div>
+						<div class="target-stats-row">
+							<div class="target-stats-col">
+								<div class="bar-label">SHIELDS</div>
+								<div class="segmented-bar" id="target-shield-bar">
+									<div class="segment" data-index="0"></div>
+									<div class="segment" data-index="1"></div>
+									<div class="segment" data-index="2"></div>
+									<div class="segment" data-index="3"></div>
+									<div class="segment" data-index="4"></div>
+									<div class="segment" data-index="5"></div>
+									<div class="segment" data-index="6"></div>
+									<div class="segment" data-index="7"></div>
+									<div class="segment" data-index="8"></div>
+									<div class="segment" data-index="9"></div>
+								</div>
+								<div class="bar-label">HULL</div>
+								<div class="segmented-bar" id="target-hull-bar">
+									<div class="segment" data-index="0"></div>
+									<div class="segment" data-index="1"></div>
+									<div class="segment" data-index="2"></div>
+									<div class="segment" data-index="3"></div>
+									<div class="segment" data-index="4"></div>
+									<div class="segment" data-index="5"></div>
+									<div class="segment" data-index="6"></div>
+									<div class="segment" data-index="7"></div>
+									<div class="segment" data-index="8"></div>
+									<div class="segment" data-index="9"></div>
+								</div>
+							</div>
+							<div class="target-stats-col">
+								<div class="panel-readout">SPD <span id="target-speed-readout">--</span></div>
+								<div class="panel-readout">DIST <span id="target-distance-readout">--</span></div>
+								<div class="panel-readout">CARGO <span id="target-cargo-readout">--</span></div>
+							</div>
 						</div>
-						<div class="bar-label">HULL</div>
-						<div class="segmented-bar" id="target-hull-bar">
-							<div class="segment" data-index="0"></div>
-							<div class="segment" data-index="1"></div>
-							<div class="segment" data-index="2"></div>
-							<div class="segment" data-index="3"></div>
-							<div class="segment" data-index="4"></div>
-							<div class="segment" data-index="5"></div>
-							<div class="segment" data-index="6"></div>
-							<div class="segment" data-index="7"></div>
-							<div class="segment" data-index="8"></div>
-							<div class="segment" data-index="9"></div>
-						</div>
-						<div class="panel-readout">SPD <span id="target-speed-readout">--</span></div>
 					</div>
 				</div>
 
-				<!-- HULL INTEGRITY -->
-				<div id="hull" class="hull panel">
-					<div class="panel-title">HULL INTEGRITY</div>
-					<div class="bar-label">HULL</div>
-					<div class="segmented-bar" id="hull-bar">
-						<div class="segment" data-index="0"></div>
-						<div class="segment" data-index="1"></div>
-						<div class="segment" data-index="2"></div>
-						<div class="segment" data-index="3"></div>
-						<div class="segment" data-index="4"></div>
-						<div class="segment" data-index="5"></div>
-						<div class="segment" data-index="6"></div>
-						<div class="segment" data-index="7"></div>
-						<div class="segment" data-index="8"></div>
-						<div class="segment" data-index="9"></div>
-					</div>
-					<div class="panel-readout">THR <span id="throttle-readout">0%</span> · SPD <span id="speed-readout">0.0</span></div>
+				<!-- COMMS LOG (history of toasted messages/events) -->
+				<div id="message-log" class="message-log panel">
+					<div class="panel-title">COMMS LOG</div>
+					<div class="message-log-entries" id="message-log-entries"></div>
 				</div>
 			</div>
 		</div>

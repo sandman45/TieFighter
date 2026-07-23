@@ -19,6 +19,7 @@
     align-items: flex-end;
     padding-bottom: 12px;
     gap: 10px;
+    --side-panel-height: 240px; /* ship-status/message-log height, kept in sync between the two */
 }
 
 /* ── Imperial panel base ── */
@@ -124,12 +125,13 @@
 
 #target-shield-bar .segment,
 #target-hull-bar .segment {
-    height: 22px;
+    height: 14px;
 }
 
 #target-shield-bar,
 #target-hull-bar {
     gap: 3px;
+    margin-bottom: 4px;
 }
 .segmented-bar.hit .segment.active {
     animation: flash-hit 0.25s ease-out;
@@ -145,12 +147,12 @@
     100% { opacity: 0.3; }
 }
 
-/* ── Shields panel ── */
-.shields {
+/* ── Ship status panel (shields, hull, lasers, throttle/speed) ── */
+.ship-status {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    min-height: 150px;
+    justify-content: flex-start;
+    height: var(--side-panel-height);
 }
 
 /* ── Target computer ── */
@@ -163,8 +165,15 @@
 
 .targetComputer {
     width: 100%;
-    height: 170px;
-    background-color: #030d06;
+    height: 158px;
+    background-color: #041a0d;
+    background-image: repeating-linear-gradient(
+        0deg,
+        rgba(0, 204, 68, 0.07),
+        rgba(0, 204, 68, 0.07) 1px,
+        transparent 1px,
+        transparent 3px
+    );
     border: 1px solid #1a3a1a;
     margin-bottom: 8px;
     display: block;
@@ -173,8 +182,25 @@
 .target-hud-overlay {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     gap: 3px;
+}
+
+.target-stats-row {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+}
+
+.target-stats-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.target-stats-col .bar-label {
+    margin-bottom: 2px;
 }
 
 #target-name {
@@ -187,12 +213,52 @@
     text-align: center;
 }
 
-/* ── Hull panel ── */
-.hull {
+#target-name.hostile {
+    color: #ff3333;
+    text-shadow: 0 0 6px #ff3333;
+}
+
+#target-name.friendly {
+    color: #33ff66;
+    text-shadow: 0 0 6px #33ff66;
+}
+
+/* ── Comms log panel (history of toasted messages/events) ── */
+.message-log {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    min-height: 150px;
+    height: var(--side-panel-height);
+}
+
+.message-log-entries {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-right: 4px;
+}
+
+.message-log-entries::-webkit-scrollbar {
+    width: 4px;
+}
+
+.message-log-entries::-webkit-scrollbar-thumb {
+    background: #1a3a1a;
+}
+
+.message-log-entry {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #3a7a3a;
+    border-left: 2px solid #1a3a1a;
+    padding-left: 6px;
+}
+
+.message-log-entry .log-timestamp {
+    color: #1a5a1a;
+    margin-right: 6px;
 }
 
 /* ── Readout line ── */
