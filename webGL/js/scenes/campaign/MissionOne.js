@@ -4,6 +4,7 @@ import Floor from "../../sceneSubjects/Floor.js";
 import CollisionManager from "../../controls/CollisionManager.js";
 import LaserCannons from "../../sceneSubjects/weapons/LaserCannons.js";
 import PlayerControls from "../../controls/PlayerControls.js";
+import InspectionManager from "../../controls/InspectionManager.js";
 import Explosion from "../../particles/Explosion.js";
 import GeneralLights from "../../sceneSubjects/GeneralLights.js";
 import WeaponsCollisionManager from "../../controls/WeaponsCollisionManager.js";
@@ -58,7 +59,7 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
     });
 
     const targetCamera = buildTargetCamera(canvas);
-    const hud = new HUD(ships[2].mesh, targetCamera);
+    const hud = new HUD(null, targetCamera);
 
     // initHUD needs maxShields/maxHull so pass the full player config
     initHUD(campaignConfiguration.player);
@@ -70,6 +71,9 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
         controls = PlayerControls(playerShip.mesh, laser, camera, campaignConfiguration.player, collisionManager, audio);
     }
     let sceneSubjects = [];
+
+    const inspectionManager = InspectionManager({ playerMesh: playerShip.mesh, hud });
+    sceneSubjects.push(inspectionManager);
 
     const explosion = Explosion(scene, "EXPLOSION", audio, camera);
 
@@ -189,6 +193,7 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
         const camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
 
         camera.position.y = 10;
+        camera.layers.enable(1); // see SkyBox.js — main view renders the skybox, target computer doesn't
 
         return camera;
     }

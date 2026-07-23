@@ -311,6 +311,7 @@ export default (canvas, canvas2, sceneSubjects) => {
         const camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
 
         camera.position.y = 10;
+        camera.layers.enable(1); // see SkyBox.js — main view renders the skybox, target computer doesn't
 
         return camera;
     }

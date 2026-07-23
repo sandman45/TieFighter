@@ -87,6 +87,7 @@ export default (canvas, models) => {
         const camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
 
         camera.position.y = 10;
+        camera.layers.enable(1); // see SkyBox.js — skybox lives on layer 1
 
         return camera;
     }
