@@ -2,6 +2,9 @@ import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threej
 import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/loaders/GLTFLoader.js';
 import createFighterFSM from "../ai/FighterFSM.js";
 import createShuttleFSM from "../ai/ShuttleFSM.js";
+import eventBus from "../eventBus/EventBus.js";
+import events from "../eventBus/events.js";
+import { resolveLaserRechargeRate, resolveShieldRechargeRate } from "./shipRechargeConfig.js";
 
 export const Model = {
     TIE_FIGHTER: "models/tie-fighter/tie.glb",
@@ -34,6 +37,8 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
     group.shields = modelConfiguration.shields;
     group.maxHull = modelConfiguration.hull;
     group.maxShields = modelConfiguration.shields;
+    group.laserRechargeRate = resolveLaserRechargeRate(modelConfiguration);
+    group.shieldRechargeRate = resolveShieldRechargeRate(modelConfiguration);
     group.name = modelConfiguration.name;
     group.userId = modelConfiguration.userId ? modelConfiguration.userId : modelConfiguration.designation;
     group.designation = modelConfiguration.designation;
@@ -140,13 +145,39 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
     }
 
     function update(time) {
+        const delta = Math.max(0, time - lastTime);
         if(mixer && time && modelReady){
-            const delta = time - lastTime;
             mixer.update(delta);
         }
         lastTime = time;
         if(fsm) {
             fsm.update();
+        }
+        regenShields(delta);
+    }
+
+    // shields (not hull) trickle-recharge over time for ships that have any;
+    // reuses the PLAYER_DAMAGED/TARGET_DAMAGED shapes the HUD already listens
+    // to for damage, so no HUD changes are needed
+    function regenShields(delta) {
+        if(group.shieldRechargeRate <= 0 || group.hull <= 0 || group.shields >= group.maxShields) return;
+
+        group.shields = Math.min(group.maxShields, group.shields + group.shieldRechargeRate * delta);
+
+        const payload = {
+            shields: group.shields,
+            maxShields: group.maxShields,
+            hull: group.hull,
+            maxHull: group.maxHull,
+        };
+        if(modelConfiguration.playerName) {
+            eventBus.post(events.PLAYER_DAMAGED, payload);
+        } else {
+            eventBus.post(events.TARGET_DAMAGED, {
+                ...payload,
+                userId: group.userId,
+                designation: group.designation,
+            });
         }
     }
 
