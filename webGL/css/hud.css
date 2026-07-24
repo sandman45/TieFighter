@@ -223,6 +223,11 @@
     text-shadow: 0 0 6px #33ff66;
 }
 
+#target-name.neutral {
+    color: #ffdd33;
+    text-shadow: 0 0 6px #ffdd33;
+}
+
 /* ── Comms log panel (history of toasted messages/events) ── */
 .message-log {
     display: flex;

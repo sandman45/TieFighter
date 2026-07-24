@@ -53,8 +53,14 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
             playerShip = ship;
         }
         if(ship.mesh.name === 'SHUTTLE') {
-            console.log(`calling wingsDown on shuttle`);
-            ship.wingsDown();
+            if(ship.mesh.dockTarget) {
+                // starts docked in the ISD hangar — wings folded until it launches
+                console.log(`shuttle starts docked, calling wingsUp`);
+                ship.wingsUp();
+            } else {
+                console.log(`calling wingsDown on shuttle`);
+                ship.wingsDown();
+            }
         }
     });
 

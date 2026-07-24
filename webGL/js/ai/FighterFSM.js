@@ -1,6 +1,7 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 import FiniteStateMachine from "./FiniteStateMachine.js";
 import NpcControls from "../controls/NpcControls.js";
+import { showToast } from "../HUD/hud.js";
 
 export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio, laser }) => {
     const cm = collisionManager;
@@ -315,6 +316,11 @@ export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio
 
                 if(distanceTo(modelGroup, isd) < FORM_RANGE) {
                     logEvent(`FORM_RANGE reached (${distanceTo(modelGroup, isd).toFixed(0)} units from hull) — transitioning to ATTACK`);
+                    // gated to one ship, same as logEvent above, so the squadron's
+                    // three fighters don't each pop their own duplicate toast
+                    if(modelGroup.designation === 'GOLD_LEADER') {
+                        showToast('WARNING: REBEL Y-WINGS DETECTED — ATTACKING ISD VICTORIOUS');
+                    }
                     attackWaypoint = getAttackWaypoint(isd, modelGroup.position);
                     fsm.transition("attack");
                 }

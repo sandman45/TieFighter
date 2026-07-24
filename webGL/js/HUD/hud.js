@@ -96,15 +96,21 @@ export function initHUD(playerConfig) {
         logMessage(`${side} SHIP DESTROYED — ${label}`);
     });
 
-    // applies the identified look (cargo readout + hostile/friendly name color) —
-    // shared by TARGET_CHANGED (re-locking an already-identified ship) and
-    // TARGET_IDENTIFIED (the moment a ship first gets identified)
+    // applies the identified look (cargo readout + hostile/neutral/friendly name
+    // color) — shared by TARGET_CHANGED (re-locking an already-identified ship)
+    // and TARGET_IDENTIFIED (the moment a ship first gets identified)
     function applyIdentification(nameEl, faction, cargo) {
         const cargoEl = document.getElementById('target-cargo-readout');
         if(cargoEl) cargoEl.textContent = (cargo || 'None').toUpperCase();
 
-        nameEl.classList.remove('hostile', 'friendly');
-        nameEl.classList.add(faction === 'REBELLION' ? 'hostile' : 'friendly');
+        nameEl.classList.remove('hostile', 'friendly', 'neutral');
+        if(faction === 'REBELLION') {
+            nameEl.classList.add('hostile');
+        } else if(faction === 'NEUTRAL') {
+            nameEl.classList.add('neutral');
+        } else {
+            nameEl.classList.add('friendly');
+        }
     }
 
     // userId is now destructured from the event payload
@@ -118,7 +124,7 @@ export function initHUD(playerConfig) {
             if(label && identified) {
                 applyIdentification(nameEl, faction, cargo);
             } else {
-                nameEl.classList.remove('hostile', 'friendly');
+                nameEl.classList.remove('hostile', 'friendly', 'neutral');
                 const cargoEl = document.getElementById('target-cargo-readout');
                 if(cargoEl) cargoEl.textContent = label ? 'UNKNOWN' : '--';
             }

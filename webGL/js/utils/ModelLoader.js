@@ -2,6 +2,7 @@ import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threej
 import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/loaders/GLTFLoader.js';
 import createFighterFSM from "../ai/FighterFSM.js";
 import createShuttleFSM from "../ai/ShuttleFSM.js";
+import createInterceptorFSM from "../ai/InterceptorFSM.js";
 import eventBus from "../eventBus/EventBus.js";
 import events from "../eventBus/events.js";
 import { resolveLaserRechargeRate, resolveShieldRechargeRate } from "./shipRechargeConfig.js";
@@ -44,7 +45,19 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
     group.designation = modelConfiguration.designation;
     group.faction = modelConfiguration.faction;
     group.cargo = modelConfiguration.cargo;
+    group.dockTarget = modelConfiguration.dockTarget;
+    // the only reliable way to pick the player's own mesh out of scene.children —
+    // every ship gets a truthy userId (falling back to its designation), so
+    // faction/userId checks alone can't distinguish the player from NPCs
+    group.playerName = modelConfiguration.playerName;
     group.speed = modelConfiguration.speed;
+    // ships with a spawnTrigger (see InterceptorFSM) start hidden and off the
+    // targeting scope entirely — they "arrive" (become visible/targetable)
+    // only once their trigger fires, rather than sitting in plain sight the
+    // whole mission just waiting far away. Every other ship defaults to
+    // arrived:true so this has no effect on existing behavior.
+    group.arrived = !modelConfiguration.spawnTrigger;
+    if(!group.arrived) group.visible = false;
     group.position.set(modelConfiguration.position.x, modelConfiguration.position.y, modelConfiguration.position.z);
 
     if(modelGltf) {
@@ -57,6 +70,8 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
         && modelConfiguration.name !== 'ISD' && modelConfiguration.name !== 'TRANSPORT') {
         if(modelConfiguration.name === 'SHUTTLE') {
             fsm = createShuttleFSM({ scene, modelGroup: group, modelConfiguration, collisionManager: cm, audio, laser, wingsUp, wingsDown });
+        } else if(modelConfiguration.name === 'X_WING') {
+            fsm = createInterceptorFSM({ scene, modelGroup: group, modelConfiguration, collisionManager: cm, audio, laser });
         } else {
             fsm = createFighterFSM({ scene, modelGroup: group, modelConfiguration, collisionManager: cm, audio, laser });
         }

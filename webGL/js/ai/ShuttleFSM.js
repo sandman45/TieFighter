@@ -1,12 +1,38 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 import FiniteStateMachine from "./FiniteStateMachine.js";
 import NpcControls from "../controls/NpcControls.js";
+import EventBus from "../eventBus/EventBus.js";
+import events from "../eventBus/events.js";
+
+// EventBus has no unsubscribe, and this factory re-subscribes on every mission
+// (re)play — without a run guard, replaying the mission would stack duplicate
+// closures, each capable of firing an old scene's fsm.transition (see the
+// identical guard in MissionObjectives.js)
+let latestRunId = 0;
 
 export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio, laser, wingsUp, wingsDown }) => {
+    const runId = ++latestRunId;
     const cm = collisionManager;
     let fsm;
 
-    function getISD() {
+    // Shuttles with a dockTarget run a scripted round trip: start docked at the
+    // ISD, wait for clearance, fly out and dock at the target, then fly back and
+    // dock at the ISD for good. Shuttles without one keep the original ambient
+    // behavior — an endless patrol loop docking at the ISD over and over.
+    const scriptedDocking = !!modelConfiguration.dockTarget;
+
+    function getShipByDesignation(designation) {
+        if(!designation) return null;
+        let found = null;
+        scene.children.forEach(child => {
+            if(child.designation === designation) found = child;
+        });
+        return found;
+    }
+
+    // older configs (e.g. the multiplayer shuttle) don't set homeDesignation,
+    // so fall back to matching the one ISD in the scene by model name
+    function getISDByName() {
         let isd = null;
         scene.children.forEach(child => {
             if(child.name === 'ISD') isd = child;
@@ -14,31 +40,86 @@ export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio
         return isd;
     }
 
+    function getHomeShip() {
+        return modelConfiguration.homeDesignation
+            ? getShipByDesignation(modelConfiguration.homeDesignation)
+            : getISDByName();
+    }
+
+    function getTargetShip() {
+        return getShipByDesignation(modelConfiguration.dockTarget);
+    }
+
+    // the ISD is scaled roughly 40x a transport, so its dock/patrol offsets
+    // need to be an order of magnitude larger or the shuttle ends up hovering
+    // deep inside the hull instead of alongside the docking bay
+    function homePatrolY(ship) { return ship.position.y - 20; }
+    function homeDockY(ship)   { return ship.position.y + 30; }
+    function homePatrolZ(ship) { return ship.position.z - 20; }
+
+    // docking-cycle offsets for TRANSPORT_A — the dock point needs to clear
+    // the transport's hull (the GR-75 model is much bigger than its "scale: 1"
+    // suggests), so the shuttle holds station clear of the ship rather than
+    // flying into it. patrolY sits just under dockY (rather than well below
+    // it, like the ISD's offsets do) so the DEPART/RETURN approach — which
+    // passes close alongside the hull in X/Z on its way to/from the dock
+    // point — stays above the hull the whole time instead of only clearing
+    // it in the final RISE climb.
+    function targetPatrolY(ship) { return ship.position.y + 8; }
+    function targetDockY(ship)   { return ship.position.y + 10; }
+    function targetPatrolZ(ship) { return ship.position.z - 5; }
+
+    const ANCHOR = {
+        home: {
+            getShip: getHomeShip,
+            patrolY: homePatrolY,
+            dockY: homeDockY,
+            patrolZ: homePatrolZ,
+            riseZOffset: -80,
+            waypointA: ship => new THREE.Vector3(ship.position.x + 1000, homePatrolY(ship), homePatrolZ(ship)),
+            waypointB: ship => new THREE.Vector3(ship.position.x - 15, homePatrolY(ship), homePatrolZ(ship) - 80),
+        },
+        target: {
+            getShip: getTargetShip,
+            patrolY: targetPatrolY,
+            dockY: targetDockY,
+            patrolZ: targetPatrolZ,
+            riseZOffset: -25,
+            waypointA: ship => new THREE.Vector3(ship.position.x - 40, targetPatrolY(ship), targetPatrolZ(ship)),
+            waypointB: ship => new THREE.Vector3(ship.position.x - 15, targetPatrolY(ship), targetPatrolZ(ship) - 20),
+        },
+    };
+
     function distanceTo(meshA, target) {
         if(!meshA || !target) return Infinity;
         const targetPos = target.isVector3 ? target : target.position;
         return meshA.position.distanceTo(targetPos);
     }
 
-    const PATROL_DISTANCE  = 1000;
     const ARRIVE_THRESHOLD = 20;
-    const DOCK_WAIT        = 20000;
+    const HOME_DOCK_WAIT    = 20000; // legacy ambient patrol loop, unchanged
+    const TARGET_DOCK_WAIT  = 60000; // ~1 minute alongside the boarded transport
 
+    // which anchor the shuttle is currently docked at / currently flying toward
+    let dockedAt = 'home';
+    let headingTo = scriptedDocking ? null : 'home';
     let waypointA = null;
     let waypointB = null;
     let dockTimer = 0;
+    let dockTimerActive = false;
 
-    function getPatrolY(isd) { return isd.position.y - 20; }
-    function getDockY(isd)   { return isd.position.y + 30; }
-    function getPatrolZ(isd) { return isd.position.z - 20; }
+    function initWaypoints(which) {
+        if(!which || waypointA) return;
+        const ship = ANCHOR[which].getShip();
+        if(!ship) return;
+        waypointA = ANCHOR[which].waypointA(ship);
+        waypointB = ANCHOR[which].waypointB(ship);
+    }
 
-    function initWaypoints() {
-        const isd = getISD();
-        if(!isd || waypointA) return;
-        const y = getPatrolY(isd);
-        const z = getPatrolZ(isd);
-        waypointA = new THREE.Vector3(isd.position.x + PATROL_DISTANCE, y, z);
-        waypointB = new THREE.Vector3(isd.position.x - 15, y, z - 80);
+    function setHeadingTo(which) {
+        headingTo = which;
+        waypointA = null;
+        waypointB = null;
     }
 
     function seedVelocityToward(target) {
@@ -55,16 +136,27 @@ export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio
 
     fsm = new FiniteStateMachine({
 
+        // shuttle sits docked at the ISD until the player has identified the
+        // ship it's meant to board (the freighter suspected of carrying
+        // rebel contraband) — only then is it cleared to launch
+        holding: {
+            enter: () => {
+                console.log(`${modelGroup.designation} SHUTTLE entering HOLDING — awaiting inspection clearance`);
+                modelConfiguration.flight = null;
+            },
+            update: () => {}
+        },
+
         depart: {
             enter: () => {
                 console.log(`${modelGroup.designation} SHUTTLE entering DEPART`);
-                initWaypoints();
+                initWaypoints(headingTo);
                 if(!modelConfiguration.flight) {
                     seedVelocityToward(waypointA);
                 }
             },
             update: () => {
-                initWaypoints();
+                initWaypoints(headingTo);
                 if(!waypointA) return;
 
                 const collision = NpcControls(
@@ -86,7 +178,7 @@ export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio
         return: {
             enter: () => {
                 console.log(`${modelGroup.designation} SHUTTLE entering RETURN`);
-                initWaypoints();
+                initWaypoints(headingTo);
                 seedVelocityToward(waypointB);
             },
             update: () => {
@@ -149,13 +241,14 @@ export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio
                 modelConfiguration.flight.velocity.set(0, 0, 0);
             },
             update: () => {
-                const isd = getISD();
-                if(!isd) return;
+                const anchor = ANCHOR[headingTo];
+                const ship = anchor && anchor.getShip();
+                if(!ship) return;
 
                 const riseTarget = new THREE.Vector3(
-                    isd.position.x,
-                    getDockY(isd),
-                    getPatrolZ(isd) - 80
+                    ship.position.x,
+                    anchor.dockY(ship),
+                    anchor.patrolZ(ship) + anchor.riseZOffset
                 );
 
                 const dist = modelGroup.position.distanceTo(riseTarget);
@@ -183,14 +276,50 @@ export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio
 
         docked: {
             enter: () => {
-                console.log(`${modelGroup.designation} SHUTTLE entering DOCKED`);
-                dockTimer = Date.now() + DOCK_WAIT;
+                console.log(`${modelGroup.designation} SHUTTLE entering DOCKED at ${headingTo}`);
+                dockedAt = headingTo;
+
                 if(modelConfiguration.flight) {
                     modelConfiguration.flight.velocity.set(0, 0, 0);
                 }
+
+                if(!scriptedDocking) {
+                    // legacy ambient loop: always heads back to the same anchor
+                    setHeadingTo('home');
+                    dockTimer = Date.now() + HOME_DOCK_WAIT;
+                    dockTimerActive = true;
+                } else if(dockedAt === 'target') {
+                    setHeadingTo('home');
+                    dockTimer = Date.now() + TARGET_DOCK_WAIT;
+                    dockTimerActive = true;
+                } else {
+                    // back home for good — stay docked, no further departure
+                    headingTo = null;
+                    dockTimerActive = false;
+
+                    // tells MissionObjectives the escort/boarding run is
+                    // actually finished, not just that the transport was
+                    // identified — the shuttle still has to make it home
+                    if(scriptedDocking) {
+                        EventBus.post(events.SHUTTLE_DOCKED, { designation: modelGroup.designation });
+
+                        // the run is over — despawn shortly after so the
+                        // docking itself is still visible for a moment
+                        // rather than vanishing the instant it arrives.
+                        // Reuses the same arrived flag ModelLoader/
+                        // InterceptorFSM use to hide/exclude a ship from
+                        // targeting, so the shuttle drops off the target
+                        // cycle exactly like a ship that hasn't arrived yet.
+                        setTimeout(() => {
+                            if(runId !== latestRunId) return;
+                            modelGroup.visible = false;
+                            modelGroup.arrived = false;
+                        }, 3000);
+                    }
+                }
             },
             update: () => {
-                if(Date.now() > dockTimer) {
+                if(dockTimerActive && Date.now() > dockTimer) {
                     fsm.transition("lower");
                 }
             }
@@ -204,15 +333,27 @@ export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio
                 }
                 modelConfiguration.flight.velocity.set(0, 0, 0);
                 wingsDown();
+                // precompute the next leg's waypoints so LOWER can start
+                // turning toward them while still descending off the dock
+                initWaypoints(headingTo);
+
+                // undocking from the boarded transport — the inspection party
+                // is now aboard with the rebel sympathizers found on the manifest,
+                // so the shuttle's own cargo readout should reflect its prisoners
+                // for the trip home (see TARGET_IDENTIFIED / target-computer cargo readout)
+                if(scriptedDocking && dockedAt === 'target') {
+                    modelGroup.cargo = 'Captured Rebels';
+                }
             },
             update: () => {
-                const isd = getISD();
-                if(!isd) return;
+                const anchor = ANCHOR[dockedAt];
+                const ship = anchor && anchor.getShip();
+                if(!ship) return;
 
                 const lowerTarget = new THREE.Vector3(
-                    isd.position.x,
-                    getPatrolY(isd),
-                    getPatrolZ(isd) - 80
+                    ship.position.x,
+                    anchor.patrolY(ship),
+                    anchor.patrolZ(ship) + anchor.riseZOffset
                 );
 
                 const dist = modelGroup.position.distanceTo(lowerTarget);
@@ -225,12 +366,16 @@ export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio
                     modelGroup.position.add(step);
                 }
 
-                // rotate toward waypointA while lowering
+                // rotate toward the next waypoint while lowering
                 if(waypointA) {
                     const toWaypoint = new THREE.Vector3()
                         .subVectors(waypointA, modelGroup.position)
                         .normalize();
-                    const targetYaw = Math.atan2(toWaypoint.x, toWaypoint.z);
+                    // nose is local -Z (see facingDir below / NpcControls.flightUpdate),
+                    // so the target heading needs the same +PI flip those use —
+                    // without it the shuttle turns to face directly away from
+                    // the waypoint and flies off backwards
+                    const targetYaw = Math.atan2(toWaypoint.x, toWaypoint.z) + Math.PI;
                     let yawDiff = targetYaw - modelGroup.rotation.y;
                     while(yawDiff >  Math.PI) yawDiff -= Math.PI * 2;
                     while(yawDiff < -Math.PI) yawDiff += Math.PI * 2;
@@ -252,14 +397,17 @@ export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio
         turnToDepart: {
             enter: () => {
                 console.log(`${modelGroup.designation} SHUTTLE entering TURN_TO_DEPART`);
+                initWaypoints(headingTo);
             },
             update: () => {
+                initWaypoints(headingTo);
                 if(!waypointA) return;
 
                 const toWaypoint = new THREE.Vector3()
                     .subVectors(waypointA, modelGroup.position)
                     .normalize();
-                const targetYaw = Math.atan2(toWaypoint.x, toWaypoint.z);
+                // see the identical +PI note in LOWER above
+                const targetYaw = Math.atan2(toWaypoint.x, toWaypoint.z) + Math.PI;
 
                 let yawDiff = targetYaw - modelGroup.rotation.y;
                 while(yawDiff >  Math.PI) yawDiff -= Math.PI * 2;
@@ -279,7 +427,14 @@ export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio
             }
         },
 
-    }, "depart");
+    }, scriptedDocking ? "holding" : "depart");
+
+    EventBus.subscribe(events.TARGET_IDENTIFIED, ({ designation }) => {
+        if(runId !== latestRunId) return;
+        if(fsm.state !== 'holding' || designation !== modelConfiguration.dockTarget) return;
+        setHeadingTo('target');
+        fsm.transition('lower');
+    });
 
     return fsm;
 };

@@ -104,6 +104,10 @@ export default {
             destroyDesignations: ["GOLD_LEADER", "GOLD_TWO", "GOLD_THREE"],
             protectDesignations: ["VICTORIOUS", "TYDERIAN", "TRANSPORT_A"],
             inspectDesignations: ["TRANSPORT_A"],
+            // mission isn't "complete" the instant TRANSPORT_A is identified —
+            // TYDERIAN still has to fly the boarding run and dock back at the
+            // ISD with the prisoners (see ShuttleFSM's SHUTTLE_DOCKED post)
+            escortDesignations: ["TYDERIAN"],
             dockDesignation: "VICTORIOUS"
         },
         weapons: [
@@ -157,7 +161,10 @@ export default {
             {
                 designation: "TYDERIAN",
                 name: 'SHUTTLE',
-                position: { x: 20, y: 20, z: -20 },
+                // parked at the ISD's own dock point (VICTORIOUS.position with
+                // ShuttleFSM's home dockY/patrolZ+riseZOffset applied) so it
+                // starts already docked in the hangar, not floating nearby
+                position: { x: 20, y: 70, z: -90 },
                 rotation: { y: 3.15, x:0, z:0 },
                 speed: .20,
                 scale: 3,
@@ -167,6 +174,13 @@ export default {
                 turnRate: 0.006,
                 autoForward: false,
                 faction: "IMPERIAL",
+                // TYDERIAN stays docked at VICTORIOUS (home) until this
+                // designation is identified by the player (see
+                // InspectionManager/MissionObjectives) — only then does
+                // ShuttleFSM undock it from the ISD and send it to dock with
+                // the transport, then bring it back to dock at the ISD again
+                homeDesignation: "VICTORIOUS",
+                dockTarget: "TRANSPORT_A",
                 weapons: {
                     firing: false
                 }
@@ -183,8 +197,80 @@ export default {
                 rollSpeed: .009,
                 turnRate: 0.006,
                 autoForward: false,
-                faction: "IMPERIAL",
+                faction: "NEUTRAL",
                 cargo: "Rebel Sympathizers",
+                weapons: {
+                    firing: false
+                }
+            },
+            {
+                designation: "TRANSPORT_B",
+                name: 'TRANSPORT',
+                position: { x: 1140, y: 65, z: 90 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .10,
+                scale: 1,
+                hull: 100,
+                shields: 100,
+                rollSpeed: .009,
+                turnRate: 0.006,
+                autoForward: false,
+                faction: "NEUTRAL",
+                cargo: "Machine Parts",
+                weapons: {
+                    firing: false
+                }
+            },
+            {
+                designation: "TRANSPORT_C",
+                name: 'TRANSPORT',
+                position: { x: 860, y: 35, z: -110 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .10,
+                scale: 1,
+                hull: 100,
+                shields: 100,
+                rollSpeed: .009,
+                turnRate: 0.006,
+                autoForward: false,
+                faction: "NEUTRAL",
+                cargo: "Medical Supplies",
+                weapons: {
+                    firing: false
+                }
+            },
+            {
+                designation: "TRANSPORT_D",
+                name: 'TRANSPORT',
+                position: { x: 1080, y: 80, z: -180 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .10,
+                scale: 1,
+                hull: 100,
+                shields: 100,
+                rollSpeed: .009,
+                turnRate: 0.006,
+                autoForward: false,
+                faction: "NEUTRAL",
+                cargo: "Mining Equipment",
+                weapons: {
+                    firing: false
+                }
+            },
+            {
+                designation: "TRANSPORT_E",
+                name: 'TRANSPORT',
+                position: { x: 950, y: 20, z: 140 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .10,
+                scale: 1,
+                hull: 100,
+                shields: 100,
+                rollSpeed: .009,
+                turnRate: 0.006,
+                autoForward: false,
+                faction: "NEUTRAL",
+                cargo: "Foodstuffs",
                 weapons: {
                     firing: false
                 }
@@ -238,6 +324,79 @@ export default {
                 autoForward: false,
                 faction: "REBELLION",
                 target: "ISD",
+                weapons: {
+                    firing: false
+                }
+            },
+            // Rebel intercept flight — hidden and off the targeting scope
+            // (ModelLoader's arrived flag) at a spawn point roughly as far out
+            // as GOLD squadron's (~1150-1200 units from the ISD) but in a
+            // distinct location — GOLD approaches from far -X/-Z, the
+            // transport cluster sits at x:860-1140/z:-180..180, so these come
+            // in from far +Z instead. They stay hidden until the player
+            // identifies TRANSPORT_A (the same moment that clears TYDERIAN to
+            // launch, see ShuttleFSM) — at that instant they "hyperspace in"
+            // (become visible/targetable) and immediately fly at TYDERIAN's
+            // CURRENT live position — not a fixed point — falling back to the
+            // player only once TYDERIAN's destroyed (InterceptorFSM).
+            // Keep well inside +/-1500 (floor.size is 3000x3000 — see Floor.js's
+            // checkCollision): a spawn past that border is flagged as a
+            // permanent "floor-border" collision, which silently blocks
+            // flightUpdate from ever moving the ship, exactly like
+            // RED_TWO/RED_THREE did at x:1580 before.
+            {
+                designation: "RED_LEADER",
+                name: 'X_WING',
+                position: { x: -100, y: 150, z: 1150 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .3,
+                scale: 5,
+                hull: 120,
+                shields: 100,
+                rollSpeed: .012,
+                turnRate: 0.008,
+                autoForward: false,
+                faction: "REBELLION",
+                spawnTrigger: "TRANSPORT_A",
+                escortTarget: "TYDERIAN",
+                weapons: {
+                    firing: false
+                }
+            },
+            {
+                designation: "RED_TWO",
+                name: 'X_WING',
+                position: { x: -220, y: 130, z: 1230 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .3,
+                scale: 5,
+                hull: 120,
+                shields: 100,
+                rollSpeed: .012,
+                turnRate: 0.008,
+                autoForward: false,
+                faction: "REBELLION",
+                spawnTrigger: "TRANSPORT_A",
+                escortTarget: "TYDERIAN",
+                weapons: {
+                    firing: false
+                }
+            },
+            {
+                designation: "RED_THREE",
+                name: 'X_WING',
+                position: { x: 20, y: 130, z: 1230 },
+                rotation: { y: 3.15, x:0, z:0 },
+                speed: .3,
+                scale: 5,
+                hull: 120,
+                shields: 100,
+                rollSpeed: .012,
+                turnRate: 0.008,
+                autoForward: false,
+                faction: "REBELLION",
+                spawnTrigger: "TRANSPORT_A",
+                escortTarget: "TYDERIAN",
                 weapons: {
                     firing: false
                 }
