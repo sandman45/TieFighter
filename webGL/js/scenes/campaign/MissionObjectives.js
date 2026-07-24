@@ -1,6 +1,7 @@
 import EventBus from "../../eventBus/EventBus.js";
 import events from "../../eventBus/events.js";
 import PilotStore from "../../pilot/PilotStore.js";
+import { showToast } from "../../HUD/hud.js";
 
 function toDisplayName(designation) {
     return designation
@@ -27,10 +28,14 @@ export default ({ config, playerDesignation }) => {
     const remainingEnemies = new Set(config.destroyDesignations);
     const protectedDesignations = new Set(config.protectDesignations);
     const remainingInspections = new Set(config.inspectDesignations);
+    // ships (e.g. TYDERIAN) whose scripted docking run must actually finish —
+    // identifying the transport only clears them to launch, it doesn't mean
+    // they've made it back to dock at the ISD yet
+    const remainingEscorts = new Set(config.escortDesignations);
     let missionEnded = false;
 
     function checkComplete() {
-        if(remainingEnemies.size === 0 && remainingInspections.size === 0) {
+        if(remainingEnemies.size === 0 && remainingInspections.size === 0 && remainingEscorts.size === 0) {
             EventBus.post(events.MISSION_OBJECTIVES_MET);
         }
     }
@@ -44,6 +49,15 @@ export default ({ config, playerDesignation }) => {
         if(runId !== latestRunId || missionEnded || !designation) return;
         if(remainingInspections.has(designation)) {
             remainingInspections.delete(designation);
+            checkComplete();
+        }
+    });
+
+    EventBus.subscribe(events.SHUTTLE_DOCKED, ({ designation }) => {
+        if(runId !== latestRunId || missionEnded || !designation) return;
+        if(remainingEscorts.has(designation)) {
+            remainingEscorts.delete(designation);
+            showToast(`${toDisplayName(designation)} HAS RETURNED WITH THE PRISONERS — OBJECTIVE COMPLETE`);
             checkComplete();
         }
     });
