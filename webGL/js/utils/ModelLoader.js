@@ -71,7 +71,7 @@ export default (scene, modelConfiguration, model, modelGltf, collisionManager, a
         if(modelConfiguration.name === 'SHUTTLE') {
             fsm = createShuttleFSM({ scene, modelGroup: group, modelConfiguration, collisionManager: cm, audio, laser, wingsUp, wingsDown });
         } else if(modelConfiguration.name === 'X_WING') {
-            fsm = createInterceptorFSM({ scene, modelGroup: group, modelConfiguration, collisionManager: cm, audio, laser });
+            fsm = createInterceptorFSM({ scene, modelGroup: group, modelConfiguration, collisionManager: cm, audio, laser, wingsUp, wingsDown });
         } else {
             fsm = createFighterFSM({ scene, modelGroup: group, modelConfiguration, collisionManager: cm, audio, laser });
         }
