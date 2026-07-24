@@ -254,13 +254,6 @@ export default (views, screen) => {
         if(mp){
             controls = mp.getControls();
         }
-        if(keyCode === 88){
-            sceneSubjects.forEach(sub=>{
-                if(sub.playAnimations){
-                    sub.playAnimations();
-                }
-            });
-        }
         if(controls){
             controls.onKeyDown(keyCode, duration);
         }

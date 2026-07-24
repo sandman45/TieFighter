@@ -35,7 +35,7 @@ const latestRunIdByDesignation = new Map();
 // same attack/egress shape as FighterFSM's ISD attack runs, just without any
 // of FighterFSM's ISD-hull-shaped avoidance/waypoint machinery, since neither
 // the shuttle nor the player have anything like the ISD's hull to route around.
-export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio, laser }) => {
+export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio, laser, wingsUp, wingsDown }) => {
     const runId = (latestRunIdByDesignation.get(modelGroup.designation) || 0) + 1;
     latestRunIdByDesignation.set(modelGroup.designation, runId);
     const cm = collisionManager;
@@ -305,6 +305,17 @@ export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio
         withdraw: {
             enter: () => {
                 console.log(`${modelGroup.designation} X-WING entering WITHDRAW — returning to hyperspace point`);
+
+                // gated to one ship so the flight's three fighters don't each
+                // pop their own duplicate toast — same convention as the
+                // arrival toast/FighterFSM's logEvent
+                if(modelGroup.designation === 'RED_LEADER') {
+                    showToast('REBEL X-WINGS RETREATING — BREAKING OFF ATTACK');
+                }
+
+                // S-foils closed for the cruise back to the hyperspace point
+                wingsUp();
+
                 const home = modelConfiguration.position;
                 const target = new THREE.Vector3(home.x, home.y, home.z);
                 const initialVelocity = new THREE.Vector3()
@@ -356,6 +367,10 @@ export default ({ scene, modelGroup, modelConfiguration, collisionManager, audio
         // targeting scope at the exact moment it starts moving
         modelGroup.visible = true;
         modelGroup.arrived = true;
+
+        // S-foils into attack position — same play-half-of-"Take 01" trick
+        // ModelLoader wires up for the shuttle's wings
+        wingsDown();
 
         // gated to one ship so the flight's three fighters don't each pop
         // their own duplicate toast — same convention as FighterFSM's logEvent
