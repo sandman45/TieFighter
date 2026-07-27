@@ -25,7 +25,7 @@ export default {
                 { id: 'nav1',      x: 0.60, y: 0.38, label: 'NAV 1',           type: 'nav',     primary: true  },
                 { id: 'shuttle',   x: 0.65, y: 0.45, label: 'TYDERIAN',        type: 'friendly'               },
                 { id: 'nav2',      x: 0.72, y: 0.48, label: 'NAV 2',           type: 'nav',     primary: true  },
-                { id: 'transport', x: 0.80, y: 0.50, label: 'TRANSPORT ALPHA', type: 'friendly'               },
+                { id: 'transport', x: 0.80, y: 0.50, label: 'FREIGHTER TRAFFIC', type: 'friendly'             },
                 { id: 'nav3',      x: 0.72, y: 0.40, label: 'NAV 3',           type: 'nav',     primary: true  },
                 // V formation — GOLD_LEADER at the tip nearest the ISD, GOLD_TWO/THREE
                 // trailing behind on either side, matching their in-game spawn wedge
@@ -42,7 +42,8 @@ export default {
                     text: `
                     <p>Following the Rebel defeat on <span class="highlight">HOTH</span>, freighter traffic has increased in the <span class="highlight">JAVIN SECTOR</span>. Imperial Intelligence suspects Rebel forces are attempting to pass through <span class="highlight">OUTPOST D-34</span>.</p>
                     <p>Three Y-Wing bombers designated <span class="highlight">GOLD SQUADRON</span> have been detected on an attack vector toward the <span class="highlight">ISD VICTORIOUS</span>. You will intercept and destroy them before they reach the Star Destroyer.</p>
-                    <p>Simultaneously, <span class="highlight">SHUTTLE TYDERIAN</span> is conducting docking operations with <span class="highlight">TRANSPORT ALPHA</span> to transfer critical cargo. The shuttle must not be interrupted.</p>
+                    <p>Several freighters are inbound through the checkpoint. It is not yet known which, if any, is carrying Rebel sympathizers — each must be inspected. <span class="highlight">SHUTTLE TYDERIAN</span> is standing by at the ISD, ready to launch and board whichever transport is confirmed. Once under way, the shuttle must not be interrupted.</p>
+                    <p>Imperial Intelligence warns that if Rebel sympathizers are confirmed aboard a transport, an escort of Rebel starfighters is likely lurking nearby and will move to intercept <span class="highlight">SHUTTLE TYDERIAN</span> once it takes the prisoners aboard. Be ready to engage additional hostiles the moment a transport is identified.</p>
                 `
                 },
                 objectives: {
@@ -50,16 +51,15 @@ export default {
                     text: `
                     <div class="objective-item"><span class="obj-marker">►</span><span>Destroy all <span class="highlight">GOLD SQUADRON</span> Y-Wing bombers</span></div>
                     <div class="objective-item"><span class="obj-marker">►</span><span>Protect <span class="highlight">ISD VICTORIOUS</span> from bomber attack runs</span></div>
-                    <div class="objective-item"><span class="obj-marker">►</span><span>Protect <span class="highlight">SHUTTLE TYDERIAN</span> during docking operations</span></div>
-                    <p style="margin-top:10px; color: var(--text-dim); font-size:9px;">Loss of the ISD Victorious will result in mission failure.</p>
+                    <div class="objective-item"><span class="obj-marker">►</span><span>Protect the confirmed transport during boarding operations</span></div>
+                    <div class="objective-item"><span class="obj-marker">►</span><span>Escort <span class="highlight">SHUTTLE TYDERIAN</span> through its boarding run and back to the ISD</span></div>
+                    <p style="margin-top:10px; color: var(--text-dim); font-size:9px;">Loss of the ISD Victorious, the boarded transport, or Shuttle Tyderian will result in mission failure.</p>
                 `
                 },
                 secondary: {
                     header: 'SECONDARY OBJECTIVES',
                     text: `
-                    <div class="objective-item"><span class="obj-marker">◆</span><span>Escort <span class="highlight">SHUTTLE TYDERIAN</span> during docking operations with <span class="highlight">TRANSPORT ALPHA</span></span></div>
                     <div class="objective-item"><span class="obj-marker">◆</span><span>Inspect incoming freighter traffic for <span class="highlight">REBEL CONTRABAND</span></span></div>
-                    <div class="objective-item"><span class="obj-marker">◆</span><span>Capture <span class="highlight">GOLD LEADER</span> — disable, do not destroy</span></div>
                     <p style="margin-top:10px; color: var(--text-dim); font-size:9px;">Secondary objectives are optional but will be noted in your Imperial service record.</p>
                 `
                 },
@@ -82,6 +82,9 @@ export default {
                     <p>CONFIRMED HOSTILES:</p>
                     <div class="objective-item"><span class="obj-marker" style="color:#cc2200">▲</span><span><span class="highlight">GOLD SQUADRON</span> — 3× BTL Y-WING · MEDIUM THREAT</span></div>
                     <p style="margin-top:8px; color: var(--text-dim); font-size:9px;">Y-Wings are heavily armoured with shields. Attack from the rear. They will attempt attack runs on the ISD — do not let them reach weapons range.</p>
+                    <p style="margin-top:8px;">POSSIBLE HOSTILES:</p>
+                    <div class="objective-item"><span class="obj-marker" style="color:#cc2200">▲</span><span>UNIDENTIFIED X-WING ESCORT · MEDIUM THREAT</span></div>
+                    <p style="margin-top:8px; color: var(--text-dim); font-size:9px;">Not yet detected. If a transport is confirmed to be carrying Rebel sympathizers, expect X-Wing fighters to arrive without warning and target SHUTTLE TYDERIAN in an attempt to free the prisoners — they will turn on you if the shuttle is destroyed first.</p>
                 `
                 }
             }

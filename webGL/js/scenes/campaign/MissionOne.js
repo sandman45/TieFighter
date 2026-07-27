@@ -12,6 +12,8 @@ import ModelLoader, { Model } from "../../utils/ModelLoader.js";
 import FlyControls from "../../controls/FlyControls.js";
 import MissionObjectives from "./MissionObjectives.js";
 import DockingManager from "../../controls/DockingManager.js";
+import MissionFailureManager from "../../controls/MissionFailureManager.js";
+import TransportArrivalManager from "../../controls/TransportArrivalManager.js";
 
 import {parseConfiguration} from "../../utils/SceneConfigUtils.js";
 import globalConfiguration from "../../../sceneConfig.js";
@@ -93,10 +95,28 @@ export default (canvas, canvas2, models, campaignConfiguration) => {
         const dockingManager = DockingManager({
             playerMesh: playerShip.mesh,
             targetMesh: dockTarget && dockTarget.mesh,
-            flyControls: controls
+            flyControls: controls,
+            isdDesignation: campaignConfiguration.objectives.dockDesignation
         });
         controls.dockingManager = dockingManager;
         sceneSubjects.push(dockingManager);
+
+        const missionFailureManager = MissionFailureManager({
+            scene,
+            playerMesh: playerShip.mesh,
+            explosion,
+            isdDesignation: campaignConfiguration.objectives.dockDesignation
+        });
+        sceneSubjects.push(missionFailureManager);
+
+        const transports = ships.filter(ship => ship.mesh.name === 'TRANSPORT').map(ship => ship.mesh);
+        if(transports.length > 0) {
+            const transportArrivalManager = TransportArrivalManager({
+                transports,
+                escortTrigger: campaignConfiguration.objectives.escortDesignations[0]
+            });
+            sceneSubjects.push(transportArrivalManager);
+        }
     }
 
     const sc = [

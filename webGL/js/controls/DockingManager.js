@@ -12,17 +12,28 @@ function getBoxCenter(mesh) {
     return center;
 }
 
-export default ({ playerMesh, targetMesh, flyControls }) => {
+export default ({ playerMesh, targetMesh, flyControls, isdDesignation }) => {
     const promptElement = document.getElementById('dock-prompt');
     let objectivesMet = false;
+    // a failure that leaves the ISD itself intact (e.g. losing the shuttle or
+    // the transport) still lets the player fly home and dock — that return
+    // trip is what actually ends the mission, rather than cutting straight
+    // to the debrief screen. Losing the ISD is handled separately (see
+    // MissionFailureManager) since there's nothing left to dock at.
+    let failed = false;
     let docked = false;
 
     EventBus.subscribe(events.MISSION_OBJECTIVES_MET, () => {
         objectivesMet = true;
     });
 
+    EventBus.subscribe(events.MISSION_FAILED, ({ designation }) => {
+        if(designation === isdDesignation) return;
+        failed = true;
+    });
+
     function isEligible() {
-        if(!objectivesMet || docked || !targetMesh || playerMesh.hull <= 0) return false;
+        if((!objectivesMet && !failed) || docked || !targetMesh || playerMesh.hull <= 0 || targetMesh.hull <= 0) return false;
         const distance = playerMesh.position.distanceTo(getBoxCenter(targetMesh));
         return distance < DOCK_RANGE && parseFloat(flyControls.throttle) <= DOCK_THROTTLE_THRESHOLD;
     }
@@ -37,7 +48,7 @@ export default ({ playerMesh, targetMesh, flyControls }) => {
         if(!isEligible()) return;
         docked = true;
         if(promptElement) promptElement.style.visibility = 'hidden';
-        EventBus.post(events.MISSION_COMPLETE);
+        EventBus.post(failed ? events.MISSION_FAILED_RETURNED : events.MISSION_COMPLETE);
     }
 
     return { update, attemptDock };
