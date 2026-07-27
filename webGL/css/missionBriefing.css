@@ -89,6 +89,24 @@
     text-shadow: 0 0 10px var(--red);
 }
 
+/* debrief text reads at a glance rather than being skimmed like the briefing
+   panel, so bump it well past that screen's baseline sizes */
+.debrief-panel .briefing-header {
+    font-size: 16px;
+    padding: 10px 14px;
+}
+.debrief-panel .briefing-text {
+    font-size: 17px;
+    line-height: 1.7;
+    padding: 16px;
+}
+#mission-debrief .mission-title {
+    font-size: 16px;
+}
+#mission-debrief .status-text {
+    font-size: 12px;
+}
+
 /* ── DEBRIEF STATS PANEL ── */
 .debrief-stats-panel {
     width: 100%;
@@ -99,9 +117,9 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    padding: 6px 0;
+    padding: 10px 0;
     border-bottom: 1px solid var(--border);
-    font-size: 12px;
+    font-size: 15px;
     letter-spacing: 1px;
 }
 .debrief-stats-panel .stat-row:last-child { border-bottom: none; }

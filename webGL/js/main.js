@@ -7,6 +7,7 @@ import events from "./eventBus/events.js";
 import LocalStorage from "./localStorage/localStorage.js";
 import { initBriefing } from './missionBriefing/missionBriefing.js';
 import { initDebrief } from './missionBriefing/missionDebrief.js';
+import { showToast } from './HUD/hud.js';
 import campaign from "./campaignMenu/campaign.js"; // add this import
 import PilotStore from "./pilot/PilotStore.js";
 import PilotScreen from "./pilot/PilotScreen.js";
@@ -65,17 +66,42 @@ document.getElementById('abortMissionCancelBtn').addEventListener('click', hideA
 document.getElementById('abortMissionConfirmBtn').addEventListener('click', abortMissionFromPause);
 
 EventBus.subscribe(events.MISSION_COMPLETE, () => {
-	PilotStore.incrementMissionsFlown();
 	const bonus = PilotStore.awardMissionCompleteBonus();
 	showDebrief('success', null, getMissionScore() + bonus);
 });
 
-EventBus.subscribe(events.MISSION_FAILED, ({ reason }) => {
-	PilotStore.incrementMissionsFlown();
-	showDebrief('failure', reason, getMissionScore());
+// most failures (losing the shuttle, the transport, etc.) don't end the
+// mission immediately — the player has to fly back and dock at the ISD first
+// (see DockingManager), same as a successful run. Only the player's own ship
+// being destroyed ends things right away, since there's no ship left to fly
+// back with; losing the ISD itself is handled by MissionFailureManager, which
+// drains the player's hull and ends with the same SHIP_DESTROYED path.
+let pendingFailureReason = null;
+
+EventBus.subscribe(events.MISSION_FAILED, ({ reason, designation }) => {
+	const playerDesignation = activeCampaignConfig && activeCampaignConfig.player && activeCampaignConfig.player.designation;
+	const isdDesignation = activeCampaignConfig && activeCampaignConfig.objectives && activeCampaignConfig.objectives.dockDesignation;
+
+	if (designation === playerDesignation) {
+		showDebrief('failure', reason, getMissionScore());
+		return;
+	}
+
+	pendingFailureReason = reason;
+
+	// losing the ISD gets its own "no chance of rescue" toast from
+	// MissionFailureManager instead — there's nothing left to dock at
+	if (designation !== isdDesignation) {
+		showToast(`MISSION FAILED — ${reason} RETURN TO ISD VICTORIOUS AND DOCK.`);
+	}
+});
+
+EventBus.subscribe(events.MISSION_FAILED_RETURNED, () => {
+	showDebrief('failure', pendingFailureReason, getMissionScore());
 });
 
 function showDebrief(result, reason, scoreEarned) {
+	PilotStore.incrementMissionsFlown();
 	inMission = false;
 	paused = false;
 	document.getElementById('heads-up-display').style.visibility = 'hidden';
@@ -493,7 +519,6 @@ function abortMissionFromPause() {
 	// a multiplayer match has no campaign config, so it still drops straight to the
 	// main menu instead
 	if (activeCampaignConfig) {
-		PilotStore.incrementMissionsFlown();
 		showDebrief('failure', 'Mission aborted by pilot.', getMissionScore());
 		return;
 	}

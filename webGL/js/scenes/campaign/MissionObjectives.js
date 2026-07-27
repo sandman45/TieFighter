@@ -70,7 +70,7 @@ export default ({ config, playerDesignation }) => {
             const reason = designation === playerDesignation
                 ? "Your TIE Fighter was destroyed."
                 : `${toDisplayName(designation)} was destroyed.`;
-            EventBus.post(events.MISSION_FAILED, { reason });
+            EventBus.post(events.MISSION_FAILED, { reason, designation });
             return;
         }
 
