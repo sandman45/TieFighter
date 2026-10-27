@@ -35,6 +35,34 @@ pm2 startup systemd -u root --hp /root
 # confirms DNS has propagated (see infra/README.md).
 python3 -m pip install certbot certbot-nginx
 
+# The pip-installed certbot (unlike the distro package) ships no renewal
+# timer, so install one ourselves — without it the cert silently expires
+# after 90 days. Harmless before the cert exists (renew is a no-op).
+cat > /etc/systemd/system/certbot-renew.service <<'EOF'
+[Unit]
+Description=Renew Let's Encrypt certificates
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/certbot renew --quiet --deploy-hook "systemctl reload nginx"
+EOF
+
+cat > /etc/systemd/system/certbot-renew.timer <<'EOF'
+[Unit]
+Description=Run certbot renew twice daily
+
+[Timer]
+OnCalendar=*-*-* 00,12:00:00
+RandomizedDelaySec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now certbot-renew.timer
+
 cat > /etc/nginx/conf.d/tiefighter.conf <<EOF
 server {
     listen 80;
