@@ -83,8 +83,10 @@ aws ssm send-command \
 ```
 
 certbot's nginx plugin edits the site config in place to add the 443
-server block and HTTP→HTTPS redirect, and installs its own systemd
-timer for renewal — no further action needed.
+server block and HTTP→HTTPS redirect. Renewal is handled by the
+`certbot-renew.timer` systemd unit that `user_data.sh.tpl` installs
+(the pip-installed certbot doesn't ship one of its own) — check it with
+`systemctl list-timers certbot-renew.timer` on the instance.
 
 ## Day to day
 
