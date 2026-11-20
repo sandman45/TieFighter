@@ -1,11 +1,18 @@
+# Reserved Instance: this account has a 1-year Standard RI for a t3.micro in us-east-1
+# (332fa6c7-73bb-4526-8640-f4b24eda20b8, No Upfront, $0.0065/hr), running 2026-11-20 to
+# 2027-11-20. It's billed for the full term whether or not the instance is running. Until it
+# expires, keep the instance a t3 in us-east-1: the discount only covers that family and region
+# (size-flexible, so a t3.small gets half coverage), and anything else is billed at on-demand
+# rates on top of the RI. Details in ~/WebstormProjects/aws-account-notes/billing-and-costs.md.
+
 variable "aws_region" {
-  description = "AWS region to deploy into."
+  description = "AWS region to deploy into. Keep us-east-1 until 2027-11-20 (Reserved Instance, see above)."
   type        = string
   default     = "us-east-1"
 }
 
 variable "instance_type" {
-  description = "EC2 instance type."
+  description = "EC2 instance type. Keep t3.micro until 2027-11-20 (Reserved Instance, see above)."
   type        = string
   default     = "t3.micro"
 }
